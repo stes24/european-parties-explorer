@@ -1,9 +1,25 @@
 import pandas
+import matplotlib.pyplot as plt
+from sklearn.manifold import MDS
+from sklearn import preprocessing
 
 years = [1999, 2002, 2006, 2010, 2014, 2019, 2024]
 columns = ['country', 'year', 'party_id', 'party', 'vote', 'epvote', 'family', 'eu_position', 'eu_intmark', 'eu_foreign', 'lrgen', 'lrecon',
            'spendvtax', 'deregulation', 'redistribution', 'civlib_laworder', 'sociallifestyle', 'religious_principles',
            'immigrate_policy', 'multiculturalism', 'environment', 'regions', 'ethnic_minorities', 'nationalism']
+columns_per_year = {
+    1999: ['country', 'year', 'party_id', 'party', 'vote', 'epvote', 'family', 'eu_position', 'eu_foreign', 'lrgen', 'lrecon'],
+    2002: ['country', 'year', 'party_id', 'party', 'vote', 'epvote', 'family', 'eu_position', 'eu_intmark', 'eu_foreign', 'lrgen', 'lrecon'],
+    2006: ['country', 'year', 'party_id', 'party', 'vote', 'epvote', 'family', 'eu_position', 'eu_intmark', 'eu_foreign', 'lrgen', 'lrecon',
+           'spendvtax', 'deregulation', 'redistribution', 'civlib_laworder', 'sociallifestyle', 'religious_principles',
+           'immigrate_policy', 'multiculturalism', 'regions', 'ethnic_minorities'],
+    2010: ['country', 'year', 'party_id', 'party', 'vote', 'epvote', 'family', 'eu_position', 'eu_intmark', 'eu_foreign', 'lrgen', 'lrecon',
+           'spendvtax', 'deregulation', 'redistribution', 'civlib_laworder', 'sociallifestyle', 'religious_principles',
+           'immigrate_policy', 'multiculturalism', 'environment', 'regions', 'ethnic_minorities'],
+    2014: columns,
+    2019: columns,
+    2024: columns
+}
 
 # Filter columns from 1999-2019 dataset
 df1 = pandas.read_csv('../public/dataset_1999.csv', na_values=[''], keep_default_na=False)  # Interpret only ,, (empty) as missing values
@@ -35,20 +51,6 @@ merged_df[['vote', 'epvote']] = merged_df[['vote', 'epvote']].round(3)      # Us
 print('4 - Removed appropriate countries, replaced missing votes')
 
 # Delete rows with missing values - consider different sets of columns for each year
-columns_per_year = {
-    1999: ['country', 'year', 'party_id', 'party', 'vote', 'epvote', 'family', 'eu_position', 'eu_foreign', 'lrgen', 'lrecon'],
-    2002: ['country', 'year', 'party_id', 'party', 'vote', 'epvote', 'family', 'eu_position', 'eu_intmark', 'eu_foreign', 'lrgen', 'lrecon'],
-    2006: ['country', 'year', 'party_id', 'party', 'vote', 'epvote', 'family', 'eu_position', 'eu_intmark', 'eu_foreign', 'lrgen', 'lrecon',
-           'spendvtax', 'deregulation', 'redistribution', 'civlib_laworder', 'sociallifestyle', 'religious_principles',
-           'immigrate_policy', 'multiculturalism', 'regions', 'ethnic_minorities'],
-    2010: ['country', 'year', 'party_id', 'party', 'vote', 'epvote', 'family', 'eu_position', 'eu_intmark', 'eu_foreign', 'lrgen', 'lrecon',
-           'spendvtax', 'deregulation', 'redistribution', 'civlib_laworder', 'sociallifestyle', 'religious_principles',
-           'immigrate_policy', 'multiculturalism', 'environment', 'regions', 'ethnic_minorities'],
-    2014: columns,
-    2019: columns,
-    2024: columns
-}
-
 def delete_nulls(df, year, cols_in_year):
     df_year = df[df['year'] == year][cols_in_year].copy()     # Take the rows of the given year and only the relevant columns of that year
     df_year = df_year.dropna()      # Delete rows with nulls
@@ -69,6 +71,41 @@ def delete_nulls(df, year, cols_in_year):
 no_nulls_dfs = [delete_nulls(merged_df, year, columns_per_year.get(year)) for year in years] # List comprehension - creates a new list from other lists
 merged_df = pandas.concat(no_nulls_dfs, ignore_index=True)
 merged_df.sort_values(['country', 'year'], inplace=True)
+merged_df.to_csv('../public/merged_dataset.csv', index=False)
 print('5 - Deleted appropriate missing values for each year and inverted scales')
 
-merged_df.to_csv('../public/merged_dataset.csv', index=False)
+# MDS --------------------------------
+
+# For dimensionality reduction, consider only the "political topics"
+excluded = ['country', 'year', 'party_id', 'party', 'vote', 'epvote', 'family']
+
+# Prepare new columns for MDS results
+merged_df['mds1'] = None
+merged_df['mds2'] = None
+
+for year in years:
+    attributes = [attr for attr in columns_per_year.get(year) if attr not in excluded] # Use only topics present in that year
+    
+    # From the whole dataset, take only the year we're using and the needed attributes
+    df_year = merged_df[merged_df['year'] == year].reset_index(drop=True)  # Reset index to 0 to avoid problems with data alignment
+    df_year = df_year[attributes]
+    
+    std_scale = preprocessing.StandardScaler()      # Standardize data - same mean/deviation
+    data = std_scale.fit_transform(df_year)         # Apply standardization
+    
+    # Apply MDS
+    mds = MDS(normalized_stress='auto', random_state=64)
+    points = mds.fit_transform(data)        # Coordinates of computed points
+    
+    # Plot inside Python
+    plt.scatter(points[:, 0], points[:, 1])
+    plt.xlabel('MDS dimension 1')
+    plt.ylabel('MDS dimension 2')
+    plt.show()
+    
+    # Add new coordinates to the original dataset
+    merged_df.loc[merged_df['year'] == year, 'mds1'] = points[:, 0]
+    merged_df.loc[merged_df['year'] == year, 'mds2'] = points[:, 1]
+
+merged_df.to_csv('../public/merged_dataset_with_mds.csv', index=False)
+print('6 - Applied dimensionality reduction and saved points\' coordinates')
