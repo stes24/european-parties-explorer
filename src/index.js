@@ -1,4 +1,5 @@
 import './index.scss'
+import 'normalize.css'
 import * as d3 from 'd3'
 
 async function init () {
