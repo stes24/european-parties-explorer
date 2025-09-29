@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkeuropean_parties_explorer=self.webpackChunkeuropean_parties_explorer||[]).push([[792],{497:()=>{console.log("Hello World!")}},e=>{e(e.s=497)}]);
