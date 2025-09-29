@@ -1,6 +1,7 @@
 import './index.scss'
 import 'normalize.css'
 import * as d3 from 'd3'
+import controller from './controller' // Already an instance of the class
 import { formatParty } from './utils'
 
 async function init () {
@@ -25,10 +26,12 @@ async function loadData () {
   }
 }
 
-function formatData (data) {
+function formatData (data) { // Create Party objects and add them to the model (through the controller)
   for (let i = 0; i < data.length; i++) {
     const party = formatParty(data[i])
+    controller.handleAddParty(party)
   }
+  console.debug(controller.parties)
 }
 
 init()
