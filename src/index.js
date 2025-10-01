@@ -6,6 +6,10 @@ import { formatParty } from './utils'
 
 async function init () {
   await loadData()
+
+  const container = d3.select('#root').append('div')
+  const views = ['scatterPlot']
+  container.call(controller[views[0]])
 }
 
 async function loadData () {
@@ -31,7 +35,6 @@ function formatData (data) { // Create Party objects and add them to the model (
     const party = formatParty(data[i])
     controller.handleAddParty(party)
   }
-  console.debug(controller.parties)
 }
 
 init()
