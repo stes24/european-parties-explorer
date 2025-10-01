@@ -11,7 +11,7 @@ class Controller {
     // this[this.views[1]] = views.lineChart()
     // this[this.views[2]] = views.parallelCoordinates()
 
-    // Models functions binding
+    // Models functions binding (tell the model how to update the views (???))
     this.parties.bindEntriesListChanged(this.onPartiesListChanged.bind(this))
     // Views functions binding
   }
@@ -28,6 +28,7 @@ class Controller {
     this.parties.deleteEntry(party)
   }
 
+  // Will be passed to the models so that they know how to update the views (???)
   onPartiesListChanged () {
     this.views.forEach(v => { this[v].data(this.parties.entries) })
   }

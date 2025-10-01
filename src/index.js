@@ -7,9 +7,11 @@ import { formatParty } from './utils'
 async function init () {
   await loadData()
 
+  // Create views
   const container = d3.select('#root').append('div')
   const views = ['scatterPlot']
   container.call(controller[views[0]])
+  console.debug('Created views')
 }
 
 async function loadData () {
