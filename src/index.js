@@ -8,8 +8,9 @@ async function init () {
   await loadData()
 
   // Create views
-  const container = d3.select('#root').append('div')
   const views = ['scatterPlot']
+  const container = d3.select('#root').append('div')
+    .attr('class', 'container')
   container.call(controller[views[0]])
   console.debug('Finished creating all views')
 }

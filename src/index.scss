@@ -1,8 +1,51 @@
+// Use #AAAAAA for borders and deselected divs, #CCCCCC for chart elements, text, legends
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  background-color: aliceblue;
+  background-color: #181818;
 }
 
 #root {
-  background-color: red;
+}
+
+// CONTAINERS ---------------------------
+
+.container {
+  border-style: solid;
+  border-width: 2px;
+  border-color: #AAAAAA;
+}
+
+// GRAPHICAL ELEMENTS -------------------
+
+// All axes
+.axis path {
+  stroke-width: 1px;
+  stroke: #CCCCCC;
+}
+
+// Axes ticks
+.axis line {
+  stroke-width: 2px;
+  stroke: #CCCCCC;
+}
+
+// Axes labels
+.axis text {
+  font-size: 12px;
+  fill: #CCCCCC;
+}
+
+// Scatter plot points
+.circle {
+  stroke-width: 2px;
+  stroke: black;
+  opacity: 0.85;
+}
+
+// OTHER --------------------------------
+
+.legend {
+  font-size: 14px;
+  fill: #CCCCCC;
 }

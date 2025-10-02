@@ -30,3 +30,7 @@ export function formatParty (row) { // For each csv row, return an object (Party
     mds2: parseFloat(row.mds2)
   }
 }
+
+export const factionsColors = {
+  1: '#1F77B4', 2: '#AEC7E8', 3: '#BCBD22', 4: '#9467BD', 5: '#FF9896', 6: '#D62728', 7: '#2CA02C', 8: '#8C564B', 9: '#7F7F7F', 10: '#E377C2', 11: '#FF7F0E'
+}
