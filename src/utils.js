@@ -31,6 +31,42 @@ export function formatParty (row) { // For each csv row, return an object (Party
   }
 }
 
+export const attributes = { // Reordered so that similar topics are close
+  // country: 'Country',
+  family: 'Political faction',
+  lrgen: 'Left/right',
+  lrecon: 'Economic left/right',
+  spendvtax: 'Spending vs. reducing taxes',
+  redistribution: 'Wealth redistribution',
+  deregulation: 'Market deregulation',
+  eu_position: 'European Union',
+  eu_intmark: 'EU internal market',
+  eu_foreign: 'EU foreign policy',
+  immigrate_policy: 'Immigration policies',
+  multiculturalism: 'Multiculturalism',
+  ethnic_minorities: 'Ethnic minorities',
+  nationalism: 'Nationalism',
+  civlib_laworder: 'Civil liberties vs. law & order',
+  sociallifestyle: 'Social lifestyle',
+  religious_principles: 'Religious principles',
+  environment: 'Environment',
+  regions: 'Regionalism'
+}
+
+export const factions = {
+  1: 'Radical Right',
+  2: 'Conservatives',
+  3: 'Liberal',
+  4: 'Christian-Democratic',
+  5: 'Socialist',
+  6: 'Radical Left',
+  7: 'Green',
+  8: 'Regionalist',
+  9: 'No faction',
+  10: 'Confessional',
+  11: 'Agrarian/Center'
+}
+
 export const factionsColors = {
   1: '#1F77B4', 2: '#AEC7E8', 3: '#BCBD22', 4: '#9467BD', 5: '#FF9896', 6: '#D62728', 7: '#2CA02C', 8: '#8C564B', 9: '#7F7F7F', 10: '#E377C2', 11: '#FF7F0E'
 }

@@ -43,6 +43,14 @@ body {
   opacity: 0.85;
 }
 
+// Plot lines
+.line {
+  fill: none;
+  stroke-width: 3.5px;
+  stroke: steelblue;
+  opacity: 0.75;
+}
+
 // OTHER --------------------------------
 
 .legend {

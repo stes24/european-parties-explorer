@@ -5,8 +5,8 @@ import { factionsColors } from '@/utils'
 export default function () {
   let data = []
   const dimensions = {
-    width: 800,
-    height: 600,
+    width: 600,
+    height: 350,
     margin: { top: 22, right: 12, bottom: 95, left: 45 }
   }
 
@@ -80,6 +80,16 @@ export default function () {
   scatterPlot.data = function (_) {
     if (!arguments.length) return data
     data = _
+    return scatterPlot
+  }
+  scatterPlot.width = function (_) {
+    if (!arguments.length) return dimensions.width
+    dimensions.width = _
+    return scatterPlot
+  }
+  scatterPlot.height = function (_) {
+    if (!arguments.length) return dimensions.height
+    dimensions.height = _
     return scatterPlot
   }
 

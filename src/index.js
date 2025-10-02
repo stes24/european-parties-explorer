@@ -12,6 +12,8 @@ async function init () {
   views.forEach(v => {
     const container = d3.select('#root').append('div')
       .attr('class', 'container')
+    // const { width, height } = container.node().getBoundingClientRect()
+    // controller[v].width(width).height(height)
     container.call(controller[v])
   })
 
