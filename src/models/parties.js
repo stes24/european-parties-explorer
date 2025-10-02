@@ -2,12 +2,14 @@ class Parties {
   constructor () {
     this.entries = [] // All rows of the dataset
     this.entriesById = {} // Maps party's id -> party's index in entries ({ id1: 0, id2: 1, ... })
-    this.onEntriesListChanged = () => {} // Callback that updates the views (???)
+    this.onEntriesListChanged = () => {} // Function that updates the views (calls the data function on all views) (???)
+    console.debug('Finished creating Parties model')
   }
 
   // Called by the controller, which passes the callback
   bindEntriesListChanged (callback) {
     this.onEntriesListChanged = callback
+    console.debug('Parties model received the function for updating views')
   }
 
   addEntry (entry) {

@@ -1,5 +1,6 @@
 import * as d3 from 'd3'
 
+// Configurable function - it returns a new function (which, when called, draws the view)
 export default function () {
   let data = []
   const dimensions = {
@@ -13,6 +14,7 @@ export default function () {
     }
   }
 
+  // It draws and can be configured (it is returned again when something changes)
   function scatterPlot (containerDiv) {
     data = data.filter(d => d.year === 2024)
 
@@ -46,13 +48,17 @@ export default function () {
       .attr('cx', d => xScale(d.mds1))
       .attr('cy', d => yScale(d.mds2))
       .attr('r', d => radius)
+
+    console.debug('Finished drawing scatter plot')
   }
 
+  // Update functions - called when something changes, they draw again the views
   scatterPlot.data = function (_) {
     if (!arguments.length) return data
     data = _
     return scatterPlot
   }
 
+  console.debug('Finished creating scatter plot configurable function')
   return scatterPlot
 }
