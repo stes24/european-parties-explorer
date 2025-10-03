@@ -7,14 +7,29 @@ import { formatParty } from './utils'
 async function init () {
   await loadData()
 
+  // Override normalize's behavior
+  document.body.style.margin = '3px'
+
   // Create views
   const views = ['scatterPlot', 'parallelCoordinates']
   views.forEach(v => {
     const container = d3.select('#root').append('div')
       .attr('class', 'container')
-    // const { width, height } = container.node().getBoundingClientRect()
-    // controller[v].width(width).height(height)
+      .attr('id', `${v}-container`)
+    const { width, height } = container.node().getBoundingClientRect()
+    controller[v].width(width).height(height) // SWAP???
     container.call(controller[v])
+  })
+
+  // Resize listener
+  window.addEventListener('resize', _ => {
+    views.forEach(v => {
+      const container = d3.select(`#${v}-container`)
+      const { width, height } = container.node().getBoundingClientRect()
+      controller[v]
+        .width(width)
+        .height(height)
+    })
   })
 
   console.debug('Finished creating all views')
