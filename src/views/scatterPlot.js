@@ -5,7 +5,7 @@ const X_OFFSET = 1.5
 const Y_OFFSET = 1
 const MIN_RADIUS = 4
 const MAX_RADIUS = 30
-const TR_TIME = 200
+const TR_TIME = 1000 // TEMPORARY
 
 // Configurable function - it returns a new function (which, when called, draws the view)
 export default function () {
@@ -58,7 +58,7 @@ export default function () {
     }
     dataJoin()
 
-    // Axes
+    // Draw axes
     const xAxis = drawArea.append('g')
       .attr('class', 'axis')
       .attr('transform', `translate(0, ${dimensions.height - dimensions.margin.bottom})`)
@@ -68,14 +68,14 @@ export default function () {
       .attr('transform', `translate(${dimensions.margin.left}, 0)`)
       .call(d3.axisLeft(yScale))
 
-    // Axes legends
-    wrapper.append('text')
+    // Draw axes legends
+    const xLegend = wrapper.append('text')
       .attr('class', 'legend')
       .attr('x', dimensions.width / 2)
       .attr('y', dimensions.height - dimensions.margin.bottom + dimensions.margin.text)
       .attr('text-anchor', 'middle')
       .text('MDS dimension 1')
-    wrapper.append('text')
+    const yLegend = wrapper.append('text')
       .attr('class', 'legend')
       .attr('transform', 'rotate(-90)')
       .attr('x', -dimensions.height / 2)
@@ -83,6 +83,7 @@ export default function () {
       .attr('text-anchor', 'middle')
       .text('MDS dimension 2')
 
+    // Join functions
     function enterFn (sel) {
       return sel.append('circle')
         .attr('class', 'circle')
@@ -92,7 +93,7 @@ export default function () {
         .attr('fill', d => factionsColors[d.family]) // TEMPORARY
     }
     function updateFn (sel) {
-      sel.call(update => update
+      return sel.call(update => update
         .transition()
         .duration(TR_TIME)
         .attr('cx', d => xScale(xAccessor(d)))
@@ -107,25 +108,36 @@ export default function () {
       )
     }
 
+    // Update functions
     updateWidth = function () {
-      xScale.range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
       wrapper.attr('width', dimensions.width)
-      xAxis.transition()
+      xScale.range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
+      xAxis.transition() // Change x axis length
         .duration(TR_TIME)
         .call(d3.axisBottom(xScale))
-      console.log('w' + dimensions.width)
+      // console.log('Before transition', xLegend.attr('x'))
+      xLegend
+        // .transition() // Move x axis legend left/right (???????????)
+        // .duration(TR_TIME)
+        .attr('x', dimensions.width / 2)
+        // .on('end', () => console.log('After transition', xLegend.attr('x')))
       dataJoin()
     }
     updateHeight = function () {
-      yScale.range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
       wrapper.attr('height', dimensions.height)
-      xAxis.transition()
+      yScale.range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
+      xAxis.transition() // Move x axis up/down
         .duration(TR_TIME)
         .attr('transform', `translate(0, ${dimensions.height - dimensions.margin.bottom})`)
-      yAxis.transition()
+      yAxis.transition() // Change y axis length
         .duration(TR_TIME)
         .call(d3.axisLeft(yScale))
-      console.log('h' + dimensions.height)
+      xLegend.transition() // Move x axis legend up/down
+        .duration(TR_TIME)
+        .attr('y', dimensions.height - dimensions.margin.bottom + dimensions.margin.text)
+      yLegend.transition() // Move y axis legend up/down
+        .duration(TR_TIME)
+        .attr('x', -dimensions.height / 2)
       dataJoin()
     }
 

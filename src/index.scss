@@ -7,7 +7,7 @@ body {
 }
 
 #root {
-  width: calc(100vw - 6px);
+  width: calc(100vw - 6px); // Body margin is 3px
   height: calc(100vh - 6px);
   display: grid;
   grid-template-rows: repeat(7, 1fr);

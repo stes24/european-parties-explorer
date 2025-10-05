@@ -18,7 +18,7 @@ async function init () {
       .attr('id', `${v}-container`)
     const { width, height } = container.node().getBoundingClientRect()
     controller[v].width(width).height(height) // SWAP???
-    container.call(controller[v])
+    container.call(controller[v]) // Call the appropriate drawing function on the current container
   })
 
   // Resize listener
