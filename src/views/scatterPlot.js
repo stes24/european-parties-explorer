@@ -21,8 +21,7 @@ export default function () {
     height: 350,
     margin: { top: 22, right: 12, bottom: 95, left: 45, text: 30 }
   }
-  let updateWidth
-  let updateHeight
+  let updateSize
 
   // It draws and can be configured (it is returned again when something changes)
   function scatterPlot (containerDiv) {
@@ -109,33 +108,22 @@ export default function () {
     }
 
     // Update functions
-    updateWidth = function () {
-      wrapper.attr('width', dimensions.width)
+    updateSize = function () {
+      wrapper.attr('width', dimensions.width).attr('height', dimensions.height)
       xScale.range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
-      xAxis.transition() // Change x axis length
-        .duration(TR_TIME)
-        .call(d3.axisBottom(xScale))
-      // console.log('Before transition', xLegend.attr('x'))
-      xLegend
-        // .transition() // Move x axis legend left/right (???????????)
-        // .duration(TR_TIME)
-        .attr('x', dimensions.width / 2)
-        // .on('end', () => console.log('After transition', xLegend.attr('x')))
-      dataJoin()
-    }
-    updateHeight = function () {
-      wrapper.attr('height', dimensions.height)
       yScale.range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
-      xAxis.transition() // Move x axis up/down
+      xAxis.transition()
         .duration(TR_TIME)
         .attr('transform', `translate(0, ${dimensions.height - dimensions.margin.bottom})`)
-      yAxis.transition() // Change y axis length
+        .call(d3.axisBottom(xScale))
+      yAxis.transition()
         .duration(TR_TIME)
         .call(d3.axisLeft(yScale))
-      xLegend.transition() // Move x axis legend up/down
+      xLegend.transition()
         .duration(TR_TIME)
+        .attr('x', dimensions.width / 2)
         .attr('y', dimensions.height - dimensions.margin.bottom + dimensions.margin.text)
-      yLegend.transition() // Move y axis legend up/down
+      yLegend.transition()
         .duration(TR_TIME)
         .attr('x', -dimensions.height / 2)
       dataJoin()
@@ -150,16 +138,11 @@ export default function () {
     data = _
     return scatterPlot
   }
-  scatterPlot.width = function (_) {
-    if (!arguments.length) return dimensions.width
-    dimensions.width = _
-    if (typeof updateWidth === 'function') updateWidth()
-    return scatterPlot
-  }
-  scatterPlot.height = function (_) {
-    if (!arguments.length) return dimensions.height
-    dimensions.height = _
-    if (typeof updateHeight === 'function') updateHeight()
+  scatterPlot.resize = function (width, height) {
+    if (!arguments.length) return [dimensions.width, dimensions.height]
+    dimensions.width = width
+    dimensions.height = height
+    if (typeof updateSize === 'function') updateSize()
     return scatterPlot
   }
 

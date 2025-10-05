@@ -92,14 +92,10 @@ export default function () {
     data = _
     return parallelCoordinates
   }
-  parallelCoordinates.width = function (_) {
-    if (!arguments.length) return dimensions.width
-    dimensions.width = _
-    return parallelCoordinates
-  }
-  parallelCoordinates.height = function (_) {
-    if (!arguments.length) return dimensions.height
-    dimensions.height = _
+  parallelCoordinates.resize = function (width, height) {
+    if (!arguments.length) return [dimensions.width, dimensions.height]
+    dimensions.width = width
+    dimensions.height = height
     return parallelCoordinates
   }
 
