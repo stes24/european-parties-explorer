@@ -1,10 +1,6 @@
 import * as d3 from 'd3'
 import { factionsColors } from '@/utils'
 
-const X_OFFSET = 1.5
-const Y_OFFSET = 1
-const MIN_RADIUS = 4
-const MAX_RADIUS = 30
 const TR_TIME = 1000 // TEMPORARY
 
 // Configurable function - it returns a new function (which, when called, draws the view)
@@ -19,7 +15,9 @@ export default function () {
   const dimensions = {
     width: 600,
     height: 350,
-    margin: { top: 22, right: 12, bottom: 95, left: 45, text: 30 }
+    margin: { top: 22, right: 12, bottom: 95, left: 45, text: 30 },
+    offset: { x: 1.5, y: 1 },
+    radius: { min: 4, max: 30 }
   }
   let updateSize
 
@@ -33,16 +31,16 @@ export default function () {
 
     // Scales
     const xScale = d3.scaleLinear()
-      .domain([d3.min(data, d => xAccessor(d) - X_OFFSET), d3.max(data, d => xAccessor(d) + X_OFFSET)])
+      .domain([d3.min(data, d => xAccessor(d) - dimensions.offset.x), d3.max(data, d => xAccessor(d) + dimensions.offset.x)])
       .range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
     const yScale = d3.scaleLinear()
-      .domain([d3.min(data, d => yAccessor(d) - Y_OFFSET), d3.max(data, d => yAccessor(d) + Y_OFFSET)])
+      .domain([d3.min(data, d => yAccessor(d) - dimensions.offset.y), d3.max(data, d => yAccessor(d) + dimensions.offset.y)])
       .range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
 
     // How to compute circles radius
     const radius = d3.scaleSqrt() // Sqrt to avoid exponential growth
       .domain(d3.extent(data, rAccessor))
-      .range([MIN_RADIUS, MAX_RADIUS])
+      .range([dimensions.radius.min, dimensions.radius.max])
 
     const drawArea = wrapper.append('g') // It contains points' g and clip
     const pointsGroup = drawArea.append('g')
@@ -138,7 +136,7 @@ export default function () {
     data = _
     return scatterPlot
   }
-  scatterPlot.resize = function (width, height) {
+  scatterPlot.size = function (width, height) {
     if (!arguments.length) return [dimensions.width, dimensions.height]
     dimensions.width = width
     dimensions.height = height

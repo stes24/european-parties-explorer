@@ -17,7 +17,7 @@ async function init () {
       .attr('class', 'container')
       .attr('id', `${v}-container`)
     const { width, height } = container.node().getBoundingClientRect()
-    controller[v].resize(width, height) // SWAP???
+    controller[v].size(width, height) // SWAP???
     container.call(controller[v]) // Call the appropriate drawing function on the current container
   })
 
@@ -26,7 +26,7 @@ async function init () {
     views.forEach(v => {
       const container = d3.select(`#${v}-container`)
       const { width, height } = container.node().getBoundingClientRect()
-      controller[v].resize(width, height)
+      controller[v].size(width, height)
     })
   })
 
