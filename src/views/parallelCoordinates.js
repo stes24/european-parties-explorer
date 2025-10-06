@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import { attributes, factions } from '@/utils'
+import { attributes, countries, factions } from '@/utils'
 
 const TEXT_ROTATION = -13
 
@@ -35,7 +35,11 @@ export default function () {
     const scaleRange = [dimensions.height - dimensions.margin.bottom, dimensions.margin.top]
     const yScales = {} // Will be a map
     attributeIds.forEach(attr => {
-      if (attr === 'family') {
+      if (attr === 'country') {
+        yScales[attr] = d3.scalePoint()
+          .domain(Object.keys(countries).map(Number))
+          .range(scaleRange)
+      } else if (attr === 'family') {
         yScales[attr] = d3.scaleLinear() // Key (attribute) -> value (scale associated to that attribute)
           .domain([1, 11])
           .range(scaleRange)

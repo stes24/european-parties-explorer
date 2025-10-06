@@ -1,6 +1,8 @@
 import * as d3 from 'd3'
 import { years } from '@/utils'
 
+const RADIUS = 4
+
 export default function () {
   let data = []
 
@@ -34,14 +36,34 @@ export default function () {
       .y(d => yScale(yAccessor(d)))
       .defined(d => yAccessor(d) !== null) // Correctly draw lines starting from a later year
 
+    // Draw lines
+    // Group the data (one line = one party over the years), give each party to one line
+    const pathsGroup = wrapper.append('g')
+    const parties = d3.group(data, d => d.party_id) // A dictionary -> party id - array of dictionaries (all instances of the party, grouped by its id)
+    parties.forEach((party, partyId) => {
+      if (party.length > 1) { // Party with at least two years -> a line
+        pathsGroup.append('path')
+          .attr('class', 'line')
+          .attr('d', line(party))
+      } else { // Party with only one year -> a point
+        const d = party[0]
+        pathsGroup.append('circle')
+          .attr('class', 'point')
+          .attr('cx', xScale(xAccessor(d)))
+          .attr('cy', yScale(yAccessor(d)))
+          .attr('r', RADIUS)
+          .attr('fill', 'steelblue')
+      }
+    })
+
     // Draw axes
-    const xAxis = wrapper.append('g')
+    wrapper.append('g')
       .attr('class', 'axis')
       .attr('transform', `translate(0, ${dimensions.height - dimensions.margin.bottom})`)
       .call(d3.axisBottom(xScale)
         .ticks(7)
         .tickValues(years))
-    const yAxis = wrapper.append('g')
+    wrapper.append('g')
       .attr('class', 'axis')
       .attr('transform', `translate(${dimensions.margin.left}, 0)`)
       .call(d3.axisLeft(yScale))

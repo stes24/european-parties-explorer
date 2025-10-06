@@ -34,7 +34,7 @@ export function formatParty (row) { // For each csv row, return an object (Party
 export const years = [1999, 2002, 2006, 2010, 2014, 2019, 2024]
 
 export const attributes = { // Reordered so that similar topics are close
-  // country: 'Country',
+  country: 'Country',
   family: 'Political faction',
   lrgen: 'Left/right',
   lrecon: 'Economic left/right',
@@ -53,6 +53,35 @@ export const attributes = { // Reordered so that similar topics are close
   religious_principles: 'Religious principles',
   environment: 'Environment',
   regions: 'Regionalism'
+}
+
+export const countries = {
+  1: 'Belgium',
+  2: 'Denmark',
+  3: 'Germany',
+  4: 'Greece',
+  5: 'Spain',
+  6: 'France',
+  7: 'Ireland',
+  8: 'Italy',
+  10: 'Netherlands',
+  11: 'UK',
+  12: 'Portgual',
+  13: 'Austria',
+  14: 'Finland',
+  16: 'Sweden',
+  20: 'Bulgaria',
+  21: 'Czechia',
+  22: 'Estonia',
+  23: 'Hungary',
+  24: 'Latvia',
+  25: 'Lithuania',
+  26: 'Poland',
+  27: 'Romania',
+  28: 'Slovakia',
+  29: 'Slovenia',
+  31: 'Croatia',
+  40: 'Cyprus'
 }
 
 export const factions = {
