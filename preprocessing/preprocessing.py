@@ -56,6 +56,10 @@ def delete_nulls(df, year, cols_in_year):
     df_year = df_year.dropna()      # Delete rows with nulls
     
     # Reverse scales so that 10 always means "agree"
+    df_year['eu_position'] = (df_year['eu_position'] - 1) * 10 / 6
+    df_year['eu_foreign'] = (df_year['eu_foreign'] - 1) * 10 / 6
+    if (year >= 2002):
+        df_year['eu_intmark'] = (df_year['eu_intmark'] - 1) * 10 / 6
     if (year >= 2006):
         df_year['spendvtax'] = 10 - df_year['spendvtax']
         df_year['redistribution'] = 10 - df_year['redistribution']
@@ -71,6 +75,7 @@ def delete_nulls(df, year, cols_in_year):
 no_nulls_dfs = [delete_nulls(merged_df, year, columns_per_year.get(year)) for year in years] # List comprehension - creates a new list from other lists
 merged_df = pandas.concat(no_nulls_dfs, ignore_index=True)
 merged_df.sort_values(['country', 'year'], inplace=True)
+
 merged_df.to_csv('../public/merged_dataset.csv', index=False)
 print('5 - Deleted appropriate missing values for each year and inverted scales')
 

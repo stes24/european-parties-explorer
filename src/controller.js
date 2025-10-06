@@ -8,6 +8,7 @@ class Controller {
 
     // Views (call the external functions, which assign the drawing functions to the following variables)
     this.scatterPlot = views.scatterPlot()
+    this.lineChart = views.lineChart()
     this.parallelCoordinates = views.parallelCoordinates()
 
     // Models functions binding (pass the function that updates the views to the models) (???)
@@ -33,6 +34,7 @@ class Controller {
   onPartiesListChanged () {
     const entries = this.parties.entries
     this.scatterPlot.data(entries)
+    this.lineChart.data(entries)
     this.parallelCoordinates.data(entries)
   }
 }

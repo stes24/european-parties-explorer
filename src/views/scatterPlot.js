@@ -130,7 +130,6 @@ export default function () {
     console.debug('Finished drawing scatter plot')
   }
 
-  // Update functions - called when something changes, they draw again the views
   scatterPlot.data = function (_) {
     if (!arguments.length) return data
     data = _

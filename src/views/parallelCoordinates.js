@@ -39,10 +39,6 @@ export default function () {
         yScales[attr] = d3.scaleLinear() // Key (attribute) -> value (scale associated to that attribute)
           .domain([1, 11])
           .range(scaleRange)
-      } else if (attr === 'eu_position' || attr === 'eu_intmark' || attr === 'eu_foreign') {
-        yScales[attr] = d3.scaleLinear()
-          .domain([1, 7])
-          .range(scaleRange)
       } else {
         yScales[attr] = d3.scaleLinear()
           .domain([0, 10])
@@ -79,8 +75,6 @@ export default function () {
         // Ticks
         if (attr === 'family') {
           axis.tickFormat(id => factions[id])
-        } else if (attr === 'eu_position' || attr === 'eu_intmark' || attr === 'eu_foreign') {
-          axis.ticks(7)
         }
 
         d3.select(this).call(axis) // Create single axis
@@ -96,7 +90,6 @@ export default function () {
     console.debug('Finished drawing parallel coordinates')
   }
 
-  // Update functions - called when something changes, they draw again the views
   parallelCoordinates.data = function (_) {
     if (!arguments.length) return data
     data = _

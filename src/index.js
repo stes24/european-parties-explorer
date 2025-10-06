@@ -11,7 +11,7 @@ async function init () {
   document.body.style.margin = '3px'
 
   // Create views
-  const views = ['scatterPlot', 'parallelCoordinates']
+  const views = ['scatterPlot', 'lineChart', 'parallelCoordinates']
   views.forEach(v => {
     const container = d3.select('#root').append('div')
       .attr('class', 'container')
