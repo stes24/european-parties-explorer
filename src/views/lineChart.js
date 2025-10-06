@@ -8,7 +8,7 @@ export default function () {
 
   // Which attributes to use
   const xAccessor = d => d.year
-  const yAccessor = d => d.eu_position
+  const yAccessor = d => d.eu_position // TEMPORARY
 
   const dimensions = {
     width: 800,
@@ -39,7 +39,7 @@ export default function () {
     // Draw lines
     // Group the data (one line = one party over the years), give each party to one line
     const pathsGroup = wrapper.append('g')
-    const parties = d3.group(data, d => d.party_id) // A dictionary -> party id - array of dictionaries (all instances of the party, grouped by its id)
+    const parties = d3.group(data, d => d.party_id) // A dictionary -> party id - array of dictionaries (all instances of the party, grouped by the id)
     parties.forEach((party, partyId) => {
       if (party.length > 1) { // Party with at least two years -> a line
         pathsGroup.append('path')

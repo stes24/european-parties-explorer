@@ -36,12 +36,12 @@ export default function () {
     const yScales = {} // Will be a map
     attributeIds.forEach(attr => {
       if (attr === 'country') {
-        yScales[attr] = d3.scalePoint()
+        yScales[attr] = d3.scalePoint() // Key (attribute) -> value (scale associated to that attribute)
           .domain(Object.keys(countries).map(Number))
           .range(scaleRange)
       } else if (attr === 'family') {
-        yScales[attr] = d3.scaleLinear() // Key (attribute) -> value (scale associated to that attribute)
-          .domain([1, 11])
+        yScales[attr] = d3.scalePoint()
+          .domain(Object.keys(factions).map(Number))
           .range(scaleRange)
       } else {
         yScales[attr] = d3.scaleLinear()
@@ -73,7 +73,7 @@ export default function () {
       .append('g')
       .attr('class', 'axis')
       .attr('transform', attr => `translate(${xScale(xAccessor(attr))}, 0)`) // Each attribute positions the corresponding axis
-      .each(function (attr) {
+      .each(function (attr) { // Create single axes
         const axis = d3.axisLeft(yScales[attr])
 
         // Ticks
@@ -81,7 +81,7 @@ export default function () {
           axis.tickFormat(id => factions[id])
         }
 
-        d3.select(this).call(axis) // Create single axis
+        d3.select(this).call(axis)
           .append('text') // Text operations
           .attr('class', 'legend')
           .attr('transform', `rotate(${TEXT_ROTATION})`)

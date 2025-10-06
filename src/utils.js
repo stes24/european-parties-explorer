@@ -34,8 +34,8 @@ export function formatParty (row) { // For each csv row, return an object (Party
 export const years = [1999, 2002, 2006, 2010, 2014, 2019, 2024]
 
 export const attributes = { // Reordered so that similar topics are close
-  country: 'Country',
   family: 'Political faction',
+  country: 'Country',
   lrgen: 'Left/right',
   lrecon: 'Economic left/right',
   spendvtax: 'Spending vs. reducing taxes',
