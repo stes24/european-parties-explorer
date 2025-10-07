@@ -1,7 +1,5 @@
 import * as d3 from 'd3'
-import { factionsColors } from '@/utils'
-
-const TR_TIME = 1000 // TEMPORARY
+import { factionsColors, TR_TIME } from '@/utils'
 
 // Configurable function - it returns a new function (which, when called, draws the view)
 export default function () {
@@ -15,7 +13,7 @@ export default function () {
   const dimensions = {
     width: 600,
     height: 350,
-    margin: { top: 22, right: 12, bottom: 95, left: 45, text: 30 },
+    margin: { top: 22, right: 12, bottom: 95, left: 47, text: 30 },
     offset: { x: 1.5, y: 1.7 },
     radius: { min: 4, max: 30 }
   }
@@ -107,23 +105,23 @@ export default function () {
 
     // Update functions
     updateSize = function () {
+      const trans = d3.transition().duration(TR_TIME)
+
       wrapper.attr('width', dimensions.width).attr('height', dimensions.height)
       xScale.range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
       yScale.range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
-      xAxis.transition()
-        .duration(TR_TIME)
+
+      xAxis.transition(trans)
         .attr('transform', `translate(0, ${dimensions.height - dimensions.margin.bottom})`)
         .call(d3.axisBottom(xScale))
-      yAxis.transition()
-        .duration(TR_TIME)
+      yAxis.transition(trans)
         .call(d3.axisLeft(yScale))
-      xLegend.transition()
-        .duration(TR_TIME)
+      xLegend.transition(trans)
         .attr('x', (dimensions.width + dimensions.margin.left - dimensions.margin.right) / 2)
         .attr('y', dimensions.height - dimensions.margin.bottom + dimensions.margin.text)
-      yLegend.transition()
-        .duration(TR_TIME)
+      yLegend.transition(trans)
         .attr('x', -(dimensions.height + dimensions.margin.top - dimensions.margin.bottom) / 2)
+
       dataJoin()
     }
 

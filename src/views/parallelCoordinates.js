@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import { attributes, countries, factions } from '@/utils'
+import { attributes, countries, factions, TR_TIME } from '@/utils'
 
 const TEXT_ROTATION = -13
 
@@ -14,7 +14,7 @@ export default function () {
   const dimensions = {
     width: 1100,
     height: 350,
-    margin: { top: 50, right: 75, bottom: 10, left: 125, textX: 10, textY: 18 }
+    margin: { top: 50, right: 55, bottom: 15, left: 125, textX: 10, textY: 18 }
   }
   let updateSize
 
@@ -56,35 +56,32 @@ export default function () {
       .x(([attr, val]) => xScale(xAccessor(attr))) // Place on the correct scale using the attribute name
       .y(([attr, val]) => yScales[attr](val)) // Find right scale with attribute, then pass the value to it
 
+    const linesGroup = wrapper.append('g')
+
     // Draw lines
-    wrapper.append('g')
-      .selectAll('path')
-      .data(data)
-      .enter()
-      .append('path')
-      .attr('class', 'line')
-      // For each datum, create [attr, value] and give it to the line (it will connect the values of different attributes)
-      .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
+    function dataJoin () {
+      linesGroup.selectAll('path')
+        .data(data)
+        .join(enterFn, updateFn, exitFn)
+    }
+    dataJoin()
 
     // Draw axes
-    wrapper.selectAll('axis')
+    function makeAxis (attr) {
+      const axis = d3.axisLeft(yScales[attr])
+      if (attr === 'family') axis.tickFormat(id => factions[id])
+      if (attr === 'country') axis.tickFormat(id => countries[id])
+      return axis
+    }
+    const axes = wrapper.selectAll('axis')
       .data(attributeIds)
       .enter()
       .append('g')
       .attr('class', 'axis')
       .attr('transform', attr => `translate(${xScale(xAccessor(attr))}, 0)`) // Each attribute positions the corresponding axis
-      .each(function (attr) { // Create single axes
-        const axis = d3.axisLeft(yScales[attr])
-
-        // Ticks
-        if (attr === 'family') {
-          axis.tickFormat(id => factions[id])
-        }
-        if (attr === 'country') {
-          axis.tickFormat(id => countries[id])
-        }
-
-        d3.select(this).call(axis)
+      .each(function (attr) {
+        d3.select(this)
+          .call(makeAxis(attr))
           .append('text') // Text operations
           .attr('class', 'legend')
           .attr('transform', `rotate(${TEXT_ROTATION})`)
@@ -93,6 +90,47 @@ export default function () {
           .attr('text-anchor', 'middle')
           .text(attributes[attr])
       })
+
+    // Join functions
+    function enterFn (sel) {
+      return sel.append('path')
+        .attr('class', 'line')
+        // For each datum, create [attr, value] and give it to the line (it will connect the values of different attributes)
+        .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
+    }
+    function updateFn (sel) {
+      return sel.call(update => update
+        .transition()
+        .duration(TR_TIME)
+        .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
+      )
+    }
+    function exitFn (sel) {
+      sel.call(exit => exit
+        .transition()
+        .duration(TR_TIME)
+        .remove()
+      )
+    }
+
+    // Update functions
+    updateSize = function () {
+      const trans = d3.transition().duration(TR_TIME)
+
+      wrapper.attr('width', dimensions.width).attr('height', dimensions.height)
+      xScale.range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
+      attributeIds.forEach(attr => yScales[attr].range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top]))
+
+      axes.transition(trans)
+        .attr('transform', attr => `translate(${xScale(xAccessor(attr))}, 0)`)
+        .each(function (attr) {
+          d3.select(this)
+            .transition(trans)
+            .call(makeAxis(attr))
+        })
+
+      dataJoin()
+    }
 
     console.debug('Finished drawing parallel coordinates')
   }

@@ -31,6 +31,8 @@ export function formatParty (row) { // For each csv row, return an object (Party
   }
 }
 
+export const TR_TIME = 1000 // TEMPORARY
+
 export const years = [1999, 2002, 2006, 2010, 2014, 2019, 2024]
 
 export const attributes = { // Reordered so that similar topics are close
