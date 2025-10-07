@@ -80,6 +80,9 @@ export default function () {
         if (attr === 'family') {
           axis.tickFormat(id => factions[id])
         }
+        if (attr === 'country') {
+          axis.tickFormat(id => countries[id])
+        }
 
         d3.select(this).call(axis)
           .append('text') // Text operations
