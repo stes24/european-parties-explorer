@@ -14,13 +14,12 @@ export default function () {
   const dimensions = {
     width: 1100,
     height: 350,
-    margin: { top: 50, right: 55, bottom: 15, left: 125, textX: 10, textY: 18 }
+    margin: { top: 50, right: 60, bottom: 15, left: 125, textX: 10, textY: 18 }
   }
   let updateSize
 
   // It draws and can be configured (it is returned again when something changes)
   function parallelCoordinates (containerDiv) {
-    data = data.filter(d => d.year === 2024) // TEMPORARY
     const attributeIds = Object.keys(attributes)
 
     const wrapper = containerDiv.append('svg')

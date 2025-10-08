@@ -4,6 +4,7 @@ import { factionsColors, TR_TIME } from '@/utils'
 // Configurable function - it returns a new function (which, when called, draws the view)
 export default function () {
   let data = []
+  let updateData
 
   // Which attributes to use
   const xAccessor = d => d.mds1
@@ -19,10 +20,12 @@ export default function () {
   }
   let updateSize
 
+  // Hovering
+  let onMouseEnter = _ => {}
+  let onMouseLeave = _ => {}
+
   // It draws and can be configured (it is returned again when something changes)
   function scatterPlot (containerDiv) {
-    data = data.filter(d => d.year === 2024) // TEMPORARY
-
     const wrapper = containerDiv.append('svg')
       .attr('width', dimensions.width)
       .attr('height', dimensions.height)
@@ -85,9 +88,13 @@ export default function () {
         .attr('cx', d => xScale(xAccessor(d)))
         .attr('cy', d => yScale(yAccessor(d)))
         .attr('r', d => radius(rAccessor(d)))
-        .attr('fill', d => factionsColors[d.family]) // TEMPORARY
+        // .attr('fill', d => factionsColors[d.family]) // TEMPORARY
+        .style('fill', d => d.hovered ? 'white' : factionsColors[d.family])
+        .on('mouseenter', (event, d) => onMouseEnter(d))
+        .on('mouseleave', (event, d) => onMouseLeave(d))
     }
     function updateFn (sel) {
+      sel.style('fill', d => d.hovered ? 'white' : factionsColors[d.family])
       return sel.call(update => update
         .transition()
         .duration(TR_TIME)
@@ -104,6 +111,10 @@ export default function () {
     }
 
     // Update functions
+    updateData = function () {
+      dataJoin()
+    }
+
     updateSize = function () {
       const trans = d3.transition().duration(TR_TIME)
 
@@ -131,6 +142,7 @@ export default function () {
   scatterPlot.data = function (_) {
     if (!arguments.length) return data
     data = _
+    if (typeof updateData === 'function') updateData()
     return scatterPlot
   }
   scatterPlot.size = function (width, height) {
@@ -139,6 +151,17 @@ export default function () {
     dimensions.height = height
     if (typeof updateSize === 'function') updateSize()
     return scatterPlot
+  }
+
+  // Save the callbacks (update hovered property)
+  scatterPlot.bindMouseEnter = function (callback) {
+    onMouseEnter = callback
+    return this
+  }
+  scatterPlot.bindMouseLeave = function (callback) {
+    onMouseLeave = callback
+    console.debug('Scatter plot received the functions for updating the model on hover')
+    return this
   }
 
   console.debug('Finished creating scatter plot configurable function')

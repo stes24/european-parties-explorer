@@ -11,9 +11,11 @@ class Controller {
     this.lineChart = views.lineChart()
     this.parallelCoordinates = views.parallelCoordinates()
 
-    // Models functions binding (pass the function that updates the views to the models) (???)
+    // Models functions binding (pass to the models the function that updates the views) (???)
     this.parties.bindEntriesListChanged(this.onPartiesListChanged.bind(this))
     // Views functions binding
+    this.scatterPlot.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)
+    this.scatterPlot.bindMouseLeave(p => this.handleMouseLeave(p)).bind(this)
 
     console.debug('Finished creating controller')
   }
@@ -26,16 +28,31 @@ class Controller {
     this.parties.updateEntry(party)
   }
 
-  handleDeleteParty (party) { // id?
+  /* handleDeleteParty (party) { // id?
     this.parties.deleteEntry(party)
+  } */
+
+  setYear (year) {
+    this.parties.setYear(year)
+  }
+
+  // Passed to the views so that they're called on hover -> the model updates the entry
+  handleMouseEnter (party) {
+    this.handleUpdateParty({ party_id: party.party_id, year: party.year, hovered: true })
+  }
+
+  handleMouseLeave (party) {
+    this.handleUpdateParty({ party_id: party.party_id, year: party.year, hovered: false })
   }
 
   // Passed to the models so that it is called whenever there's an update -> data calls the drawing function of the relative view (???)
   onPartiesListChanged () {
     const entries = this.parties.entries
-    this.scatterPlot.data(entries)
+    const entriesInYear = this.parties.entriesInYear
+
+    this.scatterPlot.data(entriesInYear)
     this.lineChart.data(entries)
-    this.parallelCoordinates.data(entries)
+    this.parallelCoordinates.data(entriesInYear)
   }
 }
 

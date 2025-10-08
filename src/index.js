@@ -29,8 +29,7 @@ async function init () {
       controller[v].size(width, height)
     })
   })
-
-  console.debug('Finished creating all views')
+  console.debug('Finished creating resize listener')
 }
 
 async function loadData () {
@@ -56,6 +55,7 @@ function formatData (data) { // Create Party objects and add them to the model (
     const party = formatParty(data[i])
     controller.handleAddParty(party)
   }
+  controller.setYear(2024) // Default year
 }
 
 init()
