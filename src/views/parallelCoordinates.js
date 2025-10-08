@@ -12,8 +12,8 @@ export default function () {
   const yAccessors = {}
 
   const dimensions = {
-    width: 1100,
-    height: 350,
+    width: null,
+    height: null,
     margin: { top: 50, right: 60, bottom: 15, left: 125, textX: 10, textY: 18 }
   }
   let updateSize

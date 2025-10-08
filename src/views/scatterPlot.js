@@ -12,8 +12,8 @@ export default function () {
   const rAccessor = d => d.vote
 
   const dimensions = {
-    width: 600,
-    height: 350,
+    width: null,
+    height: null,
     margin: { top: 22, right: 12, bottom: 95, left: 47, text: 30 },
     offset: { x: 1.5, y: 1.7 },
     radius: { min: 4, max: 30 }
@@ -88,13 +88,13 @@ export default function () {
         .attr('cx', d => xScale(xAccessor(d)))
         .attr('cy', d => yScale(yAccessor(d)))
         .attr('r', d => radius(rAccessor(d)))
-        // .attr('fill', d => factionsColors[d.family]) // TEMPORARY
-        .style('fill', d => d.hovered ? 'white' : factionsColors[d.family])
+        .attr('fill', d => factionsColors[d.family]) // TEMPORARY
         .on('mouseenter', (event, d) => onMouseEnter(d))
         .on('mouseleave', (event, d) => onMouseLeave(d))
     }
     function updateFn (sel) {
-      sel.style('fill', d => d.hovered ? 'white' : factionsColors[d.family])
+      sel.attr('fill', d => d.hovered ? 'white' : factionsColors[d.family])
+        .style('opacity', d => d.hovered ? 1 : null)
       return sel.call(update => update
         .transition()
         .duration(TR_TIME)
