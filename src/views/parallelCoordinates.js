@@ -6,6 +6,7 @@ const TEXT_ROTATION = -13
 // Configurable function - it returns a new function (which, when called, draws the view)
 export default function () {
   let data = []
+  let updateData
 
   // How to access the data for each dimension
   const xAccessor = attr => attr
@@ -17,6 +18,10 @@ export default function () {
     margin: { top: 50, right: 60, bottom: 15, left: 125, textX: 10, textY: 18 }
   }
   let updateSize
+
+  // Hovering
+  let onMouseEnter = _ => {}
+  let onMouseLeave = _ => {}
 
   // It draws and can be configured (it is returned again when something changes)
   function parallelCoordinates (containerDiv) {
@@ -96,8 +101,21 @@ export default function () {
         .attr('class', 'line')
         // For each datum, create [attr, value] and give it to the line (it will connect the values of different attributes)
         .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
+        .on('mouseenter', (event, d) => onMouseEnter(d))
+        .on('mouseleave', (event, d) => onMouseLeave(d))
     }
     function updateFn (sel) {
+      sel.each(function (d) {
+        const line = d3.select(this)
+        if (d.hovered) {
+          line.style('stroke', 'white')
+            .style('opacity', 1).raise()
+        } else {
+          line.style('stroke', null)
+            .style('opacity', null)
+        }
+      })
+
       return sel.call(update => update
         .transition()
         .duration(TR_TIME)
@@ -113,6 +131,10 @@ export default function () {
     }
 
     // Update functions
+    updateData = function () {
+      dataJoin()
+    }
+
     updateSize = function () {
       const trans = d3.transition().duration(TR_TIME)
 
@@ -137,6 +159,7 @@ export default function () {
   parallelCoordinates.data = function (_) {
     if (!arguments.length) return data
     data = _
+    if (typeof updateData === 'function') updateData()
     return parallelCoordinates
   }
   parallelCoordinates.size = function (width, height) {
@@ -145,6 +168,17 @@ export default function () {
     dimensions.height = height
     if (typeof updateSize === 'function') updateSize()
     return parallelCoordinates
+  }
+
+  // Save the callbacks (update hovered property)
+  parallelCoordinates.bindMouseEnter = function (callback) {
+    onMouseEnter = callback
+    return this
+  }
+  parallelCoordinates.bindMouseLeave = function (callback) {
+    onMouseLeave = callback
+    console.debug('Parallel coordinates received the functions for updating the model on hover')
+    return this
   }
 
   console.debug('Finished creating parallel coordinates configurable function')

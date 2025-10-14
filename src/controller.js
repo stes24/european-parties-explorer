@@ -16,6 +16,8 @@ class Controller {
     // Views functions binding
     this.scatterPlot.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)
     this.scatterPlot.bindMouseLeave(p => this.handleMouseLeave(p)).bind(this)
+    this.parallelCoordinates.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)
+    this.parallelCoordinates.bindMouseLeave(p => this.handleMouseLeave(p)).bind(this)
 
     console.debug('Finished creating controller')
   }
