@@ -4,16 +4,16 @@ import views from './views' // Object containing factory functions
 class Controller {
   constructor () {
     // Models
-    this.parties = models.parties // Property of the imported obejct = instance of Parties (= data entries)
+    this.parties = models.parties // Property of the imported obejct = instance of Parties (= data entries and the class' methods)
 
     // Views (call the external functions, which assign the drawing functions to the following variables)
     this.scatterPlot = views.scatterPlot()
     this.lineChart = views.lineChart()
     this.parallelCoordinates = views.parallelCoordinates()
 
-    // Models functions binding (pass to the models the function that updates the views) (???)
+    // Models functions binding (pass to the models the function that updates the views)
     this.parties.bindEntriesListChanged(this.onPartiesListChanged.bind(this))
-    // Views functions binding
+    // Views functions binding (pass to the views the functions that let the model update the hovered party)
     this.scatterPlot.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)
     this.scatterPlot.bindMouseLeave(p => this.handleMouseLeave(p)).bind(this)
     this.parallelCoordinates.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)
@@ -38,7 +38,7 @@ class Controller {
     this.parties.setYear(year)
   }
 
-  // Passed to the views so that they're called on hover -> the model updates the entry
+  // Passed to the views so that they're called on hover -> the model updates the hovered entry
   handleMouseEnter (party) {
     this.handleUpdateParty({ party_id: party.party_id, year: party.year, hovered: true })
   }
@@ -47,7 +47,7 @@ class Controller {
     this.handleUpdateParty({ party_id: party.party_id, year: party.year, hovered: false })
   }
 
-  // Passed to the models so that it is called whenever there's an update -> data calls the drawing function of the relative view (???)
+  // Passed to the models so that it is called whenever there's an update -> data calls the drawing function of the relative view
   onPartiesListChanged () {
     const entries = this.parties.entries
     const entriesInYear = this.parties.entriesInYear

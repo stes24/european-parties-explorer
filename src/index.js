@@ -2,7 +2,7 @@ import './index.scss'
 import 'normalize.css'
 import * as d3 from 'd3'
 import controller from './controller' // Already an instance of the class
-import { formatParty } from './utils'
+import { formatParty, years } from './utils'
 
 async function init () {
   await loadData()
@@ -17,7 +17,7 @@ async function init () {
       .attr('class', 'container')
       .attr('id', `${v}-container`)
     const { width, height } = container.node().getBoundingClientRect()
-    controller[v].size(width, height) // SWAP???
+    controller[v].size(width, height)
     container.call(controller[v]) // Call the appropriate drawing function on the current container
   })
 
@@ -55,7 +55,7 @@ function formatData (data) { // Create Party objects and add them to the model (
     const party = formatParty(data[i])
     controller.handleAddParty(party)
   }
-  controller.setYear(2024) // Default year
+  controller.setYear(years.at(-1)) // Default year (most recent)
 }
 
 init()
