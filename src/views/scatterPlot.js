@@ -14,9 +14,10 @@ export default function () {
   const dimensions = {
     width: null,
     height: null,
-    margin: { top: 22, right: 12, bottom: 95, left: 47, text: 30 },
+    margin: { top: 22, right: 12, bottom: 95, left: 47 },
     offset: { x: 1.5, y: 1.7 },
-    radius: { min: 4, max: 30 }
+    radius: { min: 4, max: 30 },
+    legendY: 30
   }
   let updateSize
 
@@ -70,14 +71,14 @@ export default function () {
     const xLegend = drawArea.append('text')
       .attr('class', 'legend')
       .attr('x', (dimensions.width + dimensions.margin.left - dimensions.margin.right) / 2)
-      .attr('y', dimensions.height - dimensions.margin.bottom + dimensions.margin.text)
+      .attr('y', dimensions.height - dimensions.margin.bottom + dimensions.legendY)
       .attr('text-anchor', 'middle')
       .text('MDS dimension 1')
     const yLegend = drawArea.append('text')
       .attr('class', 'legend')
       .attr('transform', 'rotate(-90)')
       .attr('x', -(dimensions.height + dimensions.margin.top - dimensions.margin.bottom) / 2)
-      .attr('y', dimensions.margin.left - dimensions.margin.text)
+      .attr('y', dimensions.margin.left - dimensions.legendY)
       .attr('text-anchor', 'middle')
       .text('MDS dimension 2')
 
@@ -129,7 +130,7 @@ export default function () {
         .call(d3.axisLeft(yScale))
       xLegend.transition(trans)
         .attr('x', (dimensions.width + dimensions.margin.left - dimensions.margin.right) / 2)
-        .attr('y', dimensions.height - dimensions.margin.bottom + dimensions.margin.text)
+        .attr('y', dimensions.height - dimensions.margin.bottom + dimensions.legendY)
       yLegend.transition(trans)
         .attr('x', -(dimensions.height + dimensions.margin.top - dimensions.margin.bottom) / 2)
 

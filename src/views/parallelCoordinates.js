@@ -1,7 +1,7 @@
 import * as d3 from 'd3'
 import { attributes, countries, factions, TR_TIME } from '@/utils'
 
-const TEXT_ROTATION = -13
+const LEGEND_ROTATION = -13
 
 // Configurable function - it returns a new function (which, when called, draws the view)
 export default function () {
@@ -15,7 +15,8 @@ export default function () {
   const dimensions = {
     width: null,
     height: null,
-    margin: { top: 50, right: 60, bottom: 15, left: 125, textX: 10, textY: 18 }
+    margin: { top: 50, right: 60, bottom: 15, left: 125 },
+    legend: { x: 10, y: 18 }
   }
   let updateSize
 
@@ -37,10 +38,10 @@ export default function () {
       .range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
     // Define more y scales, one for each attribute
     const scaleRange = [dimensions.height - dimensions.margin.bottom, dimensions.margin.top]
-    const yScales = {} // Will be a map
+    const yScales = {} // Will be a map - key (attribute id) -> value (scale associated to that attribute)
     attributeIds.forEach(attr => {
       if (attr === 'country') {
-        yScales[attr] = d3.scalePoint() // Key (attribute) -> value (scale associated to that attribute)
+        yScales[attr] = d3.scalePoint()
           .domain(Object.keys(countries).map(Number))
           .range(scaleRange)
       } else if (attr === 'family') {
@@ -56,7 +57,7 @@ export default function () {
     })
 
     // How to generate the lines
-    const line = d3.line() // d is given as [attribute name, value]
+    const line = d3.line() // d is given as [attribute name, attribute value for the given party]
       .x(([attr, val]) => xScale(xAccessor(attr))) // Place on the correct scale using the attribute name
       .y(([attr, val]) => yScales[attr](val)) // Find right scale with attribute, then pass the value to it
 
@@ -86,11 +87,11 @@ export default function () {
       .each(function (attr) {
         d3.select(this)
           .call(makeAxis(attr))
-          .append('text') // Text operations
+          .append('text') // Legend operations
           .attr('class', 'legend')
-          .attr('transform', `rotate(${TEXT_ROTATION})`)
-          .attr('x', dimensions.margin.textX)
-          .attr('y', dimensions.margin.top - dimensions.margin.textY)
+          .attr('transform', `rotate(${LEGEND_ROTATION})`)
+          .attr('x', dimensions.legend.x)
+          .attr('y', dimensions.margin.top - dimensions.legend.y)
           .attr('text-anchor', 'middle')
           .text(attributes[attr])
       })
@@ -99,7 +100,7 @@ export default function () {
     function enterFn (sel) {
       return sel.append('path')
         .attr('class', 'line')
-        // For each datum, create [attr, value] and give it to the line (it will connect the values of different attributes)
+        // For each datum, create [attr, value] and give it to the line (it will connect the values of the many attributes)
         .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
         .on('mouseenter', (event, d) => onMouseEnter(d))
         .on('mouseleave', (event, d) => onMouseLeave(d))
