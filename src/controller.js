@@ -12,7 +12,7 @@ class Controller {
     this.parallelCoordinates = views.parallelCoordinates()
 
     // Models functions binding (pass to the models the function that updates the views)
-    this.parties.bindEntriesListChanged(this.onPartiesListChanged.bind(this))
+    this.parties.bindEntriesListChanged(this.onPartiesListChanged.bind(this)) // Called using the controller's "this" context
     // Views functions binding (pass to the views the functions that let the model update the hovered party)
     this.scatterPlot.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)
     this.scatterPlot.bindMouseLeave(p => this.handleMouseLeave(p)).bind(this)
