@@ -73,6 +73,14 @@ body {
   opacity: 0.75;
 }
 
+.line-hovered {
+  fill: none;
+  stroke-width: 3.5px;
+  stroke: #CCCCCC;
+  opacity: 1;
+  pointer-events: none;
+}
+
 // OTHER --------------------------------
 
 svg .legend {

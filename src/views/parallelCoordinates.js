@@ -62,12 +62,16 @@ export default function () {
       .y(([attr, val]) => yScales[attr](val)) // Find right scale with attribute, then pass the value to it
 
     const linesGroup = wrapper.append('g')
+    const hoverGroup = wrapper.append('g')
 
     // Draw lines
     function dataJoin () {
       linesGroup.selectAll('path')
-        .data(data)
+        .data(data, d => d.party_id)
         .join(enterFn, updateFn, exitFn)
+      hoverGroup.selectAll('path') // Draw on top of the normal lines
+        .data(data.filter(d => d.hovered), d => d.party_id)
+        .join(enterFnHover, updateFn, exitFn)
     }
     dataJoin()
 
@@ -105,18 +109,12 @@ export default function () {
         .on('mouseenter', (event, d) => onMouseEnter(d))
         .on('mouseleave', (event, d) => onMouseLeave(d))
     }
+    function enterFnHover (sel) {
+      return sel.append('path')
+        .attr('class', 'line-hovered')
+        .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
+    }
     function updateFn (sel) {
-      sel.each(function (d) {
-        const line = d3.select(this)
-        if (d.hovered) {
-          line.style('stroke', 'white')
-            .style('opacity', 1).raise()
-        } else {
-          line.style('stroke', null)
-            .style('opacity', null)
-        }
-      })
-
       return sel.call(update => update
         .transition()
         .duration(TR_TIME)
@@ -124,11 +122,7 @@ export default function () {
       )
     }
     function exitFn (sel) {
-      sel.call(exit => exit
-        .transition()
-        .duration(TR_TIME)
-        .remove()
-      )
+      sel.call(exit => exit.remove())
     }
 
     // Update functions
