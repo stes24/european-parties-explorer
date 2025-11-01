@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import { TR_TIME, years } from '@/utils'
+import { dropDownAttributes, TR_TIME, years } from '@/utils'
 
 // const RADIUS = 4
 
@@ -15,7 +15,7 @@ export default function () {
   const dimensions = {
     width: null,
     height: null,
-    margin: { top: 35, right: 25, bottom: 40, left: 25 }
+    margin: { top: 35, right: 25, bottom: 40, left: 25, topDropDown: 8, leftDropDown: 10 }
   }
   let updateSize
 
@@ -73,6 +73,19 @@ export default function () {
       .attr('x2', dimensions.width - dimensions.margin.right)
       .attr('y1', d => yScale(d))
       .attr('y2', d => yScale(d))
+
+    // Drop-down menu
+    const dropDown = containerDiv.append('select')
+      .style('font-size', '12px')
+      .style('position', 'absolute')
+      .style('top', `${containerDiv.node().getBoundingClientRect().top + dimensions.margin.topDropDown}px`)
+      .style('left', `${containerDiv.node().getBoundingClientRect().left + dimensions.margin.leftDropDown}px`)
+    dropDown.selectAll('option')
+      .data(Object.keys(dropDownAttributes))
+      .enter()
+      .append('option')
+      .attr('value', d => d)
+      .text(d => dropDownAttributes[d])
 
     // Group the data (one line = one party over the years), give each party to one line
     /* parties.forEach((party, partyId) => {
@@ -136,6 +149,8 @@ export default function () {
         .attr('x2', dimensions.width - dimensions.margin.right)
         .attr('y1', d => yScale(d))
         .attr('y2', d => yScale(d))
+      dropDown.style('top', `${containerDiv.node().getBoundingClientRect().top + dimensions.margin.topDropDown}px`)
+        .style('left', `${containerDiv.node().getBoundingClientRect().left + dimensions.margin.leftDropDown}px`)
 
       dataJoin()
     }

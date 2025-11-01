@@ -59,6 +59,27 @@ export const attributes = { // Reordered so that similar topics are close
   environment: 'Environment',
   regions: 'Regionalism'
 }
+export const dropDownAttributes = {
+  vote: 'Votes in the most recent national election (%)',
+  epvote: 'Votes in the most recent European election (%)',
+  lrgen: 'Left/right',
+  lrecon: 'Economic left/right',
+  spendvtax: 'Spending vs. reducing taxes',
+  redistribution: 'Wealth redistribution',
+  deregulation: 'Market deregulation',
+  eu_position: 'European Union',
+  eu_intmark: 'EU internal market',
+  eu_foreign: 'EU foreign policy',
+  immigrate_policy: 'Immigration policies',
+  multiculturalism: 'Multiculturalism',
+  ethnic_minorities: 'Ethnic minorities',
+  nationalism: 'Nationalism',
+  civlib_laworder: 'Civil liberties vs. law & order',
+  sociallifestyle: 'Social lifestyle',
+  religious_principles: 'Religious principles',
+  environment: 'Environment',
+  regions: 'Regionalism'
+}
 
 export const countries = {
   1: 'Belgium',
