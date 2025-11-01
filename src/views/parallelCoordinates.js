@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import { attributes, countries, factions, TR_TIME } from '@/utils'
+import { attributes, countries, factions, hideTooltip, moveTooltip, showTooltip, TR_TIME } from '@/utils'
 
 const LEGEND_ROTATION = -13
 
@@ -106,8 +106,15 @@ export default function () {
         .attr('class', 'line')
         // For each datum, create [attr, value] and give it to the line (it will connect the values of the many attributes)
         .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
-        .on('mouseenter', (event, d) => onMouseEnter(d))
-        .on('mouseleave', (event, d) => onMouseLeave(d))
+        .on('mouseenter', (event, d) => {
+          onMouseEnter(d)
+          showTooltip(event, d)
+        })
+        .on('mousemove', (event) => moveTooltip(event))
+        .on('mouseleave', (event, d) => {
+          onMouseLeave(d)
+          hideTooltip()
+        })
     }
     function enterFnHover (sel) {
       return sel.append('path')

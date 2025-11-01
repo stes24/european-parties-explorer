@@ -21,6 +21,9 @@ async function init () {
     container.call(controller[v]) // Call the appropriate drawing function on the current container
   })
 
+  // Tooltip
+  d3.select('#root').append('div').attr('id', 'tooltip')
+
   // Resize listener
   window.addEventListener('resize', _ => {
     views.forEach(v => {

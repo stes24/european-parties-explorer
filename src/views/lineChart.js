@@ -1,7 +1,7 @@
 import * as d3 from 'd3'
-import { years, TR_TIME } from '@/utils'
+import { TR_TIME, years } from '@/utils'
 
-const RADIUS = 4
+// const RADIUS = 4
 
 // Configurable function - it returns a new function (which, when called, draws the view)
 export default function () {

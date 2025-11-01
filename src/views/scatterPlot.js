@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import { factionsColors, TR_TIME } from '@/utils'
+import { factionsColors, hideTooltip, moveTooltip, showTooltip, TR_TIME } from '@/utils'
 
 // Configurable function - it returns a new function (which, when called, draws the view)
 export default function () {
@@ -90,8 +90,15 @@ export default function () {
         .attr('cy', d => yScale(yAccessor(d)))
         .attr('r', d => radius(rAccessor(d)))
         .attr('fill', d => factionsColors[d.family]) // TEMPORARY
-        .on('mouseenter', (event, d) => onMouseEnter(d))
-        .on('mouseleave', (event, d) => onMouseLeave(d))
+        .on('mouseenter', (event, d) => {
+          onMouseEnter(d)
+          showTooltip(event, d)
+        })
+        .on('mousemove', (event) => moveTooltip(event))
+        .on('mouseleave', (event, d) => {
+          onMouseLeave(d)
+          hideTooltip()
+        })
     }
     function updateFn (sel) {
       sel.attr('fill', d => d.hovered ? 'white' : factionsColors[d.family])

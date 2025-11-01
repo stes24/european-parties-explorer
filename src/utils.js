@@ -1,3 +1,5 @@
+import * as d3 from 'd3'
+
 export function formatParty (row) { // For each csv row, return an object (Party)
   if (row.party_id === undefined) throw new Error('Party with missing ID')
 
@@ -103,4 +105,39 @@ export const factions = {
 
 export const factionsColors = {
   1: '#1F77B4', 2: '#AEC7E8', 3: '#BCBD22', 4: '#9467BD', 5: '#FF9896', 6: '#D62728', 7: '#2CA02C', 8: '#8C564B', 9: '#7F7F7F', 10: '#E377C2', 11: '#FF7F0E'
+}
+
+export function showTooltip (event, d) {
+  d3.select('#tooltip')
+    .style('visibility', 'visible')
+    .html(`<b>${d.party}</b><br>${countries[d.country]} - ${factions[d.family]}<br>Votes: ${d.vote}%`)
+  moveTooltip(event) // Correctly place tooltip
+}
+
+export function moveTooltip (event) {
+  const tooltip = d3.select('#tooltip')
+
+  // Tooltip dimensions (node gives the DOM element from the d3 selection)
+  const width = tooltip.node().offsetWidth
+  const height = tooltip.node().offsetHeight
+
+  // event.pageX/Y give cursor position
+  let x = event.pageX + 10
+  let y = event.pageY + 10
+
+  // Tooltip too much on the right
+  if (x + width > window.innerWidth) {
+    x = event.pageX - width // Move it to the left
+  }
+
+  // Tooltip too much on the bottom
+  if (y + height > window.innerHeight) {
+    y = event.pageY - height + 5 // Move it up
+  }
+
+  tooltip.style('left', `${x}px`).style('top', `${y}px`)
+}
+
+export function hideTooltip () {
+  d3.select('#tooltip').style('visibility', 'hidden')
 }

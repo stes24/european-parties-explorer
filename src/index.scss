@@ -94,3 +94,14 @@ svg .legend {
   font-size: 14px;
   fill: #CCCCCC;
 }
+
+#tooltip {
+  position: absolute;
+  visibility: hidden;
+  background: #CCCCCC;
+  border-style: solid;
+  border-width: 1.5px;
+  border-color: orange;
+  padding: 2px;
+  font-size: 12px;
+}
