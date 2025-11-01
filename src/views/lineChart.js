@@ -40,6 +40,7 @@ export default function () {
       // .defined(d => yAccessor(d) !== null) // Correctly draw lines starting from a later year
 
     const linesGroup = wrapper.append('g')
+    const gridGroup = wrapper.append('g')
     const parties = d3.group(data, d => d.party_id) // INSIDE JOIN? A dictionary -> party id - array of dictionaries (all instances of the party, grouped by the id)
 
     // Draw lines
@@ -61,12 +62,17 @@ export default function () {
       .attr('class', 'axis')
       .attr('transform', `translate(${dimensions.margin.left}, 0)`)
       .call(d3.axisLeft(yScale))
-      .call(gPaths => gPaths.selectAll('.axis line').clone() // Long horizontal lines
-        .attr('x2', dimensions.width - dimensions.margin.left - dimensions.margin.right)
-        .style('stroke', '#AAAAAA')
-        .style('stroke-width', '1px')
-        .style('stroke-opacity', 0.3)
-        .lower())
+
+    // Long horizontal lines
+    const grid = gridGroup.selectAll('line')
+      .data(yScale.ticks(10))
+      .enter()
+      .append('line')
+      .attr('class', 'grid')
+      .attr('x1', dimensions.margin.left)
+      .attr('x2', dimensions.width - dimensions.margin.right)
+      .attr('y1', d => yScale(d))
+      .attr('y2', d => yScale(d))
 
     // Group the data (one line = one party over the years), give each party to one line
     /* parties.forEach((party, partyId) => {
@@ -125,6 +131,11 @@ export default function () {
           .tickValues(years))
       yAxis.transition(trans)
         .call(d3.axisLeft(yScale))
+      grid.transition(trans)
+        .attr('x1', dimensions.margin.left)
+        .attr('x2', dimensions.width - dimensions.margin.right)
+        .attr('y1', d => yScale(d))
+        .attr('y2', d => yScale(d))
 
       dataJoin()
     }

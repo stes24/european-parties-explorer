@@ -58,6 +58,13 @@ body {
   fill: #CCCCCC;
 }
 
+// Axis grid (long lines)
+.grid {
+  stroke-width: 1;
+  stroke: #AAAAAA;
+  stroke-opacity: 0.3;
+}
+
 // Scatter plot points
 .circle {
   stroke-width: 2px;
