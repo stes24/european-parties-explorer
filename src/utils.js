@@ -111,27 +111,23 @@ export const countries = {
 }
 
 export const factions = {
-  1: 'Radical Right',
-  2: 'Conservatives',
-  3: 'Liberal',
-  4: 'Christian-Democratic',
-  5: 'Socialist',
-  6: 'Radical Left',
-  7: 'Green',
-  8: 'Regionalist',
-  9: 'No faction',
-  10: 'Confessional',
-  11: 'Agrarian/Center'
-}
-
-export const factionsColors = {
-  1: '#1F77B4', 2: '#AEC7E8', 3: '#BCBD22', 4: '#9467BD', 5: '#FF9896', 6: '#D62728', 7: '#2CA02C', 8: '#8C564B', 9: '#7F7F7F', 10: '#E377C2', 11: '#FF7F0E'
+  1: ['Radical Right', '#1F77B4'],
+  2: ['Conservatives', '#AEC7E8'],
+  3: ['Liberal', '#BCBD22'],
+  4: ['Christian-Democratic', '#9467BD'],
+  5: ['Socialist', '#FF9896'],
+  6: ['Radical Left', '#D62728'],
+  7: ['Green', '#2CA02C'],
+  8: ['Regionalist', '#8C564B'],
+  9: ['No faction', '#7F7F7F'],
+  10: ['Confessional', '#E377C2'],
+  11: ['Agrarian/Center', '#FF7F0E']
 }
 
 export function showTooltip (event, d) {
   d3.select('#tooltip')
     .style('visibility', 'visible')
-    .html(`<b>${d.party}</b><br>${countries[d.country]} - ${factions[d.family]}<br>Votes: ${d.vote}%`)
+    .html(`<b>${d.party}</b><br>${countries[d.country]} - ${factions[d.family][0]}<br>Votes: ${d.vote}%`)
   moveTooltip(event) // Correctly place tooltip
 }
 

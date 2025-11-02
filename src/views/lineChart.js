@@ -121,13 +121,13 @@ export default function () {
     function enterFn (sel) {
       return sel.append('path')
         .attr('class', 'line')
-        .attr('d', d => line(d[1]))
+        .attr('d', ([partyId, values]) => line(values))
     }
     function updateFn (sel) {
       return sel.call(update => update
         .transition()
         .duration(TR_TIME)
-        .attr('d', d => line(d[1]))
+        .attr('d', ([partyId, values]) => line(values))
       )
     }
     function exitFn (sel) {

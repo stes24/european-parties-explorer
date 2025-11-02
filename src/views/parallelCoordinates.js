@@ -78,7 +78,7 @@ export default function () {
     // Draw axes
     function makeAxis (attr) {
       const axis = d3.axisLeft(yScales[attr])
-      if (attr === 'family') axis.tickFormat(id => factions[id])
+      if (attr === 'family') axis.tickFormat(id => factions[id][0])
       if (attr === 'country') axis.tickFormat(id => countries[id])
       return axis
     }
