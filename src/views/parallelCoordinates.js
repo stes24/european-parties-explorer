@@ -98,6 +98,10 @@ export default function () {
           .attr('y', dimensions.margin.top - dimensions.legend.y)
           .attr('text-anchor', 'middle')
           .text(attributes[attr])
+
+        if (attr === 'family') {
+          d3.select(this).selectAll('.tick text').style('fill', d => factions[d][1])
+        }
       })
 
     // Join functions
