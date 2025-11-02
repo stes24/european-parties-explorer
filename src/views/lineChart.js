@@ -9,15 +9,19 @@ export default function () {
   let updateData
 
   // Which attributes to use
+  let selectedOption = 'vote'
   const xAccessor = d => d.year
-  const yAccessor = d => d.eu_position // TEMPORARY
+  const yAccessor = d => d[selectedOption]
 
   const dimensions = {
     width: null,
     height: null,
-    margin: { top: 35, right: 25, bottom: 40, left: 25, topDropDown: 8, leftDropDown: 10 }
+    margin: { top: 30, right: 25, bottom: 40, left: 30, topDropDown: 8, leftDropDown: 10 },
+    legendY: 32
   }
   let updateSize
+
+  let gridTransition = false
 
   // It draws and can be configured (it is returned again when something changes)
   function lineChart (containerDiv) {
@@ -30,7 +34,7 @@ export default function () {
       .domain(d3.extent(years))
       .range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
     const yScale = d3.scaleLinear()
-      .domain([0, 10]) // TEMPORARY
+      .domain([0, (selectedOption === 'vote' || selectedOption === 'epvote') ? d3.max(data, yAccessor) : 10])
       .range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
 
     // How to generate the lines
@@ -63,16 +67,21 @@ export default function () {
       .attr('transform', `translate(${dimensions.margin.left}, 0)`)
       .call(d3.axisLeft(yScale))
 
+    // Draw axis legend
+    const xLegend = wrapper.append('text')
+      .attr('class', 'legend')
+      .attr('x', dimensions.width / 2)
+      .attr('y', dimensions.height - dimensions.margin.bottom + dimensions.legendY)
+      .attr('text-anchor', 'middle')
+      .text('Year')
+
     // Long horizontal lines
-    const grid = gridGroup.selectAll('line')
-      .data(yScale.ticks(10))
-      .enter()
-      .append('line')
-      .attr('class', 'grid')
-      .attr('x1', dimensions.margin.left)
-      .attr('x2', dimensions.width - dimensions.margin.right)
-      .attr('y1', d => yScale(d))
-      .attr('y2', d => yScale(d))
+    function gridJoin () {
+      gridGroup.selectAll('line')
+        .data(yScale.ticks())
+        .join(enterFnGrid, updateFnGrid, exitFnGrid)
+    }
+    gridJoin()
 
     // Drop-down menu
     const dropDown = containerDiv.append('select')
@@ -86,6 +95,10 @@ export default function () {
       .append('option')
       .attr('value', d => d)
       .text(d => dropDownAttributes[d])
+    dropDown.on('change', (event) => {
+      selectedOption = event.target.value
+      updateData()
+    })
 
     // Group the data (one line = one party over the years), give each party to one line
     /* parties.forEach((party, partyId) => {
@@ -125,8 +138,41 @@ export default function () {
       )
     }
 
+    function enterFnGrid (sel) {
+      return sel.append('line')
+        .attr('class', 'grid')
+        .attr('x1', dimensions.margin.left)
+        .attr('x2', dimensions.width - dimensions.margin.right)
+        .attr('y1', d => yScale(d))
+        .attr('y2', d => yScale(d))
+    }
+    function updateFnGrid (sel) {
+      return sel.call(update => update
+        .transition()
+        .duration(gridTransition ? TR_TIME : 0)
+        .attr('x1', dimensions.margin.left)
+        .attr('x2', dimensions.width - dimensions.margin.right)
+        .attr('y1', d => yScale(d))
+        .attr('y2', d => yScale(d))
+      )
+    }
+    function exitFnGrid (sel) {
+      sel.call(exit => exit
+        .transition()
+        .duration(gridTransition ? TR_TIME : 0)
+        .remove()
+      )
+    }
+
     // Update functions
     updateData = function () {
+      // Attribute on y axis
+      yScale.domain([0, (selectedOption === 'vote' || selectedOption === 'epvote') ? d3.max(data, yAccessor) : 10])
+      yAxis.call(d3.axisLeft(yScale))
+      // Adapt grid
+      gridTransition = false
+      gridJoin()
+
       dataJoin()
     }
 
@@ -144,14 +190,14 @@ export default function () {
           .tickValues(years))
       yAxis.transition(trans)
         .call(d3.axisLeft(yScale))
-      grid.transition(trans)
-        .attr('x1', dimensions.margin.left)
-        .attr('x2', dimensions.width - dimensions.margin.right)
-        .attr('y1', d => yScale(d))
-        .attr('y2', d => yScale(d))
+      xLegend.transition(trans)
+        .attr('x', dimensions.width / 2)
+        .attr('y', dimensions.height - dimensions.margin.bottom + dimensions.legendY)
       dropDown.style('top', `${containerDiv.node().getBoundingClientRect().top + dimensions.margin.topDropDown}px`)
         .style('left', `${containerDiv.node().getBoundingClientRect().left + dimensions.margin.leftDropDown}px`)
 
+      gridTransition = true
+      gridJoin()
       dataJoin()
     }
 

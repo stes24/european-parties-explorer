@@ -39,18 +39,14 @@ async function loadData () {
   try {
     const data = await d3.csv('./merged_dataset_with_mds.csv') // Load from public
     console.debug(`Loaded data (${data.length} rows)`)
-    formatData(data)
+    for (let i = 0; i < data.length; i++) { // Create Party objects and add them to the model (through the controller)
+      const party = formatParty(data[i])
+      controller.handleAddParty(party)
+    }
+    controller.setYear(years.at(-1)) // Default year (most recent)
   } catch (e) {
     console.error('Error loading data\n', e)
   }
-}
-
-function formatData (data) { // Create Party objects and add them to the model (through the controller)
-  for (let i = 0; i < data.length; i++) {
-    const party = formatParty(data[i])
-    controller.handleAddParty(party)
-  }
-  controller.setYear(years.at(-1)) // Default year (most recent)
 }
 
 init()
