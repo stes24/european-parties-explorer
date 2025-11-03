@@ -26,7 +26,7 @@ export default function () {
 
   // It draws and can be configured (it is returned again when something changes)
   function parallelCoordinates (containerDiv) {
-    const attributeIds = Object.keys(attributes)
+    const attributeIds = Object.keys(attributes).filter(a => attributes[a][2])
 
     const wrapper = containerDiv.append('svg')
       .attr('width', dimensions.width)
@@ -97,7 +97,7 @@ export default function () {
           .attr('x', dimensions.legend.x)
           .attr('y', dimensions.margin.top - dimensions.legend.y)
           .attr('text-anchor', 'middle')
-          .text(attributes[attr])
+          .text(attributes[attr][0])
 
         if (attr === 'family') {
           d3.select(this).selectAll('.tick text').style('fill', d => factions[d][1])

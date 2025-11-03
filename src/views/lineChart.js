@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import { dropDownAttributes, TR_TIME, years } from '@/utils'
+import { attributes, TR_TIME, years } from '@/utils'
 
 // const RADIUS = 4
 
@@ -92,11 +92,11 @@ export default function () {
       .style('top', `${containerDiv.node().getBoundingClientRect().top + dimensions.margin.topDropDown}px`)
       .style('left', `${containerDiv.node().getBoundingClientRect().left + dimensions.margin.leftDropDown}px`)
     attrDropDown.selectAll('option')
-      .data(Object.keys(dropDownAttributes))
+      .data(Object.keys(attributes).filter(a => attributes[a][1]))
       .enter()
       .append('option')
       .attr('value', d => d)
-      .text(d => dropDownAttributes[d])
+      .text(d => attributes[d][0])
     attrDropDown.on('change', (event) => {
       selectedOption = event.target.value
       updateData()
