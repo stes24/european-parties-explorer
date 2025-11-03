@@ -103,6 +103,11 @@ export default function () {
           d3.select(this).selectAll('.tick text').style('fill', d => factions[d][1])
         }
       })
+    // Handle hovering on legends
+    wrapper.selectAll('.legend')
+      .on('mouseenter', (event, d) => showTooltip(event, d))
+      .on('mousemove', (event) => moveTooltip(event))
+      .on('mouseleave', () => hideTooltip())
 
     // Join functions
     function enterFn (sel) {

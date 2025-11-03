@@ -1,4 +1,5 @@
 import * as d3 from 'd3'
+import controller from './controller'
 
 export function formatParty (row) { // For each csv row, return an object (Party)
   if (row.party_id === undefined) throw new Error('Party with missing ID')
@@ -107,9 +108,13 @@ export const factions = {
 }
 
 export function showTooltip (event, d) {
-  d3.select('#tooltip')
-    .style('visibility', 'visible')
-    .html(`<b>${d.party}</b><br>${countries[d.country]} - ${factions[d.family][0]}<br>Votes: ${d.vote}%`)
+  const tooltip = d3.select('#tooltip').style('visibility', 'visible')
+
+  if (d.party) { // Party hover
+    tooltip.html(`<b>${d.party}</b><br>${countries[d.country]} - ${factions[d.family][0]}<br>Votes: ${d.vote}%`)
+  } else { // Legend hover
+    tooltip.html(d !== 'family' ? attributes[d][3] : `${attributes[d][3]}${controller.getYear()}`)
+  }
   moveTooltip(event) // Correctly place tooltip
 }
 

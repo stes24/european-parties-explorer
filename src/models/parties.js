@@ -7,6 +7,10 @@ class Parties {
     console.debug('Finished creating Parties model')
   }
 
+  get year () {
+    return this.selectedYear
+  }
+
   get entriesInYear () {
     return this.entries.filter(d => d.year === this.selectedYear)
   }

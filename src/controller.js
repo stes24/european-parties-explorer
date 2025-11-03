@@ -40,6 +40,10 @@ class Controller {
     this.parties.setYear(year)
   }
 
+  getYear () {
+    return this.parties.year
+  }
+
   // Passed to the views so that they're called on hover -> the model updates the hovered entry
   handleMouseEnter (party) {
     this.handleUpdateParty({ party_id: party.party_id, year: party.year, hovered: true })
