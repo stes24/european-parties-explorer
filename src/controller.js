@@ -18,6 +18,8 @@ class Controller {
     this.scatterPlot.bindMouseLeave(p => this.handleMouseLeave(p)).bind(this)
     this.parallelCoordinates.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)
     this.parallelCoordinates.bindMouseLeave(p => this.handleMouseLeave(p)).bind(this)
+    // Pass the function that sets the selected year
+    this.lineChart.bindYearChange(year => this.setYear(year)).bind(this)
 
     console.debug('Finished creating controller')
   }

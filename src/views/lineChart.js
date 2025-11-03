@@ -21,7 +21,10 @@ export default function () {
   }
   let updateSize
 
+  // Do animation or not
   let gridTransition = false
+
+  let onYearChange = _ => {}
 
   // It draws and can be configured (it is returned again when something changes)
   function lineChart (containerDiv) {
@@ -119,6 +122,9 @@ export default function () {
       .append('option')
       .attr('value', d => d)
       .text(d => d)
+    yearDropDown.on('change', (event) => {
+      onYearChange(+event.target.value)
+    })
 
     // Group the data (one line = one party over the years), give each party to one line
     /* parties.forEach((party, partyId) => {
@@ -236,6 +242,12 @@ export default function () {
     dimensions.height = height
     if (typeof updateSize === 'function') updateSize()
     return lineChart
+  }
+
+  lineChart.bindYearChange = function (callback) {
+    onYearChange = callback
+    console.debug('Line chart received the function for updating the model on year change')
+    return this
   }
 
   console.debug('Finished creating line chart configurable function')
