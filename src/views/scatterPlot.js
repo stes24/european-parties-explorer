@@ -14,7 +14,7 @@ export default function () {
   const dimensions = {
     width: null,
     height: null,
-    margin: { top: 22, right: 12, bottom: 95, left: 47 },
+    margin: { top: 22, right: 12, bottom: 60, left: 47 },
     offset: { x: 1.5, y: 1.7 },
     radius: { min: 4, max: 30 },
     legendY: 30
