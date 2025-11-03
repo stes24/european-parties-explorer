@@ -16,7 +16,7 @@ export default function () {
   const dimensions = {
     width: null,
     height: null,
-    margin: { top: 35, right: 25, bottom: 40, left: 30, topDropDown: 8, leftDropDown: 10 },
+    margin: { top: 35, right: 25, bottom: 40, left: 30, topDropDown: 8, leftDropDown: 10, rightYear: 12 },
     legendY: 32
   }
   let updateSize
@@ -84,21 +84,41 @@ export default function () {
     gridJoin()
 
     // Drop-down menu
-    const dropDown = containerDiv.append('select')
-      .style('font-size', '12px')
-      .style('position', 'absolute')
+    const attrDropDown = containerDiv.append('select')
+      .attr('class', 'dropDown')
       .style('top', `${containerDiv.node().getBoundingClientRect().top + dimensions.margin.topDropDown}px`)
       .style('left', `${containerDiv.node().getBoundingClientRect().left + dimensions.margin.leftDropDown}px`)
-    dropDown.selectAll('option')
+    attrDropDown.selectAll('option')
       .data(Object.keys(dropDownAttributes))
       .enter()
       .append('option')
       .attr('value', d => d)
       .text(d => dropDownAttributes[d])
-    dropDown.on('change', (event) => {
+    attrDropDown.on('change', (event) => {
       selectedOption = event.target.value
       updateData()
     })
+
+    // Create container for year label + drop-down
+    const yearContainer = containerDiv.append('div')
+      .attr('class', 'text-row')
+      .style('top', `${containerDiv.node().getBoundingClientRect().top + dimensions.margin.topDropDown - 2}px`)
+      .style('right', `${dimensions.margin.rightYear}px`)
+    // Label
+    yearContainer.append('span')
+      .attr('class', 'label')
+      .text('YEAR:')
+    // Drop-down
+    const yearDropDown = yearContainer.append('select')
+      .attr('class', 'dropDown')
+      .style('position', 'static')
+      .style('font-size', '16px')
+    yearDropDown.selectAll('option')
+      .data(years.reverse())
+      .enter()
+      .append('option')
+      .attr('value', d => d)
+      .text(d => d)
 
     // Group the data (one line = one party over the years), give each party to one line
     /* parties.forEach((party, partyId) => {
@@ -193,7 +213,7 @@ export default function () {
       xLegend.transition(trans)
         .attr('x', dimensions.width / 2)
         .attr('y', dimensions.height - dimensions.margin.bottom + dimensions.legendY)
-      dropDown.style('top', `${containerDiv.node().getBoundingClientRect().top + dimensions.margin.topDropDown}px`)
+      attrDropDown.style('top', `${containerDiv.node().getBoundingClientRect().top + dimensions.margin.topDropDown}px`)
         .style('left', `${containerDiv.node().getBoundingClientRect().left + dimensions.margin.leftDropDown}px`)
 
       gridTransition = true

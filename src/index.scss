@@ -61,7 +61,7 @@ body {
 // Axis grid (long lines)
 .grid {
   stroke-width: 1;
-  stroke: #AAAAAA;
+  stroke: #CCCCCC;
   stroke-opacity: 0.3;
 }
 
@@ -104,4 +104,22 @@ svg .legend {
   border-color: orange;
   padding: 2px;
   font-size: 12px;
+}
+
+.dropDown {
+  position: absolute;
+  font-size: 12px;
+}
+
+.text-row {
+  display: flex;
+  position: absolute;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+}
+
+.label {
+  font-size: 22px;
+  color: white;
 }
