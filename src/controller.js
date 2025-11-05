@@ -38,6 +38,9 @@ class Controller {
 
   setYear (year) {
     this.parties.setYear(year)
+
+    // Notify views that need year for drawing
+    this.parallelCoordinates.year(year)
   }
 
   getYear () {

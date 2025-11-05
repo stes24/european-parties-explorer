@@ -39,29 +39,29 @@ export const TR_TIME = 1000 // TEMPORARY
 
 export const years = [1999, 2002, 2006, 2010, 2014, 2019, 2024]
 
-// id: [displayed name, goes on line chart, goes on parallel coordinates, description]
+// id: [displayed name, goes on line chart, goes on parallel coordinates, minimum year, description]
 export const attributes = { // Reordered so that similar topics are close
-  family: ['Political faction', false, true, 'Parties\' political<br>faction in '],
-  country: ['Country', false, true, 'Parties\' country of origin'],
-  vote: ['Votes in the most recent national election (%)', true, false, 'Vote percentage received by<br>the parties in the national election<br>most prior to the given year'],
-  epvote: ['Votes in the most recent European election (%)', true, false, 'Vote percentage received by the<br>parties in the European Parliament<br>election most prior to the given year'],
-  lrgen: ['Left/right', true, true, 'Overall ideological stance<br>0 = extreme left<br>5 = center<br>10 = extreme right'],
-  lrecon: ['Economic left/right', true, true, 'Ideological stance on economic issues<br>0 = extreme left<br>5 = center<br>10 = extreme right'],
-  spendvtax: ['Spending vs. reducing taxes', true, true, 'Improving public services vs. reducing taxes<br>0 = strongly favors reducing taxes<br>10 = strongly favors improving public services'],
-  redistribution: ['Wealth redistribution', true, true, 'Redistribution of wealth from the rich to the poor<br>0 = strongly opposes redistribution<br>10 = strongly favors redistribution'],
-  deregulation: ['Market deregulation', true, true, 'Deregulations of markets<br>0 = strongly opposes deregulation<br>10 = strongly favors deregulation'],
-  eu_position: ['European Union', true, true, 'European integration<br>1 = strongly opposed<br>2 = opposed<br>3 = somewhat opposed<br>4 = neutral<br>5 = somewhat in favor<br>6 = in favor<br>7 = strongly in favor'],
-  eu_intmark: ['EU internal market', true, true, 'Internal market (free movement of goods, services, etc.)<br>1 = strongly opposed<br>2 = opposed<br>3 = somewhat opposed<br>4 = neutral<br>5 = somewhat in favor<br>6 = in favor<br>7 = strongly in favor'],
-  eu_foreign: ['EU foreign policy', true, true, 'EU foreign and security policy<br>1 = strongly opposed<br>2 = opposed<br>3 = somewhat opposed<br>4 = neutral<br>5 = somewhat in favor<br>6 = in favor<br>7 = strongly in favor'],
-  immigrate_policy: ['Immigration policies', true, true, 'Immigration policies<br>0 = strongly favors restrictive policies<br>10 = strongly favors liberal policies'],
-  multiculturalism: ['Multiculturalism', true, true, 'Integration of immigrants and asylum seekers<br>0 = strongly favors assimilation<br>10 = strongly favors multiculturalism'],
-  ethnic_minorities: ['Ethnic minorities', true, true, 'Rights for ethnic minorities<br>0 = strongly opposes more rights<br>10 = strongly favors more rights'],
-  nationalism: ['Nationalism', true, true, 'Cosmopolitanism vs. nationalism<br>0 = Strongly favors a cosmopolitan society<br>10 = Strongly favors a nationalist society'],
-  civlib_laworder: ['Civil liberties vs. law & order', true, true, 'Civil liberties vs. law & order<br>0 = strongly favors civil liberties<br>10 = strongly favors tough measures to fight crime'],
-  sociallifestyle: ['Social lifestyle', true, true, 'LGBT rights, gender equality, etc.<br>0 = strongly opposes liberal policies<br>10 = strongly favors liberal policies'],
-  religious_principles: ['Religious principles', true, true, 'Role of religious principles in politics<br>0 = strongly opposes religion in politics<br>10 = strongly favors religion in politics'],
-  environment: ['Environment', true, true, 'Environmental sustainability<br>0 = strongly favors economic growth at the cost of environment protection<br>10 = strongly favors environment protection at the cost of economic growth'],
-  regions: ['Regionalism', true, true, 'Political decentralization to regions/localities<br>0 = strongly opposes political decentralization<br>10 = strongly favors political decentralization']
+  family: ['Political faction', false, true, 1999, 'Parties\' political<br>faction in '],
+  country: ['Country', false, true, 1999, 'Parties\' country of origin'],
+  vote: ['Votes in the most recent national election (%)', true, false, 1999, 'Vote percentage received by<br>the parties in the national election<br>most prior to the given year'],
+  epvote: ['Votes in the most recent European election (%)', true, false, 1999, 'Vote percentage received by the<br>parties in the European Parliament<br>election most prior to the given year'],
+  lrgen: ['Left/right', true, true, 1999, 'Overall ideological stance<br>0 = extreme left<br>5 = center<br>10 = extreme right'],
+  lrecon: ['Economic left/right', true, true, 1999, 'Ideological stance on economic issues<br>0 = extreme left<br>5 = center<br>10 = extreme right'],
+  spendvtax: ['Spending vs. reducing taxes', true, true, 2006, 'Improving public services vs. reducing taxes<br>0 = strongly favors reducing taxes<br>10 = strongly favors improving public services'],
+  redistribution: ['Wealth redistribution', true, true, 2006, 'Redistribution of wealth from the rich to the poor<br>0 = strongly opposes redistribution<br>10 = strongly favors redistribution'],
+  deregulation: ['Market deregulation', true, true, 2006, 'Deregulations of markets<br>0 = strongly opposes deregulation<br>10 = strongly favors deregulation'],
+  eu_position: ['European Union', true, true, 1999, 'European integration<br>1 = strongly opposed<br>2 = opposed<br>3 = somewhat opposed<br>4 = neutral<br>5 = somewhat in favor<br>6 = in favor<br>7 = strongly in favor'],
+  eu_intmark: ['EU internal market', true, true, 2002, 'Internal market (free movement of goods, services, etc.)<br>1 = strongly opposed<br>2 = opposed<br>3 = somewhat opposed<br>4 = neutral<br>5 = somewhat in favor<br>6 = in favor<br>7 = strongly in favor'],
+  eu_foreign: ['EU foreign policy', true, true, 1999, 'EU foreign and security policy<br>1 = strongly opposed<br>2 = opposed<br>3 = somewhat opposed<br>4 = neutral<br>5 = somewhat in favor<br>6 = in favor<br>7 = strongly in favor'],
+  immigrate_policy: ['Immigration policies', true, true, 2006, 'Immigration policies<br>0 = strongly favors restrictive policies<br>10 = strongly favors liberal policies'],
+  multiculturalism: ['Multiculturalism', true, true, 2006, 'Integration of immigrants and asylum seekers<br>0 = strongly favors assimilation<br>10 = strongly favors multiculturalism'],
+  ethnic_minorities: ['Ethnic minorities', true, true, 2006, 'Rights for ethnic minorities<br>0 = strongly opposes more rights<br>10 = strongly favors more rights'],
+  nationalism: ['Nationalism', true, true, 2014, 'Cosmopolitanism vs. nationalism<br>0 = Strongly favors a cosmopolitan society<br>10 = Strongly favors a nationalist society'],
+  civlib_laworder: ['Civil liberties vs. law & order', true, true, 2006, 'Civil liberties vs. law & order<br>0 = strongly favors civil liberties<br>10 = strongly favors tough measures to fight crime'],
+  sociallifestyle: ['Social lifestyle', true, true, 2006, 'LGBT rights, gender equality, etc.<br>0 = strongly opposes liberal policies<br>10 = strongly favors liberal policies'],
+  religious_principles: ['Religious principles', true, true, 2006, 'Role of religious principles in politics<br>0 = strongly opposes religion in politics<br>10 = strongly favors religion in politics'],
+  environment: ['Environment', true, true, 2010, 'Environmental sustainability<br>0 = strongly favors economic growth at the cost of environment protection<br>10 = strongly favors environment protection at the cost of economic growth'],
+  regions: ['Regionalism', true, true, 2006, 'Political decentralization to regions/localities<br>0 = strongly opposes political decentralization<br>10 = strongly favors political decentralization']
 }
 
 export const countries = {
@@ -113,7 +113,7 @@ export function showTooltip (event, d) {
   if (d.party) { // Party hover
     tooltip.html(`<b>${d.party}</b><br>${countries[d.country]} - ${factions[d.family][0]}<br>Votes: ${d.vote}%`)
   } else { // Legend hover
-    tooltip.html(d !== 'family' ? attributes[d][3] : `${attributes[d][3]}${controller.getYear()}`)
+    tooltip.html(d !== 'family' ? attributes[d][4] : `${attributes[d][4]}${controller.getYear()}`)
   }
   moveTooltip(event) // Correctly place tooltip
 }

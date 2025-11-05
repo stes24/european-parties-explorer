@@ -15,6 +15,11 @@ class Parties {
     return this.entries.filter(d => d.year === this.selectedYear)
   }
 
+  setYear (year) {
+    this.selectedYear = year
+    this.onEntriesListChanged()
+  }
+
   // Called by the controller, which passes the callback (updates all views)
   bindEntriesListChanged (callback) {
     this.onEntriesListChanged = callback
@@ -47,11 +52,6 @@ class Parties {
     })
     this.onEntriesListChanged()
   } */
-
-  setYear (year) {
-    this.selectedYear = year
-    this.onEntriesListChanged()
-  }
 }
 
 export default new Parties()
