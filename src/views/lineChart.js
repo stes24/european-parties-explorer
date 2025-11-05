@@ -226,6 +226,7 @@ export default function () {
 
       gridTransition = true
       gridJoin()
+
       dataJoin()
     }
 

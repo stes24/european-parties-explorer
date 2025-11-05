@@ -7,6 +7,7 @@ const LEGEND_ROTATION = -13
 export default function () {
   let data = []
   let updateData
+  let currentyear
 
   // How to access the data for each dimension
   const xAccessor = attr => attr
@@ -15,10 +16,13 @@ export default function () {
   const dimensions = {
     width: null,
     height: null,
-    margin: { top: 50, right: 60, bottom: 70, left: 125 },
+    margin: { top: 50, right: 75, bottom: 70, left: 125 },
     legend: { x: 10, y: 18 }
   }
   let updateSize
+
+  // Do animation or not
+  let axesTransition = false
 
   // Hovering
   let onMouseEnter = _ => {}
@@ -26,35 +30,41 @@ export default function () {
 
   // It draws and can be configured (it is returned again when something changes)
   function parallelCoordinates (containerDiv) {
-    const attributeIds = Object.keys(attributes).filter(a => attributes[a][2])
-
     const wrapper = containerDiv.append('svg')
       .attr('width', dimensions.width)
       .attr('height', dimensions.height)
 
-    // Scales
-    const xScale = d3.scalePoint()
-      .domain(attributeIds.map(xAccessor))
-      .range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
-    // Define more y scales, one for each attribute
-    const scaleRange = [dimensions.height - dimensions.margin.bottom, dimensions.margin.top]
-    const yScales = {} // Will be a map - key (attribute id) -> value (scale associated to that attribute)
-    attributeIds.forEach(attr => {
-      if (attr === 'country') {
-        yScales[attr] = d3.scalePoint()
-          .domain(Object.keys(countries).map(Number))
-          .range(scaleRange)
-      } else if (attr === 'family') {
-        yScales[attr] = d3.scalePoint()
-          .domain(Object.keys(factions).map(Number))
-          .range(scaleRange)
-      } else {
-        yScales[attr] = d3.scaleLinear()
-          .domain([0, 10])
-          .range(scaleRange)
-      }
-      yAccessors[attr] = d => d[attr] // Accessor for the specific attribute
-    })
+    let attributeIds
+    let xScale, yScales
+
+    function computeAttributes () {
+      attributeIds = Object.keys(attributes).filter(a => attributes[a][2] && currentyear >= attributes[a][3])
+
+      // Scales
+      xScale = d3.scalePoint()
+        .domain(attributeIds.map(xAccessor))
+        .range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
+      // Define more y scales, one for each attribute
+      const scaleRange = [dimensions.height - dimensions.margin.bottom, dimensions.margin.top]
+      yScales = {} // Will be a map - key (attribute id) -> value (scale associated to that attribute)
+      attributeIds.forEach(attr => {
+        if (attr === 'country') {
+          yScales[attr] = d3.scalePoint()
+            .domain(Object.keys(countries).map(Number))
+            .range(scaleRange)
+        } else if (attr === 'family') {
+          yScales[attr] = d3.scalePoint()
+            .domain(Object.keys(factions).map(Number))
+            .range(scaleRange)
+        } else {
+          yScales[attr] = d3.scaleLinear()
+            .domain([0, 10])
+            .range(scaleRange)
+        }
+        yAccessors[attr] = d => d[attr] // Accessor for the specific attribute
+      })
+    }
+    computeAttributes()
 
     // How to generate the lines
     const line = d3.line() // d is given as [attribute name, attribute value for the given party]
@@ -63,6 +73,7 @@ export default function () {
 
     const linesGroup = wrapper.append('g')
     const hoverGroup = wrapper.append('g')
+    const axesGroup = wrapper.append('g')
 
     // Draw lines
     function dataJoin () {
@@ -74,40 +85,6 @@ export default function () {
         .join(enterFnHover, updateFn, exitFn)
     }
     dataJoin()
-
-    // Draw axes
-    function makeAxis (attr) {
-      const axis = d3.axisLeft(yScales[attr])
-      if (attr === 'family') axis.tickFormat(id => factions[id][0])
-      if (attr === 'country') axis.tickFormat(id => countries[id])
-      return axis
-    }
-    const axes = wrapper.selectAll('axis')
-      .data(attributeIds)
-      .enter()
-      .append('g')
-      .attr('class', 'axis')
-      .attr('transform', attr => `translate(${xScale(xAccessor(attr))}, 0)`) // Each attribute positions the corresponding axis
-      .each(function (attr) {
-        d3.select(this)
-          .call(makeAxis(attr))
-          .append('text') // Legend operations
-          .attr('class', 'legend')
-          .attr('transform', `rotate(${LEGEND_ROTATION})`)
-          .attr('x', dimensions.legend.x)
-          .attr('y', dimensions.margin.top - dimensions.legend.y)
-          .attr('text-anchor', 'middle')
-          .text(attributes[attr][0])
-
-        if (attr === 'family') {
-          d3.select(this).selectAll('.tick text').style('fill', d => factions[d][1])
-        }
-      })
-    // Handle hovering on legends
-    wrapper.selectAll('.legend')
-      .on('mouseenter', (event, d) => showTooltip(event, d))
-      .on('mousemove', (event) => moveTooltip(event))
-      .on('mouseleave', () => hideTooltip())
 
     // Join functions
     function enterFn (sel) {
@@ -141,25 +118,93 @@ export default function () {
       sel.call(exit => exit.remove())
     }
 
+    // Single axis operations
+    function makeAxis (attr) {
+      const axis = d3.axisLeft(yScales[attr])
+      if (attr === 'family') axis.tickFormat(id => factions[id][0])
+      if (attr === 'country') axis.tickFormat(id => countries[id])
+      return axis
+    }
+    function legendHover (sel) {
+      sel.on('mouseenter', (event, d) => showTooltip(event, d))
+        .on('mousemove', (event) => moveTooltip(event))
+        .on('mouseleave', () => hideTooltip())
+    }
+
+    // Draw axes
+    function axesJoin () {
+      axesGroup.selectAll('.axis')
+        .data(attributeIds)
+        .join(enterFnAxes, updateFnAxes, exitFnAxes)
+    }
+    axesJoin()
+
+    // Axes join functions
+    function enterFnAxes (sel) {
+      return sel.append('g')
+        .attr('class', 'axis')
+        .attr('transform', attr => `translate(${xScale(xAccessor(attr))}, 0)`) // Each attribute positions the corresponding axis
+        .each(function (attr) {
+          const axis = d3.select(this)
+          axis.call(makeAxis(attr))
+
+          // Legend operations
+          axis.append('text')
+            .attr('class', 'legend')
+            .attr('transform', `rotate(${LEGEND_ROTATION})`)
+            .attr('x', dimensions.legend.x)
+            .attr('y', dimensions.margin.top - dimensions.legend.y)
+            .attr('text-anchor', 'middle')
+            .text(attributes[attr][0])
+            .call(legendHover)
+
+          if (attr === 'family') {
+            axis.selectAll('.tick text').style('fill', d => factions[d][1])
+          }
+        })
+    }
+    function updateFnAxes (sel) {
+      return sel.call(update => update
+        .each(function (attr) {
+          const axis = d3.select(this)
+
+          axis.transition()
+            .duration(axesTransition ? TR_TIME : 0)
+            .attr('transform', `translate(${xScale(xAccessor(attr))},0)`)
+            .call(makeAxis(attr))
+
+          // Update legend
+          axis.select('.legend')
+            .text(attributes[attr][0])
+            .call(legendHover)
+        })
+      )
+    }
+    function exitFnAxes (sel) {
+      sel.call(exit => exit
+        .transition()
+        .duration(axesTransition ? TR_TIME : 0)
+        .remove()
+      )
+    }
+
     // Update functions
     updateData = function () {
+      // Recompute which axes are needed for the selected year
+      computeAttributes()
+      axesTransition = false
+      axesJoin()
+
       dataJoin()
     }
 
     updateSize = function () {
-      const trans = d3.transition().duration(TR_TIME)
-
       wrapper.attr('width', dimensions.width).attr('height', dimensions.height)
       xScale.range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
       attributeIds.forEach(attr => yScales[attr].range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top]))
 
-      axes.transition(trans)
-        .attr('transform', attr => `translate(${xScale(xAccessor(attr))}, 0)`)
-        .each(function (attr) {
-          d3.select(this)
-            .transition(trans)
-            .call(makeAxis(attr))
-        })
+      axesTransition = true
+      axesJoin()
 
       dataJoin()
     }
@@ -167,6 +212,11 @@ export default function () {
     console.debug('Finished drawing parallel coordinates')
   }
 
+  parallelCoordinates.year = function (_) {
+    if (!arguments.length) return currentyear
+    currentyear = _
+    return parallelCoordinates
+  }
   parallelCoordinates.data = function (_) {
     if (!arguments.length) return data
     data = _
