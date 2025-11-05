@@ -57,31 +57,6 @@ export default function () {
     }
     dataJoin()
 
-    // Draw axes
-    const xAxis = drawArea.append('g')
-      .attr('class', 'axis')
-      .attr('transform', `translate(0, ${dimensions.height - dimensions.margin.bottom})`)
-      .call(d3.axisBottom(xScale))
-    const yAxis = drawArea.append('g')
-      .attr('class', 'axis')
-      .attr('transform', `translate(${dimensions.margin.left}, 0)`)
-      .call(d3.axisLeft(yScale))
-
-    // Draw axes legends
-    const xLegend = drawArea.append('text')
-      .attr('class', 'legend')
-      .attr('x', (dimensions.width + dimensions.margin.left - dimensions.margin.right) / 2)
-      .attr('y', dimensions.height - dimensions.margin.bottom + dimensions.legendY)
-      .attr('text-anchor', 'middle')
-      .text('MDS dimension 1')
-    const yLegend = drawArea.append('text')
-      .attr('class', 'legend')
-      .attr('transform', 'rotate(-90)')
-      .attr('x', -(dimensions.height + dimensions.margin.top - dimensions.margin.bottom) / 2)
-      .attr('y', dimensions.margin.left - dimensions.legendY)
-      .attr('text-anchor', 'middle')
-      .text('MDS dimension 2')
-
     // Join functions
     function enterFn (sel) {
       return sel.append('circle')
@@ -117,6 +92,31 @@ export default function () {
         .remove()
       )
     }
+
+    // Draw axes
+    const xAxis = drawArea.append('g')
+      .attr('class', 'axis')
+      .attr('transform', `translate(0, ${dimensions.height - dimensions.margin.bottom})`)
+      .call(d3.axisBottom(xScale))
+    const yAxis = drawArea.append('g')
+      .attr('class', 'axis')
+      .attr('transform', `translate(${dimensions.margin.left}, 0)`)
+      .call(d3.axisLeft(yScale))
+
+    // Draw axes legends
+    const xLegend = drawArea.append('text')
+      .attr('class', 'legend')
+      .attr('x', (dimensions.width + dimensions.margin.left - dimensions.margin.right) / 2)
+      .attr('y', dimensions.height - dimensions.margin.bottom + dimensions.legendY)
+      .attr('text-anchor', 'middle')
+      .text('MDS dimension 1')
+    const yLegend = drawArea.append('text')
+      .attr('class', 'legend')
+      .attr('transform', 'rotate(-90)')
+      .attr('x', -(dimensions.height + dimensions.margin.top - dimensions.margin.bottom) / 2)
+      .attr('y', dimensions.margin.left - dimensions.legendY)
+      .attr('text-anchor', 'middle')
+      .text('MDS dimension 2')
 
     // Update functions
     updateData = function () {

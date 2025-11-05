@@ -58,6 +58,27 @@ export default function () {
     }
     dataJoin()
 
+    // Join functions
+    function enterFn (sel) {
+      return sel.append('path')
+        .attr('class', 'line')
+        .attr('d', ([partyId, values]) => line(values))
+    }
+    function updateFn (sel) {
+      return sel.call(update => update
+        .transition()
+        .duration(TR_TIME)
+        .attr('d', ([partyId, values]) => line(values))
+      )
+    }
+    function exitFn (sel) {
+      sel.call(exit => exit
+        .transition()
+        .duration(TR_TIME)
+        .remove()
+      )
+    }
+
     // Draw axes
     const xAxis = wrapper.append('g')
       .attr('class', 'axis')
@@ -86,7 +107,34 @@ export default function () {
     }
     gridJoin()
 
-    // Drop-down menu
+    // Grid join functions
+    function enterFnGrid (sel) {
+      return sel.append('line')
+        .attr('class', 'grid')
+        .attr('x1', dimensions.margin.left)
+        .attr('x2', dimensions.width - dimensions.margin.right)
+        .attr('y1', d => yScale(d))
+        .attr('y2', d => yScale(d))
+    }
+    function updateFnGrid (sel) {
+      return sel.call(update => update
+        .transition()
+        .duration(gridTransition ? TR_TIME : 0)
+        .attr('x1', dimensions.margin.left)
+        .attr('x2', dimensions.width - dimensions.margin.right)
+        .attr('y1', d => yScale(d))
+        .attr('y2', d => yScale(d))
+      )
+    }
+    function exitFnGrid (sel) {
+      sel.call(exit => exit
+        .transition()
+        .duration(gridTransition ? TR_TIME : 0)
+        .remove()
+      )
+    }
+
+    // Attributes drop-down menu
     const attrDropDown = containerDiv.append('select')
       .attr('class', 'dropDown')
       .style('top', `${containerDiv.node().getBoundingClientRect().top + dimensions.margin.topDropDown}px`)
@@ -143,58 +191,12 @@ export default function () {
       }
     }) */
 
-    // Join functions
-    function enterFn (sel) {
-      return sel.append('path')
-        .attr('class', 'line')
-        .attr('d', ([partyId, values]) => line(values))
-    }
-    function updateFn (sel) {
-      return sel.call(update => update
-        .transition()
-        .duration(TR_TIME)
-        .attr('d', ([partyId, values]) => line(values))
-      )
-    }
-    function exitFn (sel) {
-      sel.call(exit => exit
-        .transition()
-        .duration(TR_TIME)
-        .remove()
-      )
-    }
-
-    function enterFnGrid (sel) {
-      return sel.append('line')
-        .attr('class', 'grid')
-        .attr('x1', dimensions.margin.left)
-        .attr('x2', dimensions.width - dimensions.margin.right)
-        .attr('y1', d => yScale(d))
-        .attr('y2', d => yScale(d))
-    }
-    function updateFnGrid (sel) {
-      return sel.call(update => update
-        .transition()
-        .duration(gridTransition ? TR_TIME : 0)
-        .attr('x1', dimensions.margin.left)
-        .attr('x2', dimensions.width - dimensions.margin.right)
-        .attr('y1', d => yScale(d))
-        .attr('y2', d => yScale(d))
-      )
-    }
-    function exitFnGrid (sel) {
-      sel.call(exit => exit
-        .transition()
-        .duration(gridTransition ? TR_TIME : 0)
-        .remove()
-      )
-    }
-
     // Update functions
     updateData = function () {
       // Attribute on y axis
       yScale.domain([0, (selectedOption === 'vote' || selectedOption === 'epvote') ? d3.max(data, yAccessor) : 10])
       yAxis.call(d3.axisLeft(yScale))
+
       // Adapt grid
       gridTransition = false
       gridJoin()
@@ -247,7 +249,7 @@ export default function () {
   lineChart.bindYearChange = function (callback) {
     onYearChange = callback
     console.debug('Line chart received the function for updating the model on year change')
-    return this
+    return lineChart
   }
 
   console.debug('Finished creating line chart configurable function')
