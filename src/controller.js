@@ -34,6 +34,7 @@ class Controller {
 
   setYear (year) {
     // Notify views that need year for drawing
+    this.lineChart.year(year)
     this.parallelCoordinates.year(year)
 
     // Update model and redraw views

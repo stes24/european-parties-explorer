@@ -7,6 +7,7 @@ import { attributes, TR_TIME, years } from '@/utils'
 export default function () {
   let data = []
   let updateData
+  let currentYear
 
   // Which attributes to use
   let selectedOption = 'vote'
@@ -233,6 +234,11 @@ export default function () {
     console.debug('Finished drawing line chart')
   }
 
+  lineChart.year = function (_) {
+    if (!arguments.length) return currentYear
+    currentYear = _
+    return lineChart
+  }
   lineChart.data = function (_) {
     if (!arguments.length) return lineChart
     data = _

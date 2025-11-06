@@ -7,7 +7,7 @@ const LEGEND_ROTATION = -13
 export default function () {
   let data = []
   let updateData
-  let currentyear
+  let currentYear
 
   // How to access the data for each dimension
   const xAccessor = attr => attr
@@ -38,7 +38,7 @@ export default function () {
     let xScale, yScales
 
     function computeAttributes () {
-      attributeIds = Object.keys(attributes).filter(a => attributes[a][2] && currentyear >= attributes[a][3])
+      attributeIds = Object.keys(attributes).filter(a => attributes[a][2] && currentYear >= attributes[a][3])
 
       // Scales
       xScale = d3.scalePoint()
@@ -213,8 +213,8 @@ export default function () {
   }
 
   parallelCoordinates.year = function (_) {
-    if (!arguments.length) return currentyear
-    currentyear = _
+    if (!arguments.length) return currentYear
+    currentYear = _
     return parallelCoordinates
   }
   parallelCoordinates.data = function (_) {
