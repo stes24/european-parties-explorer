@@ -41,17 +41,6 @@ class Parties {
     this.entries[entryIndex] = { ...this.entries[entryIndex], ...entry } // Take the old entry and update the changed fields
     this.onEntriesListChanged()
   }
-
-  /* deleteEntry (entryId) {
-    const entryIndex = this.entriesById[entryId] // Retrieve entries index
-
-    this.entries.splice(entryIndex, 1) // Remove the party at said index
-    delete this.entriesById[entryId] // Remove in entriesById
-    this.entries.forEach(e => { // Update index for successive entries (-1)
-      if (this.entriesById[e.party_id] > entryIndex) this.entriesById[e.id] -= 1
-    })
-    this.onEntriesListChanged()
-  } */
 }
 
 export default new Parties()

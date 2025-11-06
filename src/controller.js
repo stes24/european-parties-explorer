@@ -32,10 +32,6 @@ class Controller {
     this.parties.updateEntry(party)
   }
 
-  /* handleDeleteParty (party) { // id?
-    this.parties.deleteEntry(party)
-  } */
-
   setYear (year) {
     // Notify views that need year for drawing
     this.parallelCoordinates.year(year)
