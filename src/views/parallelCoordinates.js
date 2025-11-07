@@ -17,7 +17,8 @@ export default function () {
     width: null,
     height: null,
     margin: { top: 50, right: 75, bottom: 70, left: 125 },
-    legend: { x: 10, y: 18 }
+    legend: { x: 10, y: 18 },
+    brush: { top: -1, right: 10, bottom: 1, left: -10 }
   }
   let updateSize
 
@@ -27,6 +28,10 @@ export default function () {
   // Hovering
   let onMouseEnter = _ => {}
   let onMouseLeave = _ => {}
+
+  // Brushing
+  let onBrush = _ => {}
+  const brushes = {}
 
   // It draws and can be configured (it is returned again when something changes)
   function parallelCoordinates (containerDiv) {
@@ -89,7 +94,7 @@ export default function () {
     // Join functions
     function enterFn (sel) {
       return sel.append('path')
-        .attr('class', 'line')
+        .attr('class', d => d.brushed ? 'line-brushed' : 'line')
         // For each datum, create [attr, value] and give it to the line (it will connect the values of the many attributes)
         .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
         .on('mouseenter', (event, d) => {
@@ -109,6 +114,7 @@ export default function () {
     }
     function updateFn (sel) {
       return sel.call(update => update
+        .attr('class', d => d.brushed ? 'line-brushed' : 'line')
         .transition()
         .duration(TR_TIME)
         .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
@@ -129,6 +135,27 @@ export default function () {
       sel.on('mouseenter', (event, d) => showTooltip(event, d))
         .on('mousemove', (event) => moveTooltip(event))
         .on('mouseleave', () => hideTooltip())
+    }
+    function updateBrush (attr, sel) {
+      // Retrieve single brush on axis
+      const [y0, y1] = sel
+      brushes[attr] = new Set(
+        data.filter(d => {
+          const y = yScales[attr](yAccessors[attr](d))
+          return y0 <= y && y <= y1
+        }).map(d => d.party_id)
+      )
+      // Intersect all brushes
+      onBrush(intersect(Object.values(brushes)), 'parallelCoordinates')
+    }
+    function clearBrush (attr) {
+      brushes[attr] = null
+      onBrush(intersect(Object.values(brushes)), 'parallelCoordinates')
+    }
+    function intersect (sets) {
+      const active = sets.filter(s => s !== null) // Non null brushes (active brushes)
+      if (active.length === 0) return null
+      return active.reduce((acc, s) => new Set([...acc].filter(x => s.has(x)))) // Accumulated set intersection current set
     }
 
     // Draw axes
@@ -161,6 +188,19 @@ export default function () {
           if (attr === 'family') {
             axis.selectAll('.tick text').style('fill', d => factions[d][1])
           }
+
+          // Brush
+          axis.call(d3.brushY()
+            .filter(event => event.target.tagName !== 'text') // Avoids the very bad bug
+            .extent([[dimensions.brush.left, yScales[attr].range()[1] + dimensions.brush.top],
+              [dimensions.brush.right, yScales[attr].range()[0] + dimensions.brush.bottom]])
+            .on('brush', (event) => {
+              updateBrush(attr, event.selection)
+            })
+            .on('end', (event) => {
+              if (!event.selection) clearBrush(attr)
+            })
+          )
         })
     }
     function updateFnAxes (sel) {
@@ -231,7 +271,7 @@ export default function () {
     return parallelCoordinates
   }
 
-  // Save the callbacks (update hovered property)
+  // Save the callbacks (update appropriate properties in the data)
   parallelCoordinates.bindMouseEnter = function (callback) {
     onMouseEnter = callback
     return this
@@ -239,6 +279,11 @@ export default function () {
   parallelCoordinates.bindMouseLeave = function (callback) {
     onMouseLeave = callback
     console.debug('Parallel coordinates received the functions for updating the model on hover')
+    return this
+  }
+  parallelCoordinates.bindBrush = function (callback) {
+    onBrush = callback
+    console.debug('Parallel coordinates received the functions for updating the model on brush')
     return this
   }
 

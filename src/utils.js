@@ -31,7 +31,8 @@ export function formatParty (row) { // For each csv row, return an object (Party
     nationalism: parseFloat(row.nationalism),
     mds1: parseFloat(row.mds1),
     mds2: parseFloat(row.mds2),
-    hovered: false
+    hovered: false,
+    brushed: false
   }
 }
 

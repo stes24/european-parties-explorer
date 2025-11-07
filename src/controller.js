@@ -11,13 +11,20 @@ class Controller {
     this.lineChart = views.lineChart()
     this.parallelCoordinates = views.parallelCoordinates()
 
+    // Save brush from each view
+    this.brushes = {
+      scatterPlot: null,
+      parallelCoordinates: null
+    }
+
     // Models functions binding (pass to the models the function that updates the views)
     this.parties.bindEntriesListChanged(this.onPartiesListChanged.bind(this)) // Called using the controller's "this" context
-    // Views functions binding (pass to the views the functions that let the model update the hovered party)
+    // Views functions binding (pass to the views the functions that let the model update parties)
     this.scatterPlot.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)
     this.scatterPlot.bindMouseLeave(p => this.handleMouseLeave(p)).bind(this)
     this.parallelCoordinates.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)
     this.parallelCoordinates.bindMouseLeave(p => this.handleMouseLeave(p)).bind(this)
+    this.parallelCoordinates.bindBrush((p, v) => this.handleBrush(p, v)).bind(this)
     // Pass the function that sets the selected year
     this.lineChart.bindYearChange(year => this.setYear(year)).bind(this)
 
@@ -52,6 +59,22 @@ class Controller {
 
   handleMouseLeave (party) {
     this.handleUpdateParty({ party_id: party.party_id, year: party.year, hovered: false })
+  }
+
+  handleBrush (ids, view) {
+    // Associate brush to the view it comes from
+    this.brushes[view] = ids
+    // Non null brushes (active brushes)
+    const activeBrushes = Object.values(this.brushes).filter(b => b && b.size > 0)
+
+    let intersection
+    if (activeBrushes.length === 0) { // No brushes
+      intersection = null
+    } else { // Intersection among all brushes
+      intersection = activeBrushes.reduce((acc, s) => new Set([...acc].filter(x => s.has(x)))) // Accumulated set intersection current set
+    }
+
+    this.parties.setBrush(intersection)
   }
 
   // Passed to the models so that it is called whenever there's an update -> data calls the drawing function of the relative view

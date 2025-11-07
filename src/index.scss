@@ -88,6 +88,13 @@ body {
   pointer-events: none;
 }
 
+.line-brushed {
+  fill: none;
+  stroke-width: 3.5px;
+  stroke: red;
+  opacity: 0.7;
+}
+
 // OTHER --------------------------------
 
 svg .legend {

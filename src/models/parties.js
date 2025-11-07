@@ -41,6 +41,25 @@ class Parties {
     this.entries[entryIndex] = { ...this.entries[entryIndex], ...entry } // Take the old entry and update the changed fields
     this.onEntriesListChanged()
   }
+
+  setBrush (brushedSet) {
+    // Reset all brushed properties (or else they remain brushed after a brush is removed)
+    Object.keys(this.entriesById).forEach(id => {
+      this.entriesById[id].forEach(i => {
+        this.entries[i].brushed = false
+      })
+    })
+
+    // Brush all instances of the brushed party
+    if (brushedSet && brushedSet.size > 0) {
+      brushedSet.forEach(id => {
+        this.entriesById[id].forEach(i => {
+          this.entries[i].brushed = true
+        })
+      })
+    }
+    this.onEntriesListChanged()
+  }
 }
 
 export default new Parties()
