@@ -22,6 +22,7 @@ class Controller {
     // Views functions binding (pass to the views the functions that let the model update parties)
     this.scatterPlot.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)
     this.scatterPlot.bindMouseLeave(p => this.handleMouseLeave(p)).bind(this)
+    this.scatterPlot.bindBrush((p, v) => this.handleBrush(p, v)).bind(this)
     this.parallelCoordinates.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)
     this.parallelCoordinates.bindMouseLeave(p => this.handleMouseLeave(p)).bind(this)
     this.parallelCoordinates.bindBrush((p, v) => this.handleBrush(p, v)).bind(this)

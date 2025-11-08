@@ -25,6 +25,9 @@ export default function () {
   let onMouseEnter = _ => {}
   let onMouseLeave = _ => {}
 
+  // Brushing
+  let onBrush = _ => {}
+
   // It draws and can be configured (it is returned again when something changes)
   function scatterPlot (containerDiv) {
     const wrapper = containerDiv.append('svg')
@@ -64,6 +67,7 @@ export default function () {
         .attr('cx', d => xScale(xAccessor(d)))
         .attr('cy', d => yScale(yAccessor(d)))
         .attr('r', d => radius(rAccessor(d)))
+        .style('stroke', d => d.brushed ? 'red' : null)
         .attr('fill', d => factions[d.family][1]) // TEMPORARY
         .on('mouseenter', (event, d) => {
           onMouseEnter(d)
@@ -76,7 +80,8 @@ export default function () {
         })
     }
     function updateFn (sel) {
-      sel.attr('fill', d => d.hovered ? 'white' : factions[d.family][1])
+      sel.style('stroke', d => d.brushed ? 'red' : null)
+        .attr('fill', d => d.hovered ? 'white' : factions[d.family][1])
         .style('opacity', d => d.hovered ? 1 : null)
       return sel.call(update => update
         .transition()
@@ -117,6 +122,31 @@ export default function () {
       .attr('y', dimensions.margin.left - dimensions.legendY)
       .attr('text-anchor', 'middle')
       .text('MDS dimension 2')
+
+    // Brush
+    function updateBrush (sel) {
+      const [[x0, y0], [x1, y1]] = sel
+      const brushedData = new Set(
+        data.filter(d => {
+          const x = xScale(xAccessor(d))
+          const y = yScale(yAccessor(d))
+          return x0 <= x && x <= x1 && y0 <= y && y <= y1
+        }).map(d => d.party_id)
+      )
+      onBrush(brushedData, 'scatterPlot')
+    }
+    function clearBrush (sel) {
+      onBrush(null, 'scatterPlot')
+    }
+    drawArea.call(d3.brush()
+      .extent([[xScale.range()[0], yScale.range()[1]], [xScale.range()[1], yScale.range()[0]]])
+      .on('brush', (event) => {
+        updateBrush(event.selection)
+      })
+      .on('end', (event) => {
+        if (!event.selection) clearBrush(event.selection)
+      })
+    )
 
     // Update functions
     updateData = function () {
@@ -169,6 +199,11 @@ export default function () {
   scatterPlot.bindMouseLeave = function (callback) {
     onMouseLeave = callback
     console.debug('Scatter plot received the functions for updating the model on hover')
+    return this
+  }
+  scatterPlot.bindBrush = function (callback) {
+    onBrush = callback
+    console.debug('Scatter plot received the functions for updating the model on brush')
     return this
   }
 
