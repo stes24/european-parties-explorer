@@ -77,6 +77,7 @@ export default function () {
       .y(([attr, val]) => yScales[attr](val)) // Find right scale with attribute, then pass the value to it
 
     const linesGroup = wrapper.append('g')
+    const brushGroup = wrapper.append('g')
     const hoverGroup = wrapper.append('g')
     const axesGroup = wrapper.append('g')
 
@@ -85,6 +86,9 @@ export default function () {
       linesGroup.selectAll('path')
         .data(data, d => d.party_id)
         .join(enterFn, updateFn, exitFn)
+      brushGroup.selectAll('path')
+        .data(data.filter(d => d.brushed), d => d.party_id)
+        .join(enterFnBrush, updateFn, exitFn)
       hoverGroup.selectAll('path') // Draw on top of the normal lines
         .data(data.filter(d => d.hovered), d => d.party_id)
         .join(enterFnHover, updateFn, exitFn)
@@ -94,8 +98,22 @@ export default function () {
     // Join functions
     function enterFn (sel) {
       return sel.append('path')
-        .attr('class', d => d.brushed ? 'line-brushed' : 'line')
+        .attr('class', 'line')
         // For each datum, create [attr, value] and give it to the line (it will connect the values of the many attributes)
+        .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
+        .on('mouseenter', (event, d) => {
+          onMouseEnter(d)
+          showTooltip(event, d)
+        })
+        .on('mousemove', (event) => moveTooltip(event))
+        .on('mouseleave', (event, d) => {
+          onMouseLeave(d)
+          hideTooltip()
+        })
+    }
+    function enterFnBrush (sel) {
+      return sel.append('path')
+        .attr('class', 'line-brushed')
         .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
         .on('mouseenter', (event, d) => {
           onMouseEnter(d)
@@ -114,7 +132,6 @@ export default function () {
     }
     function updateFn (sel) {
       return sel.call(update => update
-        .attr('class', d => d.brushed ? 'line-brushed' : 'line')
         .transition()
         .duration(TR_TIME)
         .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
