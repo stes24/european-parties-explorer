@@ -10,6 +10,7 @@ export default function () {
   const xAccessor = d => d.mds1
   const yAccessor = d => d.mds2
   const rAccessor = d => d.vote
+  const colorAccessor = d => factions[d.family][1]
 
   const dimensions = {
     width: null,
@@ -55,7 +56,7 @@ export default function () {
       pointsGroup.selectAll('circle')
         .data(data.sort((a, b) => { // Bigger circles on the background
           return d3.descending(rAccessor(a), rAccessor(b))
-        }))
+        }), d => d.party_id)
         .join(enterFn, updateFn, exitFn)
     }
     dataJoin()
@@ -68,7 +69,7 @@ export default function () {
         .attr('cy', d => yScale(yAccessor(d)))
         .attr('r', d => radius(rAccessor(d)))
         .style('stroke', d => d.brushed ? 'red' : null)
-        .attr('fill', d => factions[d.family][1]) // TEMPORARY
+        .attr('fill', d => colorAccessor(d))
         .on('mouseenter', (event, d) => {
           onMouseEnter(d)
           showTooltip(event, d)

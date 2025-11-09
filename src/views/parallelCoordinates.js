@@ -32,6 +32,7 @@ export default function () {
   // Brushing
   let onBrush = _ => {}
   const brushes = {}
+  let brushActive
 
   // It draws and can be configured (it is returned again when something changes)
   function parallelCoordinates (containerDiv) {
@@ -83,6 +84,7 @@ export default function () {
 
     // Draw lines
     function dataJoin () {
+      brushActive = data.some(d => d.brushed)
       linesGroup.selectAll('path')
         .data(data, d => d.party_id)
         .join(enterFn, updateFn, exitFn)
@@ -98,7 +100,7 @@ export default function () {
     // Join functions
     function enterFn (sel) {
       return sel.append('path')
-        .attr('class', 'line')
+        .attr('class', brushActive ? 'line-deselected' : 'line')
         // For each datum, create [attr, value] and give it to the line (it will connect the values of the many attributes)
         .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
         .on('mouseenter', (event, d) => {
@@ -132,6 +134,7 @@ export default function () {
     }
     function updateFn (sel) {
       return sel.call(update => update
+        .classed('line-deselected', d => brushActive && !d.brushed)
         .transition()
         .duration(TR_TIME)
         .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))

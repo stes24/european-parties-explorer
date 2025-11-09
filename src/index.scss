@@ -80,6 +80,13 @@ body {
   opacity: 0.75;
 }
 
+.line-deselected {
+  fill: none;
+  stroke-width: 3.5px;
+  stroke: gray;
+  opacity: 0.35
+}
+
 .line-brushed {
   fill: none;
   stroke-width: 3.5px;
