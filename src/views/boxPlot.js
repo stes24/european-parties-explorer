@@ -9,7 +9,8 @@ export default function () {
   const dimensions = {
     width: null,
     height: null,
-    margin: { top: 7, bottom: 10 }
+    margin: { top: 10, bottom: 10 },
+    axisMargin: 5 // Space between axis and box plot
   }
   let updateSize
 
@@ -19,9 +20,15 @@ export default function () {
       .domain([0, 10])
       .range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
 
+    const axisGroup = wrapper.append('g')
+      .attr('class', 'axis')
+
     const verticalLineGroup = wrapper.append('g')
+      .attr('transform', `translate(${dimensions.axisMargin}, 0)`)
     const boxGroup = wrapper.append('g')
+      .attr('transform', `translate(${dimensions.axisMargin}, 0)`)
     const horizontalLinesGroup = wrapper.append('g')
+      .attr('transform', `translate(${dimensions.axisMargin}, 0)`)
 
     // Draw box plot elements
     function dataJoin () {
@@ -35,6 +42,11 @@ export default function () {
         max: d3.max(sortedData)
       }
       const mid = dimensions.width / 2
+
+      // Axis
+      const axis = d3.axisLeft(yScale)
+        .ticks(3)
+      axisGroup.call(axis)
 
       // Vertical line
       verticalLineGroup.selectAll('line')

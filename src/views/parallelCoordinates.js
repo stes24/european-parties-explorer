@@ -255,7 +255,7 @@ export default function () {
     }
 
     function drawBoxPlots () {
-      const boxPlotWidth = 20
+      const boxPlotWidth = 12
       const boxPlotHeight = dimensions.margin.bottom
 
       // Exclude categorical attributes
