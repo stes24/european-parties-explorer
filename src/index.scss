@@ -102,6 +102,18 @@ body {
   pointer-events: none;
 }
 
+// Box plot elements
+.boxPlot-line {
+  stroke-width: 2px;
+  stroke: #CCCCCC;
+}
+
+.box {
+  fill: steelblue;
+  stroke-width: 2px;
+  stroke: #CCCCCC;
+}
+
 // OTHER --------------------------------
 
 svg .legend {

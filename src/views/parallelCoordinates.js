@@ -1,5 +1,6 @@
 import * as d3 from 'd3'
 import { attributes, countries, factions, hideTooltip, moveTooltip, showTooltip, TR_TIME } from '@/utils'
+import boxPlot from './boxPlot'
 
 const LEGEND_ROTATION = -13
 
@@ -81,6 +82,10 @@ export default function () {
     const brushGroup = wrapper.append('g')
     const hoverGroup = wrapper.append('g')
     const axesGroup = wrapper.append('g')
+    const boxPlotsGroup = wrapper.append('g')
+
+    // Store box plots
+    const boxPlotInstances = {}
 
     // Draw lines
     function dataJoin () {
@@ -178,11 +183,12 @@ export default function () {
       return active.reduce((acc, s) => new Set([...acc].filter(x => s.has(x)))) // Accumulated set intersection current set
     }
 
-    // Draw axes
+    // Draw axes and box plots
     function axesJoin () {
       axesGroup.selectAll('.axis')
         .data(attributeIds)
         .join(enterFnAxes, updateFnAxes, exitFnAxes)
+      drawBoxPlots()
     }
     axesJoin()
 
@@ -246,6 +252,55 @@ export default function () {
         .duration(axesTransition ? TR_TIME : 0)
         .remove()
       )
+    }
+
+    function drawBoxPlots () {
+      const boxPlotWidth = 20
+      const boxPlotHeight = dimensions.margin.bottom
+
+      // Exclude categorical attributes
+      const numericAttributes = attributeIds.filter(attr => attr !== 'country' && attr !== 'family')
+
+      // Manage box plot containers
+      boxPlotsGroup.selectAll('g.boxPlot')
+        .data(numericAttributes, d => d)
+        .join(
+          enter => { // Place box plot containers and set parameters for each box plot
+            return enter.append('g')
+              .attr('class', 'boxPlot')
+              .attr('transform', attr => `translate(${xScale(attr) - boxPlotWidth / 2}, ${dimensions.height - dimensions.margin.bottom})`)
+              .each(function (attr) {
+                // Create new box plot for this attribute
+                const bp = boxPlot()
+                boxPlotInstances[attr] = bp
+                // Set parameters and call drawing function
+                bp.size(boxPlotWidth, boxPlotHeight)
+                  .data(data.map(d => d[attr]).filter(v => v != null && !isNaN(v)))
+                d3.select(this).call(bp)
+              })
+          },
+          update => {
+            return update
+              .transition()
+              .duration(axesTransition ? TR_TIME : 0)
+              .attr('transform', attr => `translate(${xScale(attr) - boxPlotWidth / 2}, ${dimensions.height - dimensions.margin.bottom})`)
+              .each(function (attr) {
+                // Update the existing box plot instance
+                const bp = boxPlotInstances[attr]
+                if (bp) {
+                  bp.size(boxPlotWidth, boxPlotHeight)
+                    .data(data.map(d => d[attr]).filter(v => v != null && !isNaN(v)))
+                }
+              })
+          },
+          exit => {
+            return exit.each(function (attr) {
+              delete boxPlotInstances[attr]
+            }).transition()
+              .duration(axesTransition ? TR_TIME : 0)
+              .remove()
+          }
+        )
     }
 
     // Update functions

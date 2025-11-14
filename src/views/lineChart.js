@@ -138,6 +138,7 @@ export default function () {
     // Attributes drop-down menu
     const attrDropDown = containerDiv.append('select')
       .attr('class', 'dropDown')
+      .attr('id', 'lineChartDropDown')
       .style('top', `${containerDiv.node().getBoundingClientRect().top + dimensions.margin.topDropDown}px`)
       .style('left', `${containerDiv.node().getBoundingClientRect().left + dimensions.margin.leftDropDown}px`)
     attrDropDown.selectAll('option')
@@ -163,6 +164,7 @@ export default function () {
     // Drop-down
     const yearDropDown = yearContainer.append('select')
       .attr('class', 'dropDown')
+      .attr('id', 'yearDropDown')
       .style('position', 'static')
       .style('font-size', '16px')
     yearDropDown.selectAll('option')
