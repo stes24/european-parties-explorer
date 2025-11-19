@@ -60,6 +60,25 @@ class Parties {
     }
     this.onEntriesListChanged()
   }
+
+  setBatchHover (hoveredSet) {
+    // Reset all hovered properties
+    Object.keys(this.entriesById).forEach(id => {
+      this.entriesById[id].forEach(i => {
+        this.entries[i].hovered = false
+      })
+    })
+
+    // Hover all instances of the hovered parties
+    if (hoveredSet && hoveredSet.size > 0) {
+      hoveredSet.forEach(id => {
+        this.entriesById[id].forEach(i => {
+          this.entries[i].hovered = true
+        })
+      })
+    }
+    this.onEntriesListChanged()
+  }
 }
 
 export default new Parties()

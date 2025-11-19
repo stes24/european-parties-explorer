@@ -26,6 +26,8 @@ class Controller {
     this.parallelCoordinates.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)
     this.parallelCoordinates.bindMouseLeave(p => this.handleMouseLeave(p)).bind(this)
     this.parallelCoordinates.bindBrush((p, v) => this.handleBrush(p, v)).bind(this)
+    this.parallelCoordinates.bindBoxPlotMouseEnter(p => this.handleBatchMouseEnter(p)).bind(this)
+    this.parallelCoordinates.bindBoxPlotMouseLeave(() => this.handleBatchMouseLeave()).bind(this)
     // Pass the function that sets the selected year
     this.lineChart.bindYearChange(year => this.setYear(year)).bind(this)
 
@@ -60,6 +62,16 @@ class Controller {
 
   handleMouseLeave (party) {
     this.handleUpdateParty({ party_id: party.party_id, year: party.year, hovered: false })
+  }
+
+  // Batch hover handlers for hovering multiple parties at once (box plots)
+  handleBatchMouseEnter (parties) {
+    const partyIds = new Set(parties.map(p => p.party_id))
+    this.parties.setBatchHover(partyIds)
+  }
+
+  handleBatchMouseLeave () {
+    this.parties.setBatchHover(null)
   }
 
   handleBrush (ids, view) {

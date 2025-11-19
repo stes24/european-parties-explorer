@@ -30,6 +30,10 @@ export default function () {
   let onMouseEnter = _ => {}
   let onMouseLeave = _ => {}
 
+  // Box plots hovering
+  let onBoxPlotMouseEnter = _ => {}
+  let onBoxPlotMouseLeave = _ => {}
+
   // Brushing
   let onBrush = _ => {}
   const brushes = {}
@@ -255,7 +259,7 @@ export default function () {
     }
 
     function drawBoxPlots () {
-      const boxPlotWidth = 12
+      const boxPlotWidth = 15
       const boxPlotHeight = dimensions.margin.bottom
 
       // Exclude categorical attributes
@@ -273,9 +277,13 @@ export default function () {
                 // Create new box plot for this attribute
                 const bp = boxPlot()
                 boxPlotInstances[attr] = bp
+                // Bind hover callbacks (box plots hover many parties at once)
+                bp.bindMouseEnter(onBoxPlotMouseEnter)
+                  .bindMouseLeave(onBoxPlotMouseLeave)
                 // Set parameters and call drawing function
                 bp.size(boxPlotWidth, boxPlotHeight)
-                  .data(data.map(d => d[attr]).filter(v => v != null && !isNaN(v)))
+                  .data(data)
+                  .attribute(attr)
                 d3.select(this).call(bp)
               })
           },
@@ -289,7 +297,8 @@ export default function () {
                 const bp = boxPlotInstances[attr]
                 if (bp) {
                   bp.size(boxPlotWidth, boxPlotHeight)
-                    .data(data.map(d => d[attr]).filter(v => v != null && !isNaN(v)))
+                    .data(data)
+                    .attribute(attr)
                 }
               })
           },
@@ -359,6 +368,17 @@ export default function () {
   parallelCoordinates.bindBrush = function (callback) {
     onBrush = callback
     console.debug('Parallel coordinates received the functions for updating the model on brush')
+    return this
+  }
+
+  // Save the box plot callbacks
+  parallelCoordinates.bindBoxPlotMouseEnter = function (callback) {
+    onBoxPlotMouseEnter = callback
+    return this
+  }
+  parallelCoordinates.bindBoxPlotMouseLeave = function (callback) {
+    onBoxPlotMouseLeave = callback
+    console.debug('Parallel coordinates received the functions for updating the model on box plot hover')
     return this
   }
 

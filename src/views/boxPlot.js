@@ -3,8 +3,9 @@ import { TR_TIME } from '@/utils'
 
 // Configurable function - it returns a new function (which, when called, draws the view)
 export default function () {
-  let data = [] // Only data of the given attribute
+  let data = []
   let updateData
+  let currentAttribute // Which attribute this box plot is referring to
 
   const dimensions = {
     width: null,
@@ -13,6 +14,10 @@ export default function () {
     axisMargin: 5 // Space between axis and box plot
   }
   let updateSize
+
+  // Hovering
+  let onMouseEnter = _ => {}
+  let onMouseLeave = _ => {}
 
   // It draws and can be configured (it is returned again when something changes)
   function boxPlot (wrapper) {
@@ -29,10 +34,14 @@ export default function () {
       .attr('transform', `translate(${dimensions.axisMargin}, 0)`)
     const horizontalLinesGroup = wrapper.append('g')
       .attr('transform', `translate(${dimensions.axisMargin}, 0)`)
+    const hoverRegionsGroup = wrapper.append('g')
+      .attr('transform', `translate(${dimensions.axisMargin}, 0)`)
 
     // Draw box plot elements
     function dataJoin () {
-      const sortedData = data.sort(d3.ascending)
+      const sortedData = data
+        .map(d => d[currentAttribute])
+        .sort(d3.ascending)
 
       const stats = {
         q1: d3.quantile(sortedData, 0.25),
@@ -77,8 +86,8 @@ export default function () {
             return enter.append('rect')
               .attr('class', 'box')
               .attr('x', 0)
-              .attr('width', dimensions.width)
               .attr('y', yScale(stats.q3))
+              .attr('width', dimensions.width)
               .attr('height', yScale(stats.q1) - yScale(stats.q3))
           },
           update => {
@@ -110,6 +119,48 @@ export default function () {
               .attr('y2', d => yScale(d))
           }
         )
+
+      // Hover regions (one for each quartile range)
+      const hoverRegions = [
+        { range: [stats.min, stats.q1], name: 'Q0-Q1' },
+        { range: [stats.q1, stats.median], name: 'Q1-Q2' },
+        { range: [stats.median, stats.q3], name: 'Q2-Q3' },
+        { range: [stats.q3, stats.max], name: 'Q3-Q4' }
+      ]
+
+      let hoveredParties = [] // Track currently hovered parties
+
+      hoverRegionsGroup.selectAll('rect.hover-region')
+        .data(hoverRegions, d => d.name)
+        .join(
+          enter => {
+            return enter.append('rect')
+              .attr('class', 'hover-region')
+              .attr('x', 0)
+              .attr('y', d => yScale(d.range[1]))
+              .attr('width', dimensions.width)
+              .attr('height', d => yScale(d.range[0]) - yScale(d.range[1]))
+              .style('fill', 'transparent')
+              .on('mouseenter', (event, d) => {
+                // Find all parties whose attribute value falls in this range
+                hoveredParties = data.filter(party => {
+                  const value = party[currentAttribute]
+                  return d.range[0] <= value && value <= d.range[1]
+                })
+                // Hover all parties in this quartile at once
+                onMouseEnter(hoveredParties)
+              })
+              .on('mouseleave', () => {
+                onMouseLeave()
+                hoveredParties = []
+              })
+          },
+          update => {
+            return update
+              .attr('y', d => yScale(d.range[1]))
+              .attr('height', d => yScale(d.range[0]) - yScale(d.range[1]))
+          }
+        )
     }
     dataJoin()
 
@@ -130,12 +181,29 @@ export default function () {
     return boxPlot
   }
 
+  boxPlot.attribute = function (_) {
+    if (!arguments.length) return currentAttribute
+    currentAttribute = _
+    return boxPlot
+  }
+
   boxPlot.size = function (width, height) {
     if (!arguments.length) return [dimensions.width, dimensions.height]
     dimensions.width = width
     dimensions.height = height
     if (typeof updateSize === 'function') updateSize()
     return boxPlot
+  }
+
+  // Save the callbacks (hover multiple parties at once)
+  boxPlot.bindMouseEnter = function (callback) {
+    onMouseEnter = callback
+    return this
+  }
+
+  boxPlot.bindMouseLeave = function (callback) {
+    onMouseLeave = callback
+    return this
   }
 
   return boxPlot
