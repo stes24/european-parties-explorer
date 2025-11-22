@@ -8,6 +8,7 @@ class Controller {
 
     // Views (call the external functions, which assign the drawing functions to the following variables)
     this.scatterPlot = views.scatterPlot()
+    this.radviz = views.radviz()
     this.lineChart = views.lineChart()
     this.parallelCoordinates = views.parallelCoordinates()
 
@@ -96,6 +97,7 @@ class Controller {
     const entriesInYear = this.parties.entriesInYear
 
     this.scatterPlot.data(entriesInYear)
+    this.radviz.data(entriesInYear)
     this.lineChart.data(entries)
     this.parallelCoordinates.data(entriesInYear)
   }
