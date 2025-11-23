@@ -119,6 +119,16 @@ body {
   stroke: #CCCCCC;
 }
 
+// RADVIZ ELEMENTS ----------------------
+
+text.anchor-points {
+  fill: #CCCCCC;
+}
+
+circle.anchor-points {
+  fill: #CCCCCC !important;
+}
+
 // OTHER --------------------------------
 
 svg .legend {
