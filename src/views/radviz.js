@@ -15,9 +15,9 @@ export default function () {
   // d3-radviz instance
   let radvizInstance
 
-  // Attributes to use as radviz anchors
-  const attributes = ['spendvtax', 'immigrate_policy', 'environment', 'civlib_laworder', 'nationalism']
-  // const attributes = ['lrgen', 'lrecon', 'eu_position', 'eu_foreign']
+  // Dimensions to use as radviz anchors
+  const radvizDimensions = ['spendvtax', 'immigrate_policy', 'environment', 'civlib_laworder', 'nationalism']
+  // const radvizDimensions = ['lrgen', 'lrecon', 'eu_position', 'eu_foreign']
 
   // It draws and can be configured (it is returned again when something changes)
   function radvizPlot (containerDiv) {
@@ -35,12 +35,12 @@ export default function () {
       const filteredData = data.map(d => {
         const filtered = {
           // party_id: d.party_id, // Keep identifier
-          party: d.party, // Keep party name for tooltip
-          family: d.family // Keep for classification/coloring
+          // party: d.party, // Keep party name for tooltip
+          // family: d.family // Keep for classification/coloring
         }
         // Add only the desired numeric dimensions
-        attributes.forEach(attr => {
-          filtered[attr] = d[attr]
+        radvizDimensions.forEach(dim => {
+          filtered[dim] = d[dim]
         })
         return filtered
       })

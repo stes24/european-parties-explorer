@@ -37,7 +37,7 @@ async function init () {
 
 async function loadData () {
   try {
-    const data = await d3.csv('./merged_dataset_with_mds.csv') // Load from public
+    const data = await d3.csv('./dataset_final_with_mds.csv') // Load from public
     console.debug(`Loaded data (${data.length} rows)`)
     for (let i = 0; i < data.length; i++) { // Create Party objects and add them to the model (through the controller)
       const party = formatParty(data[i])
