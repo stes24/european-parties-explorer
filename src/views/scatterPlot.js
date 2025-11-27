@@ -10,7 +10,7 @@ export default function () {
   const xAccessor = d => d.mds1
   const yAccessor = d => d.mds2
   const rAccessor = d => d.vote
-  const colorAccessor = d => factions[d.family][1]
+  const colorAccessor = d => factions[d.family].color
 
   const dimensions = {
     width: null,
@@ -82,7 +82,7 @@ export default function () {
     }
     function updateFn (sel) {
       sel.style('stroke', d => d.brushed ? 'red' : null)
-        .attr('fill', d => d.hovered ? 'white' : factions[d.family][1])
+        .attr('fill', d => d.hovered ? 'white' : colorAccessor(d))
         .style('opacity', d => d.hovered ? 1 : null)
       return sel.call(update => update
         .transition()

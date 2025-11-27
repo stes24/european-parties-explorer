@@ -157,7 +157,7 @@ export default function () {
     // Single axis operations
     function makeAxis (attr) {
       const axis = d3.axisLeft(yScales[attr])
-      if (attr === 'family') axis.tickFormat(id => factions[id][0])
+      if (attr === 'family') axis.tickFormat(id => factions[id].name)
       if (attr === 'country') axis.tickFormat(id => countries[id])
       return axis
     }
@@ -217,7 +217,7 @@ export default function () {
             .call(legendHover)
 
           if (attr === 'family') {
-            axis.selectAll('.tick text').style('fill', d => factions[d][1])
+            axis.selectAll('.tick text').style('fill', d => factions[d].color)
           }
 
           // Brush

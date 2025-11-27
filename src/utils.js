@@ -228,24 +228,24 @@ export const countries = {
 }
 
 export const factions = {
-  1: ['Radical Right', '#1F77B4'],
-  2: ['Conservatives', '#AEC7E8'],
-  3: ['Liberal', '#BCBD22'],
-  4: ['Christian-Democratic', '#9467BD'],
-  5: ['Socialist', '#FF9896'],
-  6: ['Radical Left', '#D62728'],
-  7: ['Green', '#2CA02C'],
-  8: ['Regionalist', '#8C564B'],
-  9: ['No faction', '#7F7F7F'],
-  10: ['Confessional', '#E377C2'],
-  11: ['Agrarian/Center', '#FF7F0E']
+  1: { name: 'Radical Right', color: '#1F77B4' },
+  2: { name: 'Conservatives', color: '#AEC7E8' },
+  3: { name: 'Liberal', color: '#BCBD22' },
+  4: { name: 'Christian-Democratic', color: '#9467BD' },
+  5: { name: 'Socialist', color: '#FF9896' },
+  6: { name: 'Radical Left', color: '#D62728' },
+  7: { name: 'Green', color: '#2CA02C' },
+  8: { name: 'Regionalist', color: '#8C564B' },
+  9: { name: 'No faction', color: '#7F7F7F' },
+  10: { name: 'Confessional', color: '#E377C2' },
+  11: { name: 'Agrarian/Center', color: '#FF7F0E' }
 }
 
 export function showTooltip (event, d) {
   const tooltip = d3.select('#tooltip').style('visibility', 'visible')
 
   if (d.party) { // Party hover
-    tooltip.html(`<b>${d.party}</b><br>${countries[d.country]} - ${factions[d.family][0]}<br>Votes: ${d.vote}%`)
+    tooltip.html(`<b>${d.party}</b><br>${countries[d.country]} - ${factions[d.family].name}<br>Votes: ${d.vote}%`)
   } else { // Legend hover
     tooltip.html(d !== 'family' ? attributes[d].description : `${attributes[d].description}${controller.getYear()}`)
   }
