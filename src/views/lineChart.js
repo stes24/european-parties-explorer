@@ -38,7 +38,7 @@ export default function () {
       .domain(d3.extent(years))
       .range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
     const yScale = d3.scaleLinear()
-      .domain([0, (selectedOption === 'vote' || selectedOption === 'epvote') ? d3.max(data, yAccessor) : 10])
+      .domain([0, (selectedOption === 'vote' || selectedOption === 'seat' || selectedOption === 'epvote') ? d3.max(data, yAccessor) : 10])
       .range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
 
     // How to generate the lines
@@ -142,11 +142,11 @@ export default function () {
       .style('top', `${containerDiv.node().getBoundingClientRect().top + dimensions.margin.topDropDown}px`)
       .style('left', `${containerDiv.node().getBoundingClientRect().left + dimensions.margin.leftDropDown}px`)
     attrDropDown.selectAll('option')
-      .data(Object.keys(attributes).filter(a => attributes[a][1]))
+      .data(Object.keys(attributes).filter(a => attributes[a].goesOnLineChart))
       .enter()
       .append('option')
       .attr('value', d => d)
-      .text(d => attributes[d][0])
+      .text(d => attributes[d].name)
     attrDropDown.on('change', (event) => {
       selectedOption = event.target.value
       updateData()
@@ -197,7 +197,7 @@ export default function () {
     // Update functions
     updateData = function () {
       // Attribute on y axis
-      yScale.domain([0, (selectedOption === 'vote' || selectedOption === 'epvote') ? d3.max(data, yAccessor) : 10])
+      yScale.domain([0, (selectedOption === 'vote' || selectedOption === 'seat' || selectedOption === 'epvote') ? d3.max(data, yAccessor) : 10])
       yAxis.call(d3.axisLeft(yScale))
 
       // Adapt grid

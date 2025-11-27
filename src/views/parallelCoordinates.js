@@ -49,7 +49,8 @@ export default function () {
     let xScale, yScales
 
     function computeAttributes () {
-      attributeIds = Object.keys(attributes).filter(a => attributes[a][2] && currentYear >= attributes[a][3])
+      attributeIds = Object.keys(attributes)
+        .filter(a => attributes[a].goesOnParallelCoordinates && currentYear >= attributes[a].minYear)
 
       // Scales
       xScale = d3.scalePoint()
@@ -212,7 +213,7 @@ export default function () {
             .attr('x', dimensions.legend.x)
             .attr('y', dimensions.margin.top - dimensions.legend.y)
             .attr('text-anchor', 'middle')
-            .text(attributes[attr][0])
+            .text(attributes[attr].name)
             .call(legendHover)
 
           if (attr === 'family') {
@@ -245,7 +246,7 @@ export default function () {
 
           // Update legend
           axis.select('.legend')
-            .text(attributes[attr][0])
+            .text(attributes[attr].name)
             .call(legendHover)
         })
       )
