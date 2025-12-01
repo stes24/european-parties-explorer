@@ -1,5 +1,4 @@
 import * as d3 from 'd3'
-import { TR_TIME } from '@/utils'
 
 // Configurable function - it returns a new function (which, when called, draws the view)
 export default function () {
@@ -18,6 +17,8 @@ export default function () {
   // Hovering
   let onMouseEnter = _ => {}
   let onMouseLeave = _ => {}
+
+  const TR_TIME = 1500
 
   // It draws and can be configured (it is returned again when something changes)
   function boxPlot (wrapper) {

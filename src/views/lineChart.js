@@ -23,7 +23,7 @@ export default function () {
   let updateSize
 
   // Do animation or not
-  let gridTransition = false
+  let doTransition = false
 
   let onYearChange = _ => {}
 
@@ -77,16 +77,12 @@ export default function () {
     function updateFn (sel) {
       return sel.call(update => update
         .transition()
-        .duration(TR_TIME)
+        .duration(doTransition ? TR_TIME : 0)
         .attr('d', ([partyId, values]) => line(values))
       )
     }
     function exitFn (sel) {
-      sel.call(exit => exit
-        .transition()
-        .duration(TR_TIME)
-        .remove()
-      )
+      sel.call(exit => exit.remove())
     }
 
     // Draw axes
@@ -129,7 +125,7 @@ export default function () {
     function updateFnGrid (sel) {
       return sel.call(update => update
         .transition()
-        .duration(gridTransition ? TR_TIME : 0)
+        .duration(doTransition ? TR_TIME : 0)
         .attr('x1', dimensions.margin.left)
         .attr('x2', dimensions.width - dimensions.margin.right)
         .attr('y1', d => yScale(d))
@@ -137,11 +133,7 @@ export default function () {
       )
     }
     function exitFnGrid (sel) {
-      sel.call(exit => exit
-        .transition()
-        .duration(gridTransition ? TR_TIME : 0)
-        .remove()
-      )
+      sel.call(exit => exit.remove())
     }
 
     // Attributes drop-down menu
@@ -210,7 +202,7 @@ export default function () {
       yAxis.call(d3.axisLeft(yScale))
 
       // Adapt grid
-      gridTransition = false
+      doTransition = false
       gridJoin()
 
       dataJoin()
@@ -236,7 +228,7 @@ export default function () {
       attrDropDown.style('top', `${containerDiv.node().getBoundingClientRect().top + dimensions.margin.topDropDown}px`)
         .style('left', `${containerDiv.node().getBoundingClientRect().left + dimensions.margin.leftDropDown}px`)
 
-      gridTransition = true
+      doTransition = true
       gridJoin()
 
       dataJoin()

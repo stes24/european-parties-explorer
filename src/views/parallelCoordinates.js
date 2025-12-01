@@ -24,7 +24,7 @@ export default function () {
   let updateSize
 
   // Do animation or not
-  let axesTransition = false
+  let doTransition = false
 
   // Hovering
   let onMouseEnter = _ => {}
@@ -150,7 +150,7 @@ export default function () {
       return sel.call(update => update
         .classed('line-deselected', d => brushActive && !d.brushed)
         .transition()
-        .duration(TR_TIME)
+        .duration(doTransition ? TR_TIME : 0)
         .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
       )
     }
@@ -244,7 +244,7 @@ export default function () {
           const axis = d3.select(this)
 
           axis.transition()
-            .duration(axesTransition ? TR_TIME : 0)
+            .duration(doTransition ? TR_TIME : 0)
             .attr('transform', `translate(${xScale(xAccessor(attr))},0)`)
             .call(makeAxis(attr))
 
@@ -256,11 +256,7 @@ export default function () {
       )
     }
     function exitFnAxes (sel) {
-      sel.call(exit => exit
-        .transition()
-        .duration(axesTransition ? TR_TIME : 0)
-        .remove()
-      )
+      sel.call(exit => exit.remove())
     }
 
     function drawBoxPlots () {
@@ -295,7 +291,7 @@ export default function () {
           update => {
             return update
               .transition()
-              .duration(axesTransition ? TR_TIME : 0)
+              .duration(doTransition ? TR_TIME : 0)
               .attr('transform', attr => `translate(${xScale(attr) - boxPlotWidth / 2}, ${dimensions.height - dimensions.margin.bottom})`)
               .each(function (attr) {
                 // Update the existing box plot instance
@@ -310,9 +306,7 @@ export default function () {
           exit => {
             return exit.each(function (attr) {
               delete boxPlotInstances[attr]
-            }).transition()
-              .duration(axesTransition ? TR_TIME : 0)
-              .remove()
+            }).remove()
           }
         )
     }
@@ -321,7 +315,7 @@ export default function () {
     updateData = function () {
       // Recompute which axes are needed for the selected year
       computeAttributes()
-      axesTransition = false
+      doTransition = false
       axesJoin()
 
       dataJoin()
@@ -332,7 +326,7 @@ export default function () {
       xScale.range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
       attributeIds.forEach(attr => yScales[attr].range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top]))
 
-      axesTransition = true
+      doTransition = true
       axesJoin()
 
       dataJoin()

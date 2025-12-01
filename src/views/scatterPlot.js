@@ -22,6 +22,9 @@ export default function () {
   }
   let updateSize
 
+  // Do animation or not
+  let doTransition = false
+
   // Hovering
   let onMouseEnter = _ => {}
   let onMouseLeave = _ => {}
@@ -86,17 +89,13 @@ export default function () {
         .style('opacity', d => d.hovered ? 1 : null)
       return sel.call(update => update
         .transition()
-        .duration(TR_TIME)
+        .duration(doTransition ? TR_TIME : 0)
         .attr('cx', d => xScale(xAccessor(d)))
         .attr('cy', d => yScale(yAccessor(d)))
       )
     }
     function exitFn (sel) {
-      sel.call(exit => exit
-        .transition()
-        .duration(TR_TIME)
-        .remove()
-      )
+      sel.call(exit => exit.remove())
     }
 
     // Draw axes
@@ -151,6 +150,7 @@ export default function () {
 
     // Update functions
     updateData = function () {
+      doTransition = false
       dataJoin()
     }
 
@@ -172,6 +172,7 @@ export default function () {
       yLegend.transition(trans)
         .attr('x', -(dimensions.height + dimensions.margin.top - dimensions.margin.bottom) / 2)
 
+      doTransition = true
       dataJoin()
     }
 
