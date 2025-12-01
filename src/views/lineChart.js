@@ -97,6 +97,14 @@ export default function () {
       .attr('transform', `translate(${dimensions.margin.left}, 0)`)
       .call(d3.axisLeft(yScale))
 
+    // Highlight current year on x-axis
+    function highlightCurrentYear () {
+      xAxis.selectAll('.tick text')
+        .style('fill', d => d === currentYear ? 'red' : null)
+        .style('font-weight', d => d === currentYear ? 'bold' : null)
+    }
+    highlightCurrentYear()
+
     // Draw axis legend
     const xLegend = wrapper.append('text')
       .attr('class', 'legend')
@@ -206,6 +214,7 @@ export default function () {
       gridJoin()
 
       dataJoin()
+      highlightCurrentYear()
     }
 
     updateSize = function () {
