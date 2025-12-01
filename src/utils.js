@@ -82,119 +82,119 @@ export const attributes = { // Reordered so that similar topics are close
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
     minYear: 1999,
-    description: 'Overall ideological stance<br>0 = extreme left<br>5 = center<br>10 = extreme right'
+    description: 'Overall ideological stance<br>5 = extreme right<br>0 = center<br>-5 = extreme left'
   },
   lrecon: {
     name: 'Economic left/right',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
     minYear: 1999,
-    description: 'Ideological stance on economic issues<br>0 = extreme left<br>5 = center<br>10 = extreme right'
+    description: 'Ideological stance on economic issues<br>5 = extreme right<br>0 = center<br>-5 = extreme left'
   },
   spendvtax: {
-    name: 'Spending vs. reducing taxes',
+    name: 'Public spending',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
     minYear: 2006,
-    description: 'Improving public services vs. reducing taxes<br>0 = strongly favors reducing taxes<br>10 = strongly favors improving public services'
+    description: 'Improving public services vs. reducing taxes<br>10 = strongly favors improving public services<br>0 = strongly favors reducing taxes'
   },
   redistribution: {
     name: 'Wealth redistribution',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
     minYear: 2006,
-    description: 'Redistribution of wealth from the rich to the poor<br>0 = strongly opposes redistribution<br>10 = strongly favors redistribution'
+    description: 'Redistribution of wealth from the rich to the poor<br>10 = strongly favors redistribution<br>0 = strongly opposes redistribution'
   },
   deregulation: {
     name: 'Market deregulation',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
     minYear: 2006,
-    description: 'Deregulations of markets<br>0 = strongly opposes deregulation<br>10 = strongly favors deregulation'
+    description: 'Deregulations of markets<br>10 = strongly favors deregulation<br>0 = strongly opposes deregulation'
   },
   eu_position: {
     name: 'European Union',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
     minYear: 1999,
-    description: 'European integration<br>1 = strongly opposed<br>2 = opposed<br>3 = somewhat opposed<br>4 = neutral<br>5 = somewhat in favor<br>6 = in favor<br>7 = strongly in favor'
+    description: 'European integration<br>10 = strongly in favor<br>0 = strongly opposed'
   },
   eu_intmark: {
     name: 'EU internal market',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
     minYear: 2002,
-    description: 'Internal market (free movement of goods, services, etc.)<br>1 = strongly opposed<br>2 = opposed<br>3 = somewhat opposed<br>4 = neutral<br>5 = somewhat in favor<br>6 = in favor<br>7 = strongly in favor'
+    description: 'Internal market (free movement of goods, services, etc.)<br>10 = strongly in favor<br>0 = strongly opposed'
   },
   eu_foreign: {
     name: 'EU foreign policy',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
     minYear: 1999,
-    description: 'EU foreign and security policy<br>1 = strongly opposed<br>2 = opposed<br>3 = somewhat opposed<br>4 = neutral<br>5 = somewhat in favor<br>6 = in favor<br>7 = strongly in favor'
+    description: 'EU foreign and security policy<br>10 = strongly in favor<br>0 = strongly opposed'
   },
   immigrate_policy: {
     name: 'Immigration restriction',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
     minYear: 2006,
-    description: 'Immigration policies<br>0 = strongly favors liberal policies<br>10 = strongly favors restrictive policies'
+    description: 'Immigration policies<br>10 = strongly favors restrictive policies<br>0 = strongly favors liberal policies'
   },
   multiculturalism: {
     name: 'Multiculturalism',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
     minYear: 2006,
-    description: 'Integration of immigrants and asylum seekers<br>0 = strongly favors assimilation<br>10 = strongly favors multiculturalism'
+    description: 'Integration of immigrants and asylum seekers<br>10 = strongly favors multiculturalism<br>0 = strongly favors assimilation'
   },
   ethnic_minorities: {
     name: 'Ethnic minorities',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
     minYear: 2006,
-    description: 'Rights for ethnic minorities<br>0 = strongly opposes more rights<br>10 = strongly favors more rights'
+    description: 'Rights for ethnic minorities<br>10 = strongly favors more rights<br>0 = strongly opposes more rights'
   },
   nationalism: {
     name: 'Nationalism',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
     minYear: 2014,
-    description: 'Cosmopolitanism vs. nationalism<br>0 = Strongly favors a cosmopolitan society<br>10 = Strongly favors a nationalist society'
+    description: 'Nationalism vs. cosmopolitanism<br>10 = Strongly favors a nationalist society<br>0 = Strongly favors a cosmopolitan society'
   },
   civlib_laworder: {
-    name: 'Civil liberties vs. law & order',
+    name: 'Law & order',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
     minYear: 2006,
-    description: 'Civil liberties vs. law & order<br>0 = strongly favors civil liberties<br>10 = strongly favors tough measures to fight crime'
+    description: 'Law & order vs. civil liberties<br>10 = strongly favors tough measures to fight crime<br>0 = strongly favors civil liberties'
   },
   sociallifestyle: {
     name: 'Social lifestyle',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
     minYear: 2006,
-    description: 'LGBT rights, gender equality, etc.<br>0 = strongly opposes liberal policies<br>10 = strongly favors liberal policies'
+    description: 'LGBT rights, gender equality, etc.<br>10 = strongly favors liberal policies<br>0 = strongly opposes liberal policies'
   },
   religious_principles: {
-    name: 'Religious principles',
+    name: 'Religion in politics',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
     minYear: 2006,
-    description: 'Role of religious principles in politics<br>0 = strongly opposes religion in politics<br>10 = strongly favors religion in politics'
+    description: 'Role of religious principles in politics<br>10 = strongly favors religion in politics<br>0 = strongly opposes religion in politics'
   },
   environment: {
-    name: 'Environment',
+    name: 'Environment protection',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
     minYear: 2010,
-    description: 'Environmental sustainability<br>0 = strongly favors economic growth at the cost of environment protection<br>10 = strongly favors environment protection at the cost of economic growth'
+    description: 'Environmental sustainability<br>10 = strongly favors environment protection at the cost of economic growth<br>0 = strongly favors economic growth at the cost of environment protection'
   },
   regions: {
     name: 'Regionalism',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
     minYear: 2006,
-    description: 'Political decentralization to regions/localities<br>0 = strongly opposes political decentralization<br>10 = strongly favors political decentralization'
+    description: 'Political decentralization to regions/localities<br>10 = strongly favors political decentralization<br>0 = strongly opposes political decentralization'
   }
 }
 

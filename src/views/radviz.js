@@ -16,8 +16,10 @@ export default function () {
   let radvizInstance
 
   // Dimensions to use as radviz anchors
-  const radvizDimensions = ['spendvtax', 'immigrate_policy', 'environment', 'civlib_laworder', 'nationalism']
-  // const radvizDimensions = ['lrgen', 'lrecon', 'eu_position', 'eu_foreign']
+  // const radvizDimensions = ['spendvtax', 'immigrate_policy', 'environment', 'civlib_laworder', 'nationalism']
+  const radvizDimensions = ['lrgen', 'lrecon', 'eu_position', 'eu_foreign']
+  // const radvizDimensions = ['redistribution', 'spendvtax', 'deregulation']
+  // const radvizDimensions = ['lrgen', 'lrecon', 'spendvtax', 'redistribution', 'deregulation'] // METTI LRECON ULTIMO
 
   // It draws and can be configured (it is returned again when something changes)
   function radvizPlot (containerDiv) {
