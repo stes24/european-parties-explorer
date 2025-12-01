@@ -34,11 +34,20 @@ export default function () {
       .attr('height', dimensions.height)
 
     // Scales
+    const yDomain = function (selectedOption) {
+      if (selectedOption === 'vote' || selectedOption === 'seat' || selectedOption === 'epvote') {
+        return [0, d3.max(data, yAccessor)]
+      } else if (selectedOption === 'lrgen' || selectedOption === 'lrecon') {
+        return [-5, 5]
+      } else {
+        return [0, 10]
+      }
+    }
     const xScale = d3.scaleLinear()
       .domain(d3.extent(years))
       .range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
     const yScale = d3.scaleLinear()
-      .domain([0, (selectedOption === 'vote' || selectedOption === 'seat' || selectedOption === 'epvote') ? d3.max(data, yAccessor) : 10])
+      .domain(yDomain(selectedOption))
       .range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
 
     // How to generate the lines
@@ -197,7 +206,7 @@ export default function () {
     // Update functions
     updateData = function () {
       // Attribute on y axis
-      yScale.domain([0, (selectedOption === 'vote' || selectedOption === 'seat' || selectedOption === 'epvote') ? d3.max(data, yAccessor) : 10])
+      yScale.domain(yDomain(selectedOption))
       yAxis.call(d3.axisLeft(yScale))
 
       // Adapt grid

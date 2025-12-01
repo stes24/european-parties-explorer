@@ -43,9 +43,13 @@ def delete_nulls(df, year, cols_in_year):
     df_year = df[df['year'] == year][cols_in_year].copy() # Take the rows of the given year and only the relevant columns of that year
     df_year = df_year.dropna()      # Delete rows with nulls
     
-    # Adjust EU scales to 0-10 and reverse scales so that 10 always means "agree"
+    # Adjust EU scales to 0 - 10 and 
     df_year['eu_position'] = (df_year['eu_position'] - 1) * 10 / 6
     df_year['eu_foreign'] = (df_year['eu_foreign'] - 1) * 10 / 6
+    # Adjust left-right scale to -5 - 5
+    df_year['lrgen'] = df_year['lrgen'] - 5
+    df_year['lrecon'] = df_year['lrecon'] - 5
+    # Reverse scales so that 10 always means "agree"
     if (year >= 2002):
         df_year['eu_intmark'] = (df_year['eu_intmark'] - 1) * 10 / 6
     if (year >= 2006):

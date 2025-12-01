@@ -22,7 +22,7 @@ export default function () {
   // It draws and can be configured (it is returned again when something changes)
   function boxPlot (wrapper) {
     const yScale = d3.scaleLinear()
-      .domain([0, 10])
+      .domain(currentAttribute === 'lrgen' || currentAttribute === 'lrecon' ? [-5, 5] : [0, 10])
       .range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
 
     const axisGroup = wrapper.append('g')

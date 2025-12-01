@@ -60,13 +60,17 @@ export default function () {
       const scaleRange = [dimensions.height - dimensions.margin.bottom, dimensions.margin.top]
       yScales = {} // Will be a map - key (attribute id) -> value (scale associated to that attribute)
       attributeIds.forEach(attr => {
-        if (attr === 'country') {
+        if (attr === 'family') {
+          yScales[attr] = d3.scalePoint()
+            .domain(Object.keys(factions).map(Number))
+            .range(scaleRange)
+        } else if (attr === 'country') {
           yScales[attr] = d3.scalePoint()
             .domain(Object.keys(countries).map(Number))
             .range(scaleRange)
-        } else if (attr === 'family') {
-          yScales[attr] = d3.scalePoint()
-            .domain(Object.keys(factions).map(Number))
+        } else if (attr === 'lrgen' || attr === 'lrecon') {
+          yScales[attr] = d3.scaleLinear()
+            .domain([-5, 5])
             .range(scaleRange)
         } else {
           yScales[attr] = d3.scaleLinear()
