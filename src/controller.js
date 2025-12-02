@@ -20,15 +20,19 @@ class Controller {
 
     // Models functions binding (pass to the models the function that updates the views)
     this.parties.bindEntriesListChanged(this.onPartiesListChanged.bind(this)) // Called using the controller's "this" context
+
     // Views functions binding (pass to the views the functions that let the model update parties)
     this.scatterPlot.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)
     this.scatterPlot.bindMouseLeave(p => this.handleMouseLeave(p)).bind(this)
     this.scatterPlot.bindBrush((p, v) => this.handleBrush(p, v)).bind(this)
+    this.lineChart.bindMouseEnter(p => this.handleBatchMouseEnter(p)).bind(this)
+    this.lineChart.bindMouseLeave(() => this.handleBatchMouseLeave()).bind(this)
     this.parallelCoordinates.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)
     this.parallelCoordinates.bindMouseLeave(p => this.handleMouseLeave(p)).bind(this)
     this.parallelCoordinates.bindBrush((p, v) => this.handleBrush(p, v)).bind(this)
     this.parallelCoordinates.bindBoxPlotMouseEnter(p => this.handleBatchMouseEnter(p)).bind(this)
     this.parallelCoordinates.bindBoxPlotMouseLeave(() => this.handleBatchMouseLeave()).bind(this)
+
     // Pass the function that sets the selected year
     this.lineChart.bindYearChange(year => this.setYear(year)).bind(this)
 

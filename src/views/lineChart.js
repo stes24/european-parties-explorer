@@ -1,7 +1,5 @@
 import * as d3 from 'd3'
-import { attributes, TR_TIME, years } from '@/utils'
-
-// const RADIUS = 4
+import { attributes, hideTooltip, moveTooltip, showTooltip, TR_TIME, years } from '@/utils'
 
 // Configurable function - it returns a new function (which, when called, draws the view)
 export default function () {
@@ -24,6 +22,10 @@ export default function () {
 
   // Do animation or not
   let doTransition = false
+
+  // Hovering (line chart uses batch hover since lines span multiple years)
+  let onMouseEnter = _ => {}
+  let onMouseLeave = _ => {}
 
   let onYearChange = _ => {}
 
@@ -54,33 +56,114 @@ export default function () {
     const line = d3.line()
       .x(d => xScale(xAccessor(d)))
       .y(d => yScale(yAccessor(d)))
-      // .defined(d => yAccessor(d) !== null) // Correctly draw lines starting from a later year
+      .defined(d => yAccessor(d) != null && !isNaN(yAccessor(d))) // Skip null/undefined/NaN but connect across gaps
 
     const linesGroup = wrapper.append('g')
+    const linesHoverGroup = wrapper.append('g')
+    const pointsGroup = wrapper.append('g')
     const gridGroup = wrapper.append('g')
-    const parties = d3.group(data, d => d.party_id) // INSIDE JOIN? A dictionary -> party id - array of dictionaries (all instances of the party, grouped by the id)
 
-    // Draw lines
+    // Separate parties with multiple defined values (lines) from single-year parties (points)
+    function getPartiesData () {
+      const parties = d3.group(data, d => d.party_id) // A dictionary -> party id - array of dictionaries (all instances of the party, grouped by the id)
+      const multiYear = []
+      const singleYear = []
+
+      parties.forEach((values, partyId) => {
+        // Count how many defined values this party has for the selected attribute
+        const definedValues = values.filter(d => yAccessor(d) != null && !isNaN(yAccessor(d)))
+        if (definedValues.length > 1) {
+          multiYear.push([partyId, values]) // id + all instances of the party
+        } else if (definedValues.length === 1) {
+          singleYear.push(definedValues[0]) // Single instance of the party
+        }
+      })
+
+      return { parties, multiYear, singleYear }
+    }
+
+    // Draw lines and points
     function dataJoin () {
+      const { parties, multiYear, singleYear } = getPartiesData()
+
+      // Draw lines for multi-year parties
       linesGroup.selectAll('path')
-        .data(parties)
-        .join(enterFn, updateFn, exitFn)
+        .data(multiYear, d => d[0])
+        .join(enterFnLine, updateFnLine, exitFn)
+
+      // Draw hovered lines on top
+      linesHoverGroup.selectAll('path')
+        .data(multiYear.filter(([partyId, values]) => values.some(d => d.hovered)), d => d[0])
+        .join(enterFnLineHover, updateFnLine, exitFn)
+
+      // Draw points for single-year parties
+      pointsGroup.selectAll('circle')
+        .data(singleYear, d => d.party_id)
+        .join(d => enterFnPoint(d, parties), updateFnPoint, exitFn)
     }
     dataJoin()
 
     // Join functions
-    function enterFn (sel) {
+    function enterFnLine (sel) {
       return sel.append('path')
         .attr('class', 'line')
         .attr('d', ([partyId, values]) => line(values))
+        .on('mouseenter', (event, [partyId, values]) => {
+          // Hover all instances of this party
+          onMouseEnter(values)
+          // Show tooltip for the current year instance (or first available) - TEMPORARY
+          const party = values.find(d => d.year === currentYear) || values[0]
+          showTooltip(event, party)
+        })
+        .on('mousemove', (event) => moveTooltip(event))
+        .on('mouseleave', (event, [partyId, values]) => {
+          onMouseLeave()
+          hideTooltip()
+        })
     }
-    function updateFn (sel) {
+    function enterFnLineHover (sel) {
+      return sel.append('path')
+        .attr('class', 'line-hovered')
+        .attr('d', ([partyId, values]) => line(values))
+    }
+    function updateFnLine (sel) {
       return sel.call(update => update
         .transition()
         .duration(doTransition ? TR_TIME : 0)
         .attr('d', ([partyId, values]) => line(values))
       )
     }
+
+    function enterFnPoint (sel, parties) {
+      return sel.append('circle')
+        .attr('class', 'circle')
+        .attr('fill', 'steelblue')
+        .style('stroke-width', '1.5px')
+        .attr('cx', d => xScale(xAccessor(d)))
+        .attr('cy', d => yScale(yAccessor(d)))
+        .attr('r', 3)
+        .on('mouseenter', (event, d) => {
+          // Hover all instances of this party (even though only one has data for this attribute)
+          const allInstances = parties.get(d.party_id) || [d]
+          onMouseEnter(allInstances)
+          showTooltip(event, d)
+        })
+        .on('mousemove', (event) => moveTooltip(event))
+        .on('mouseleave', (event, d) => {
+          onMouseLeave()
+          hideTooltip()
+        })
+    }
+    function updateFnPoint (sel) {
+      sel.attr('fill', d => d.hovered ? 'white' : 'steelblue')
+      return sel.call(update => update
+        .transition()
+        .duration(doTransition ? TR_TIME : 0)
+        .attr('cx', d => xScale(xAccessor(d)))
+        .attr('cy', d => yScale(yAccessor(d)))
+      )
+    }
+
     function exitFn (sel) {
       sel.call(exit => exit.remove())
     }
@@ -186,23 +269,6 @@ export default function () {
       onYearChange(+event.target.value)
     })
 
-    // Group the data (one line = one party over the years), give each party to one line
-    /* parties.forEach((party, partyId) => {
-      if (party.length > 1) { // Party with at least two years -> a line
-        linesGroup.append('path')
-          .attr('class', 'line')
-          .attr('d', line(party))
-      } else { // Party with only one year -> a point
-        const d = party[0]
-        linesGroup.append('circle')
-          .attr('class', 'point')
-          .attr('cx', xScale(xAccessor(d)))
-          .attr('cy', yScale(yAccessor(d)))
-          .attr('r', RADIUS)
-          .attr('fill', 'steelblue')
-      }
-    }) */
-
     // Update functions
     updateData = function () {
       // Attribute on y axis
@@ -263,6 +329,17 @@ export default function () {
     dimensions.height = height
     if (typeof updateSize === 'function') updateSize()
     return lineChart
+  }
+
+  // Save the callbacks (batch hover - line chart hovers all instances of a party)
+  lineChart.bindMouseEnter = function (callback) {
+    onMouseEnter = callback
+    return this
+  }
+  lineChart.bindMouseLeave = function (callback) {
+    onMouseLeave = callback
+    console.debug('Line chart received the functions for updating the model on hover')
+    return this
   }
 
   lineChart.bindYearChange = function (callback) {
