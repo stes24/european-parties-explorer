@@ -59,9 +59,12 @@ export default function () {
       .defined(d => yAccessor(d) != null && !isNaN(yAccessor(d))) // Skip null/undefined/NaN but connect across gaps
 
     const linesGroup = wrapper.append('g')
+    const linesBrushGroup = wrapper.append('g')
     const linesHoverGroup = wrapper.append('g')
     const pointsGroup = wrapper.append('g')
     const gridGroup = wrapper.append('g')
+
+    let brushActive = false
 
     // Separate parties with multiple defined values (lines) from single-year parties (points)
     function getPartiesData () {
@@ -86,12 +89,16 @@ export default function () {
     function dataJoin () {
       const { parties, multiYear, singleYear } = getPartiesData()
 
+      // Check if any data is brushed
+      brushActive = data.some(d => d.brushed)
+
       // Draw lines for multi-year parties
       linesGroup.selectAll('path')
         .data(multiYear, d => d[0])
         .join(enterFnLine, updateFnLine, exitFn)
-
-      // Draw hovered lines on top
+      linesBrushGroup.selectAll('path')
+        .data(multiYear.filter(([partyId, values]) => values.some(d => d.brushed)), d => d[0])
+        .join(enterFnLineBrush, updateFnLine, exitFn)
       linesHoverGroup.selectAll('path')
         .data(multiYear.filter(([partyId, values]) => values.some(d => d.hovered)), d => d[0])
         .join(enterFnLineHover, updateFnLine, exitFn)
@@ -121,6 +128,21 @@ export default function () {
           hideTooltip()
         })
     }
+    function enterFnLineBrush (sel) {
+      return sel.append('path')
+        .attr('class', 'line-brushed')
+        .attr('d', ([partyId, values]) => line(values))
+        .on('mouseenter', (event, [partyId, values]) => {
+          onMouseEnter(values)
+          const party = values.find(d => d.year === currentYear) || values[0]
+          showTooltip(event, party)
+        })
+        .on('mousemove', (event) => moveTooltip(event))
+        .on('mouseleave', (event, [partyId, values]) => {
+          onMouseLeave()
+          hideTooltip()
+        })
+    }
     function enterFnLineHover (sel) {
       return sel.append('path')
         .attr('class', 'line-hovered')
@@ -128,6 +150,7 @@ export default function () {
     }
     function updateFnLine (sel) {
       return sel.call(update => update
+        .classed('line-deselected', ([partyId, values]) => brushActive && !values.some(d => d.brushed))
         .transition()
         .duration(doTransition ? TR_TIME : 0)
         .attr('d', ([partyId, values]) => line(values))
@@ -138,6 +161,7 @@ export default function () {
       return sel.append('circle')
         .attr('class', 'circle')
         .attr('fill', 'steelblue')
+        .style('stroke', d => d.brushed ? 'red' : null)
         .style('stroke-width', '1.5px')
         .attr('cx', d => xScale(xAccessor(d)))
         .attr('cy', d => yScale(yAccessor(d)))
@@ -155,7 +179,9 @@ export default function () {
         })
     }
     function updateFnPoint (sel) {
-      sel.attr('fill', d => d.hovered ? 'white' : 'steelblue')
+      sel.attr('fill', d => d.hovered ? 'white' : (brushActive && !d.brushed ? 'gray' : 'steelblue'))
+        .style('opacity', d => d.brushed ? 0.9 : (brushActive && !d.brushed ? 0.3 : null))
+        .style('stroke', d => d.brushed ? 'red' : null)
       return sel.call(update => update
         .transition()
         .duration(doTransition ? TR_TIME : 0)

@@ -37,7 +37,7 @@ export default function () {
   // Brushing
   let onBrush = _ => {}
   const brushes = {}
-  let brushActive
+  let brushActive = false
 
   // It draws and can be configured (it is returned again when something changes)
   function parallelCoordinates (containerDiv) {
