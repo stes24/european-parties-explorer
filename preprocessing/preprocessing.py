@@ -31,8 +31,8 @@ df = df[columns + ['womens_rights', 'lgbtq_rights']]
 df = df[~df['country'].isin([37, 38])] # Tilde inverts the result - keep only "True" rows
 df.sort_values(['country', 'year', 'party_id'], inplace=True)
 
-df.to_csv('../public/dataset_reordered.csv', index=False) # Don't save the index
 print('1 - Filtered columns, removed appropriate countries, reordered by country')
+df.to_csv('../public/dataset_reordered.csv', index=False) # Don't save the index
 
 # Fix numerical values
 df[['vote', 'seat', 'epvote']] = df[['vote', 'seat', 'epvote']].fillna(0) # Missing votes become 0%
@@ -78,8 +78,26 @@ print('2 - Replaced missing votes, deleted appropriate missing values for each y
 df.loc[df['year'] == 2024, 'sociallifestyle'] = df.loc[df['year'] == 2024, ['womens_rights', 'lgbtq_rights']].mean(axis=1) # Replace 2024 sociallifestyle with the mean
 df = df.drop(columns=["womens_rights", "lgbtq_rights"])
 
-df.to_csv('../public/dataset_final.csv', index=False)
 print('3 - Computed sociallifestyle for 2024, removed womens_rights and lgbtq_rights')
+
+# Create new "positive" scales for left and right for radviz
+def left(x):
+    if x <= 0:
+        return -x
+    else:
+        return 0
+def right(x):
+    if x >= 0:
+        return x
+    else:
+        return 0
+df['leftgen'] = df['lrgen'].apply(left)
+df['rightgen'] = df['lrgen'].apply(right)
+df['leftecon'] = df['lrecon'].apply(left)
+df['rightecon'] = df['lrecon'].apply(right)
+
+print('5 - Recomputed left and right for radviz')
+df.to_csv('../public/dataset_final.csv', index=False)
 
 # MDS --------------------------------
 
@@ -117,4 +135,4 @@ for year in years:
     df.loc[df['year'] == year, 'mds2'] = points[:, 1]
 
 df.to_csv('../public/dataset_final_with_mds.csv', index=False)
-print('4 - Applied dimensionality reduction and saved points\' coordinates')
+print('6 - Applied dimensionality reduction and saved points\' coordinates')

@@ -18,7 +18,7 @@ export default function () {
   let radvizInstance
 
   // Dimensions to use as radviz anchors
-  let selectedDimensions = ['eu_position', 'eu_intmark', 'eu_foreign']
+  let selectedDimensions = ['leftgen', 'rightgen', 'leftecon', 'rightecon']
 
   // It draws and can be configured (it is returned again when something changes)
   function radvizPlot (containerDiv) {
@@ -64,7 +64,7 @@ export default function () {
     }
 
     const wrapper = containerDiv.append('svg')
-      .attr('width', dimensions.width - dimensions.buttonsWidth)
+      .attr('width', dimensions.width)
       .attr('height', dimensions.height)
 
     // radvizInstance = radviz()

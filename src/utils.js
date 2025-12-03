@@ -30,6 +30,10 @@ export function formatParty (row) { // For each csv row, return an object (Party
     regions: parseFloat(row.regions),
     environment: parseFloat(row.environment),
     nationalism: parseFloat(row.nationalism),
+    leftgen: parseFloat(row.leftgen),
+    rightgen: parseFloat(row.rightgen),
+    leftecon: parseFloat(row.leftecon),
+    rightecon: parseFloat(row.rightecon),
     mds1: parseFloat(row.mds1),
     mds2: parseFloat(row.mds2),
     hovered: false,
@@ -85,7 +89,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Left/right',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
-    goesOnRadviz: true,
+    goesOnRadviz: false,
     minYear: 1999,
     description: 'Overall ideological stance<br>5 = extreme right<br>0 = center<br>-5 = extreme left'
   },
@@ -93,9 +97,41 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Economic left/right',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
-    goesOnRadviz: true,
+    goesOnRadviz: false,
     minYear: 1999,
     description: 'Ideological stance on economic issues<br>5 = extreme right<br>0 = center<br>-5 = extreme left'
+  },
+  leftgen: {
+    name: 'Left',
+    goesOnLineChart: false,
+    goesOnParallelCoordinates: false,
+    goesOnRadviz: true,
+    minYear: 1999,
+    description: ''
+  },
+  rightgen: {
+    name: 'Right',
+    goesOnLineChart: false,
+    goesOnParallelCoordinates: false,
+    goesOnRadviz: true,
+    minYear: 1999,
+    description: ''
+  },
+  leftecon: {
+    name: 'Economic left',
+    goesOnLineChart: false,
+    goesOnParallelCoordinates: false,
+    goesOnRadviz: true,
+    minYear: 1999,
+    description: ''
+  },
+  rightecon: {
+    name: 'Economic right',
+    goesOnLineChart: false,
+    goesOnParallelCoordinates: false,
+    goesOnRadviz: true,
+    minYear: 1999,
+    description: ''
   },
   spendvtax: {
     name: 'Public spending',
