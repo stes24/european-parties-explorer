@@ -51,6 +51,7 @@ class Controller {
     // Notify views that need year for drawing
     this.lineChart.year(year)
     this.parallelCoordinates.year(year)
+    this.radviz.year(year)
 
     // Update model and redraw views
     this.parties.setYear(year)

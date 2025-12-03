@@ -46,6 +46,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Political faction',
     goesOnLineChart: false,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: false,
     minYear: 1999,
     description: 'Parties\' political<br>faction in '
   },
@@ -53,6 +54,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Country',
     goesOnLineChart: false,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: false,
     minYear: 1999,
     description: 'Parties\' country of origin'
   },
@@ -60,6 +62,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Votes in the most recent national election (%)',
     goesOnLineChart: true,
     goesOnParallelCoordinates: false,
+    goesOnRadviz: false,
     minYear: 1999,
     description: 'Vote percentage received by<br>the parties in the national election<br>most prior to the given year'
   },
@@ -74,6 +77,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Votes in the most recent European election (%)',
     goesOnLineChart: true,
     goesOnParallelCoordinates: false,
+    goesOnRadviz: false,
     minYear: 1999,
     description: 'Vote percentage received by the<br>parties in the European Parliament<br>election most prior to the given year'
   },
@@ -81,6 +85,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Left/right',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
     minYear: 1999,
     description: 'Overall ideological stance<br>5 = extreme right<br>0 = center<br>-5 = extreme left'
   },
@@ -88,6 +93,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Economic left/right',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
     minYear: 1999,
     description: 'Ideological stance on economic issues<br>5 = extreme right<br>0 = center<br>-5 = extreme left'
   },
@@ -95,6 +101,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Public spending',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
     minYear: 2006,
     description: 'Improving public services vs. reducing taxes<br>10 = strongly favors improving public services<br>0 = strongly favors reducing taxes'
   },
@@ -102,6 +109,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Wealth redistribution',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
     minYear: 2006,
     description: 'Redistribution of wealth from the rich to the poor<br>10 = strongly favors redistribution<br>0 = strongly opposes redistribution'
   },
@@ -109,6 +117,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Market deregulation',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
     minYear: 2006,
     description: 'Deregulations of markets<br>10 = strongly favors deregulation<br>0 = strongly opposes deregulation'
   },
@@ -116,6 +125,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'European Union',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
     minYear: 1999,
     description: 'European integration<br>10 = strongly in favor<br>0 = strongly opposed'
   },
@@ -123,6 +133,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'EU internal market',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
     minYear: 2002,
     description: 'Internal market (free movement of goods, services, etc.)<br>10 = strongly in favor<br>0 = strongly opposed'
   },
@@ -130,6 +141,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'EU foreign policy',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
     minYear: 1999,
     description: 'EU foreign and security policy<br>10 = strongly in favor<br>0 = strongly opposed'
   },
@@ -137,6 +149,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Immigration restriction',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
     minYear: 2006,
     description: 'Immigration policies<br>10 = strongly favors restrictive policies<br>0 = strongly favors liberal policies'
   },
@@ -144,6 +157,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Multiculturalism',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
     minYear: 2006,
     description: 'Integration of immigrants and asylum seekers<br>10 = strongly favors multiculturalism<br>0 = strongly favors assimilation'
   },
@@ -151,6 +165,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Ethnic minorities',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
     minYear: 2006,
     description: 'Rights for ethnic minorities<br>10 = strongly favors more rights<br>0 = strongly opposes more rights'
   },
@@ -158,6 +173,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Nationalism',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
     minYear: 2014,
     description: 'Nationalism vs. cosmopolitanism<br>10 = Strongly favors a nationalist society<br>0 = Strongly favors a cosmopolitan society'
   },
@@ -165,6 +181,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Law & order',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
     minYear: 2006,
     description: 'Law & order vs. civil liberties<br>10 = strongly favors tough measures to fight crime<br>0 = strongly favors civil liberties'
   },
@@ -172,6 +189,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Social lifestyle',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
     minYear: 2006,
     description: 'LGBT rights, gender equality, etc.<br>10 = strongly favors liberal policies<br>0 = strongly opposes liberal policies'
   },
@@ -179,6 +197,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Religion in politics',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
     minYear: 2006,
     description: 'Role of religious principles in politics<br>10 = strongly favors religion in politics<br>0 = strongly opposes religion in politics'
   },
@@ -186,6 +205,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Environment protection',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
     minYear: 2010,
     description: 'Environmental sustainability<br>10 = strongly favors environment protection at the cost of economic growth<br>0 = strongly favors economic growth at the cost of environment protection'
   },
@@ -193,6 +213,7 @@ export const attributes = { // Reordered so that similar topics are close
     name: 'Regionalism',
     goesOnLineChart: true,
     goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
     minYear: 2006,
     description: 'Political decentralization to regions/localities<br>10 = strongly favors political decentralization<br>0 = strongly opposes political decentralization'
   }
