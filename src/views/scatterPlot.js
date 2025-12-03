@@ -15,7 +15,7 @@ export default function () {
   const dimensions = {
     width: null,
     height: null,
-    margin: { top: 22, right: 12, bottom: 60, left: 47 },
+    margin: { top: 0, right: 12, bottom: 60, left: 47 },
     offset: { x: 2.5, y: 2.5 },
     radius: { min: 4, max: 30 },
     legendY: 30
@@ -24,6 +24,9 @@ export default function () {
 
   // Do animation or not
   let doTransition = false
+
+  // Interaction mode
+  let interactionMode = 'hover'
 
   // Hovering
   let onMouseEnter = _ => {}
@@ -34,6 +37,38 @@ export default function () {
 
   // It draws and can be configured (it is returned again when something changes)
   function scatterPlot (containerDiv) {
+    // Add mode radio buttons
+    const modeContainer = containerDiv.append('div')
+      .attr('class', 'interaction-mode-container')
+
+    modeContainer.append('span')
+      .attr('class', 'mode-label')
+      .text('Mode of interaction:')
+
+    const hoverLabel = modeContainer.append('label')
+      .attr('class', 'mode-radio-label')
+
+    hoverLabel.append('input')
+      .attr('type', 'radio')
+      .attr('name', 'scatter-interaction-mode')
+      .attr('value', 'hover')
+      .property('checked', interactionMode === 'hover')
+      .on('change', () => switchMode('hover'))
+
+    hoverLabel.append('span').text('hover')
+
+    const selectLabel = modeContainer.append('label')
+      .attr('class', 'mode-radio-label')
+
+    selectLabel.append('input')
+      .attr('type', 'radio')
+      .attr('name', 'scatter-interaction-mode')
+      .attr('value', 'brush')
+      .property('checked', interactionMode === 'brush')
+      .on('change', () => switchMode('brush'))
+
+    selectLabel.append('span').text('select')
+
     const wrapper = containerDiv.append('svg')
       .attr('width', dimensions.width)
       .attr('height', dimensions.height)
@@ -54,6 +89,10 @@ export default function () {
     const drawArea = wrapper.append('g') // It contains points' g and clip
     const pointsGroup = drawArea.append('g')
 
+    // Store brush behavior
+    const brushBehavior = d3.brush()
+      .extent([[xScale.range()[0], yScale.range()[1]], [xScale.range()[1], yScale.range()[0]]])
+
     // Draw points
     function dataJoin () {
       pointsGroup.selectAll('circle')
@@ -66,27 +105,36 @@ export default function () {
 
     // Join functions
     function enterFn (sel) {
-      return sel.append('circle')
+      const circles = sel.append('circle')
         .attr('class', 'circle')
         .attr('cx', d => xScale(xAccessor(d)))
         .attr('cy', d => yScale(yAccessor(d)))
         .attr('r', d => radius(rAccessor(d)))
         .style('stroke', d => d.brushed ? 'red' : null)
         .attr('fill', d => colorAccessor(d))
-        .on('mouseenter', (event, d) => {
-          onMouseEnter(d)
-          showTooltip(event, d)
-        })
-        .on('mousemove', (event) => moveTooltip(event))
-        .on('mouseleave', (event, d) => {
-          onMouseLeave(d)
-          hideTooltip()
-        })
+        .style('pointer-events', interactionMode === 'hover' ? 'all' : 'none')
+
+      // Add hover listeners only in hover mode
+      if (interactionMode === 'hover') {
+        circles
+          .on('mouseenter', (event, d) => {
+            onMouseEnter(d)
+            showTooltip(event, d)
+          })
+          .on('mousemove', (event) => moveTooltip(event))
+          .on('mouseleave', (event, d) => {
+            onMouseLeave(d)
+            hideTooltip()
+          })
+      }
+
+      return circles
     }
     function updateFn (sel) {
       sel.style('stroke', d => d.brushed ? 'red' : null)
         .attr('fill', d => d.hovered ? 'white' : colorAccessor(d))
         .style('opacity', d => d.hovered ? 1 : null)
+        .style('pointer-events', interactionMode === 'hover' ? 'all' : 'none')
       return sel.call(update => update
         .transition()
         .duration(doTransition ? TR_TIME : 0)
@@ -138,15 +186,55 @@ export default function () {
     function clearBrush (sel) {
       onBrush(null, 'scatterPlot')
     }
-    drawArea.call(d3.brush()
-      .extent([[xScale.range()[0], yScale.range()[1]], [xScale.range()[1], yScale.range()[0]]])
+
+    brushBehavior
       .on('brush', (event) => {
         updateBrush(event.selection)
       })
       .on('end', (event) => {
         if (!event.selection) clearBrush(event.selection)
       })
-    )
+
+    // Apply brush only in brush mode
+    if (interactionMode === 'brush') {
+      drawArea.call(brushBehavior)
+    }
+
+    // Switch interaction mode
+    function switchMode (newMode) {
+      interactionMode = newMode
+
+      // Update circle pointer events and listeners
+      pointsGroup.selectAll('circle')
+        .style('pointer-events', newMode === 'hover' ? 'all' : 'none')
+        .on('mouseenter', null)
+        .on('mousemove', null)
+        .on('mouseleave', null)
+
+      if (newMode === 'hover') {
+        // Enable hover interactions
+        pointsGroup.selectAll('circle')
+          .on('mouseenter', (event, d) => {
+            onMouseEnter(d)
+            showTooltip(event, d)
+          })
+          .on('mousemove', (event) => moveTooltip(event))
+          .on('mouseleave', (event, d) => {
+            onMouseLeave(d)
+            hideTooltip()
+          })
+
+        // Disable brush
+        drawArea.on('.brush', null)
+        drawArea.selectAll('.selection, .overlay, .handle').remove()
+      } else {
+        // Disable hover interactions (already done above with null)
+        hideTooltip()
+
+        // Enable brush
+        drawArea.call(brushBehavior)
+      }
+    }
 
     // Update functions
     updateData = function () {

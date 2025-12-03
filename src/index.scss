@@ -147,20 +147,51 @@ svg .legend {
   font-size: 13px;
 }
 
+.interaction-mode-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  font-size: 13px;
+  color: #CCCCCC;
+}
+
+.mode-label {
+  color: #CCCCCC;
+}
+
+.mode-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  color: #CCCCCC;
+
+  input[type="radio"] {
+    cursor: pointer;
+    accent-color: steelblue;
+  }
+}
+
+.lineChart-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 8px;
+}
+
 .dropDown {
-  position: absolute;
   font-size: 12px;
 }
 
-.text-row {
+.year-container {
   display: flex;
-  position: absolute;
   align-items: center;
   gap: 3px;
   font-size: 12px;
 }
 
-.label {
+.year-label {
   font-size: 22px;
   color: white;
 }
