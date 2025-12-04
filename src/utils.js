@@ -30,6 +30,7 @@ export function formatParty (row) { // For each csv row, return an object (Party
     regions: parseFloat(row.regions),
     environment: parseFloat(row.environment),
     nationalism: parseFloat(row.nationalism),
+    region: row.region,
     leftgen: parseFloat(row.leftgen),
     rightgen: parseFloat(row.rightgen),
     leftecon: parseFloat(row.leftecon),
@@ -61,6 +62,14 @@ export const attributes = { // Reordered so that similar topics are close
     goesOnRadviz: false,
     minYear: 1999,
     description: 'Parties\' country of origin'
+  },
+  region: {
+    name: 'European Region',
+    goesOnLineChart: false,
+    goesOnParallelCoordinates: true,
+    goesOnRadviz: false,
+    minYear: 1999,
+    description: 'European region of the parties\' country<br>(according to the UN geoscheme)'
   },
   vote: {
     name: 'Votes in the most recent national election (%)',

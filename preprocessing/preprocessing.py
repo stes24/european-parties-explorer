@@ -80,6 +80,19 @@ df = df.drop(columns=["womens_rights", "lgbtq_rights"])
 
 print('3 - Computed sociallifestyle for 2024, removed womens_rights and lgbtq_rights')
 
+def computeRegion(country):
+    if (country in [1, 3, 6, 10, 13]): # BE, GE, FR, NL, AUS
+        return 'West'
+    elif (country in [2, 7, 11, 14, 16, 22, 24, 25]): # DK, IRL, UK, FIN, SV, EST, LAT, LITH
+        return 'North'
+    elif (country in [4, 5, 8, 12, 29, 31, 40]): # GR, ESP, IT, POR, SLE, CRO, CYP
+        return 'South'
+    elif (country in [20, 21, 23, 26, 27, 28]): # BUL, CZ, HUN, POL, ROM, SLO
+        return 'East'
+df['region'] = df['country'].apply(computeRegion)
+
+print('4 - Computed European regions')
+
 # Create new "positive" scales for left and right for radviz
 def left(x):
     if x <= 0:

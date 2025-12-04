@@ -68,6 +68,10 @@ export default function () {
           yScales[attr] = d3.scalePoint()
             .domain(Object.keys(countries).map(Number))
             .range(scaleRange)
+        } else if (attr === 'region') {
+          yScales[attr] = d3.scalePoint()
+            .domain(['West', 'North', 'South', 'East'].reverse())
+            .range(scaleRange)
         } else if (attr === 'lrgen' || attr === 'lrecon') {
           yScales[attr] = d3.scaleLinear()
             .domain([-5, 5])
@@ -264,7 +268,7 @@ export default function () {
       const boxPlotHeight = dimensions.margin.bottom
 
       // Exclude categorical attributes
-      const numericAttributes = attributeIds.filter(attr => attr !== 'country' && attr !== 'family')
+      const numericAttributes = attributeIds.filter(attr => attr !== 'country' && attr !== 'family' && attr !== 'region')
 
       // Manage box plot containers
       boxPlotsGroup.selectAll('g.boxPlot')
