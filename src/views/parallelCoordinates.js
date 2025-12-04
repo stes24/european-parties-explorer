@@ -66,7 +66,10 @@ export default function () {
             .range(scaleRange)
         } else if (attr === 'country') {
           yScales[attr] = d3.scalePoint()
-            .domain(Object.keys(countries).map(Number))
+            .domain([13, 1, 6, 3, 10, // West
+              2, 22, 14, 7, 24, 25, 16, 11, // North
+              31, 40, 4, 8, 12, 29, 5, // South
+              20, 21, 23, 26, 27, 28].reverse()) // East
             .range(scaleRange)
         } else if (attr === 'region') {
           yScales[attr] = d3.scalePoint()
