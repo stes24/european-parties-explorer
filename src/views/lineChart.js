@@ -99,17 +99,15 @@ export default function () {
       .y(d => yScale(yAccessor(d)))
       .defined(d => yAccessor(d) != null && !isNaN(yAccessor(d))) // Skip null/undefined/NaN but connect across gaps
 
-    const linesGroup = wrapper.append('g')
-    const linesBrushGroup = wrapper.append('g')
-    const linesHoverGroup = wrapper.append('g')
-    const pointsGroup = wrapper.append('g')
+    const elementsGroup = wrapper.append('g')
     const gridGroup = wrapper.append('g')
 
     let brushActive = false
+    let parties // Store parties for point hover callback
 
     // Separate parties with multiple defined values (lines) from single-year parties (points)
     function getPartiesData () {
-      const parties = d3.group(data, d => d.party_id) // A dictionary -> party id - array of dictionaries (all instances of the party, grouped by the id)
+      parties = d3.group(data, d => d.party_id) // A dictionary -> party id - array of dictionaries (all instances of the party, grouped by the id)
       const multiYear = []
       const singleYear = []
 
@@ -117,118 +115,146 @@ export default function () {
         // Count how many defined values this party has for the selected attribute
         const definedValues = values.filter(d => yAccessor(d) != null && !isNaN(yAccessor(d)))
         if (definedValues.length > 1) {
-          multiYear.push([partyId, values]) // id + all instances of the party
+          multiYear.push({ type: 'line', partyId, values }) // id + all instances of the party
         } else if (definedValues.length === 1) {
-          singleYear.push(definedValues[0]) // Single instance of the party
+          singleYear.push({ type: 'circle', data: definedValues[0] }) // Single instance of the party
         }
       })
 
-      return { parties, multiYear, singleYear }
+      return { multiYear, singleYear }
     }
 
     // Draw lines and points
     function dataJoin () {
-      const { parties, multiYear, singleYear } = getPartiesData()
+      const { multiYear, singleYear } = getPartiesData()
 
       // Check if any data is brushed
       brushActive = data.some(d => d.brushed)
 
-      // Draw lines for multi-year parties
-      linesGroup.selectAll('path')
-        .data(multiYear, d => d[0])
-        .join(enterFnLine, updateFnLine, exitFn)
-      linesBrushGroup.selectAll('path')
-        .data(multiYear.filter(([partyId, values]) => values.some(d => d.brushed)), d => d[0])
-        .join(enterFnLineBrush, updateFnLine, exitFn)
-      linesHoverGroup.selectAll('path')
-        .data(multiYear.filter(([partyId, values]) => values.some(d => d.hovered)), d => d[0])
-        .join(enterFnLineHover, updateFnLine, exitFn)
+      // Merge lines and circles into a single array - they are marked with their type
+      const allElements = [...multiYear, ...singleYear] // Lines first, then circles
 
-      // Draw points for single-year parties
-      pointsGroup.selectAll('circle')
-        .data(singleYear, d => d.party_id)
-        .join(d => enterFnPoint(d, parties), updateFnPoint, exitFn)
+      // Sort by state for proper rendering order
+      allElements.sort((a, b) => {
+        // Check if a and b are hovered or brushed, regardless of their type
+        const isHoveredA = a.type === 'line' ? a.values.some(d => d.hovered) : a.data.hovered
+        const isHoveredB = b.type === 'line' ? b.values.some(d => d.hovered) : b.data.hovered
+        const isBrushedA = a.type === 'line' ? a.values.some(d => d.brushed) : a.data.brushed
+        const isBrushedB = b.type === 'line' ? b.values.some(d => d.brushed) : b.data.brushed
+
+        // First priority: hovered state (hovered on top)
+        if (isHoveredA !== isHoveredB) {
+          return isHoveredA ? 1 : -1 // 1 = move a after b, -1 = move a before b
+        }
+        // Second priority: brushed state (brushed above non-brushed)
+        if (isBrushedA !== isBrushedB) {
+          return isBrushedA ? 1 : -1
+        }
+        return 0 // If a and b have the same state, they remain in the same order (lines first, then circles)
+      })
+
+      // Single data join for both lines and circles
+      elementsGroup.selectAll('.line-or-circle-wrapper')
+        .data(allElements, d => d.type === 'line' ? `line-${d.partyId}` : `circle-${d.data.party_id}`)
+        .join(enterFn, updateFn, exitFn)
     }
     dataJoin()
 
-    // Join functions
-    function enterFnLine (sel) {
-      return sel.append('path')
-        .attr('class', 'line')
-        .attr('d', ([partyId, values]) => line(values))
-        .on('mouseenter', (event, [partyId, values]) => {
-          // Hover all instances of this party
-          onMouseEnter(values)
-          // Show tooltip for the current year instance (or first available) - TEMPORARY
-          const party = values.find(d => d.year === currentYear) || values[0]
-          showTooltip(event, party)
-        })
-        .on('mousemove', (event) => moveTooltip(event))
-        .on('mouseleave', (event, [partyId, values]) => {
-          onMouseLeave()
-          hideTooltip()
-        })
-    }
-    function enterFnLineBrush (sel) {
-      return sel.append('path')
-        .attr('class', 'line-brushed')
-        .attr('d', ([partyId, values]) => line(values))
-        .on('mouseenter', (event, [partyId, values]) => {
-          onMouseEnter(values)
-          const party = values.find(d => d.year === currentYear) || values[0]
-          showTooltip(event, party)
-        })
-        .on('mousemove', (event) => moveTooltip(event))
-        .on('mouseleave', (event, [partyId, values]) => {
-          onMouseLeave()
-          hideTooltip()
-        })
-    }
-    function enterFnLineHover (sel) {
-      return sel.append('path')
-        .attr('class', 'line-hovered')
-        .attr('d', ([partyId, values]) => line(values))
-    }
-    function updateFnLine (sel) {
-      return sel.call(update => update
-        .classed('line-deselected', ([partyId, values]) => brushActive && !values.some(d => d.brushed))
-        .transition()
-        .duration(doTransition ? TR_TIME : 0)
-        .attr('d', ([partyId, values]) => line(values))
-      )
+    // Unified join functions for both lines and circles
+    function enterFn (sel) {
+      const groups = sel.append('g')
+        .attr('class', 'line-or-circle-wrapper')
+
+      groups.each(function (d) {
+        const wrapper = d3.select(this)
+
+        if (d.type === 'line') {
+          // Render as line
+          wrapper.append('path')
+            .attr('class', () => {
+              if (d.values.some(v => v.hovered)) return 'line-hovered'
+              if (d.values.some(v => v.brushed)) return 'line-brushed'
+              if (brushActive) return 'line-deselected'
+              return 'line'
+            })
+            .attr('d', line(d.values))
+            .on('mouseenter', (event) => {
+              onMouseEnter(d.values)
+              const party = d.values.find(v => v.year === currentYear) || d.values[0]
+              showTooltip(event, party)
+            })
+            .on('mousemove', (event) => moveTooltip(event))
+            .on('mouseleave', () => {
+              onMouseLeave()
+              hideTooltip()
+            })
+        } else {
+          // Render as circle
+          wrapper.append('circle')
+            .attr('class', () => {
+              if (d.data.brushed) return 'circle-brushed'
+              if (brushActive) return 'circle-deselected'
+              return 'circle'
+            })
+            .attr('fill', () => {
+              if (brushActive && !d.data.brushed) return 'gray'
+              return 'steelblue'
+            })
+            .attr('cx', xScale(xAccessor(d.data)))
+            .attr('cy', yScale(yAccessor(d.data)))
+            .attr('r', 3)
+            .on('mouseenter', (event) => {
+              const allInstances = parties.get(d.data.party_id) || [d.data]
+              onMouseEnter(allInstances)
+              showTooltip(event, d.data)
+            })
+            .on('mousemove', (event) => moveTooltip(event))
+            .on('mouseleave', () => {
+              onMouseLeave()
+              hideTooltip()
+            })
+        }
+      })
+
+      return groups
     }
 
-    function enterFnPoint (sel, parties) {
-      return sel.append('circle')
-        .attr('class', 'circle')
-        .attr('fill', 'steelblue')
-        .style('stroke', d => d.brushed ? 'red' : null)
-        .style('stroke-width', '1.5px')
-        .attr('cx', d => xScale(xAccessor(d)))
-        .attr('cy', d => yScale(yAccessor(d)))
-        .attr('r', 3)
-        .on('mouseenter', (event, d) => {
-          // Hover all instances of this party (even though only one has data for this attribute)
-          const allInstances = parties.get(d.party_id) || [d]
-          onMouseEnter(allInstances)
-          showTooltip(event, d)
-        })
-        .on('mousemove', (event) => moveTooltip(event))
-        .on('mouseleave', (event, d) => {
-          onMouseLeave()
-          hideTooltip()
-        })
-    }
-    function updateFnPoint (sel) {
-      sel.attr('fill', d => d.hovered ? 'white' : (brushActive && !d.brushed ? 'gray' : 'steelblue'))
-        .style('opacity', d => d.brushed ? 0.9 : (brushActive && !d.brushed ? 0.3 : null))
-        .style('stroke', d => d.brushed ? 'red' : null)
-      return sel.call(update => update
-        .transition()
-        .duration(doTransition ? TR_TIME : 0)
-        .attr('cx', d => xScale(xAccessor(d)))
-        .attr('cy', d => yScale(yAccessor(d)))
-      )
+    function updateFn (sel) {
+      sel.each(function (d) {
+        const wrapper = d3.select(this)
+
+        if (d.type === 'line') {
+          wrapper.select('path')
+            .attr('class', () => {
+              if (d.values.some(v => v.hovered)) return 'line-hovered'
+              if (d.values.some(v => v.brushed)) return 'line-brushed'
+              if (brushActive) return 'line-deselected'
+              return 'line'
+            })
+            .transition()
+            .duration(doTransition ? TR_TIME : 0)
+            .attr('d', line(d.values))
+        } else {
+          wrapper.select('circle')
+            .attr('class', () => {
+              if (d.data.brushed) return 'circle-brushed'
+              if (brushActive) return 'circle-deselected'
+              return 'circle'
+            })
+            .attr('fill', () => {
+              if (d.data.hovered) return 'white'
+              if (brushActive && !d.data.brushed) return 'gray'
+              return 'steelblue'
+            })
+            .style('opacity', d.data.hovered ? 1 : null)
+            .transition()
+            .duration(doTransition ? TR_TIME : 0)
+            .attr('cx', xScale(xAccessor(d.data)))
+            .attr('cy', yScale(yAccessor(d.data)))
+        }
+      })
+
+      return sel
     }
 
     function exitFn (sel) {
