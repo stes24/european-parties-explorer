@@ -171,6 +171,24 @@ export default function () {
         .on('mousemove', (event) => moveTooltip(event))
         .on('mouseleave', () => hideTooltip())
     }
+    // Helper function to set up brush for an axis, needed because there are different axes in each year
+    function setupBrush (axis, attr) {
+      // Remove old brush if it exists
+      axis.selectAll('.brush').remove()
+
+      // Create new brush
+      axis.call(d3.brushY()
+        .filter(event => event.target.tagName !== 'text') // Avoids the very bad bug
+        .extent([[dimensions.brush.left, yScales[attr].range()[1] + dimensions.brush.top],
+          [dimensions.brush.right, yScales[attr].range()[0] + dimensions.brush.bottom]])
+        .on('brush', (event) => {
+          updateBrush(attr, event.selection)
+        })
+        .on('end', (event) => {
+          if (!event.selection) clearBrush(attr)
+        })
+      )
+    }
     function updateBrush (attr, sel) {
       // Retrieve single brush on axis
       const [y0, y1] = sel
@@ -226,17 +244,7 @@ export default function () {
           }
 
           // Brush
-          axis.call(d3.brushY()
-            .filter(event => event.target.tagName !== 'text') // Avoids the very bad bug
-            .extent([[dimensions.brush.left, yScales[attr].range()[1] + dimensions.brush.top],
-              [dimensions.brush.right, yScales[attr].range()[0] + dimensions.brush.bottom]])
-            .on('brush', (event) => {
-              updateBrush(attr, event.selection)
-            })
-            .on('end', (event) => {
-              if (!event.selection) clearBrush(attr)
-            })
-          )
+          setupBrush(axis, attr)
         })
     }
     function updateFnAxes (sel) {
@@ -253,6 +261,9 @@ export default function () {
           axis.select('.legend')
             .text(attributes[attr].name)
             .call(legendHover)
+
+          // Update brush with new scales
+          setupBrush(axis, attr)
         })
       )
     }

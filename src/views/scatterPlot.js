@@ -129,7 +129,7 @@ export default function () {
         .attr('cy', d => yScale(yAccessor(d)))
         .attr('r', d => radius(rAccessor(d)))
         .attr('fill', d => d.hovered ? 'white' : colorAccessor(d))
-        .style('opacity', d => d.hovered ? 1 : null)
+        .style('opacity', d => d.hovered ? 0.95 : null)
         .style('pointer-events', interactionMode === 'hover' ? 'all' : 'none')
 
       // Add hover listeners only in hover mode
@@ -155,7 +155,7 @@ export default function () {
         return 'circle'
       })
         .attr('fill', d => d.hovered ? 'white' : colorAccessor(d))
-        .style('opacity', d => d.hovered ? 1 : null)
+        .style('opacity', d => d.hovered ? 0.95 : null)
         .style('pointer-events', interactionMode === 'hover' ? 'all' : 'none')
       return sel.call(update => update
         .transition()
