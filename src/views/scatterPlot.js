@@ -93,10 +93,24 @@ export default function () {
     const brushBehavior = d3.brush()
       .extent([[xScale.range()[0], yScale.range()[1]], [xScale.range()[1], yScale.range()[0]]])
 
+    let brushActive = false
+
     // Draw points
     function dataJoin () {
+      // Check if any data is brushed
+      brushActive = data.some(d => d.brushed)
+
       pointsGroup.selectAll('circle')
-        .data(data.sort((a, b) => { // Bigger circles on the background
+        .data(data.sort((a, b) => {
+          // First priority: hovered state (hovered on top)
+          if (a.hovered !== b.hovered) {
+            return a.hovered ? 1 : -1 // 1 = move a after b, -1 = move a before b
+          }
+          // Second priority: brushed state (brushed above non-brushed)
+          if (a.brushed !== b.brushed) {
+            return a.brushed ? 1 : -1
+          }
+          // Third priority: within each group, bigger circles on the background
           return d3.descending(rAccessor(a), rAccessor(b))
         }), d => d.party_id)
         .join(enterFn, updateFn, exitFn)
@@ -106,11 +120,14 @@ export default function () {
     // Join functions
     function enterFn (sel) {
       const circles = sel.append('circle')
-        .attr('class', 'circle')
+        .attr('class', d => {
+          if (d.brushed) return 'circle-brushed'
+          if (brushActive) return 'circle-deselected'
+          return 'circle'
+        })
         .attr('cx', d => xScale(xAccessor(d)))
         .attr('cy', d => yScale(yAccessor(d)))
         .attr('r', d => radius(rAccessor(d)))
-        .style('stroke', d => d.brushed ? 'red' : null)
         .attr('fill', d => colorAccessor(d))
         .style('pointer-events', interactionMode === 'hover' ? 'all' : 'none')
 
@@ -131,7 +148,11 @@ export default function () {
       return circles
     }
     function updateFn (sel) {
-      sel.style('stroke', d => d.brushed ? 'red' : null)
+      sel.attr('class', d => {
+        if (d.brushed) return 'circle-brushed'
+        if (brushActive) return 'circle-deselected'
+        return 'circle'
+      })
         .attr('fill', d => d.hovered ? 'white' : colorAccessor(d))
         .style('opacity', d => d.hovered ? 1 : null)
         .style('pointer-events', interactionMode === 'hover' ? 'all' : 'none')

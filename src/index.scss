@@ -79,6 +79,18 @@ body {
   opacity: 0.85;
 }
 
+.circle-deselected {
+  stroke-width: 2px;
+  stroke: black;
+  opacity: 0.45;
+}
+
+.circle-brushed {
+  stroke-width: 2.5px;
+  stroke: red;
+  opacity: 0.95;
+}
+
 // Plot lines
 .line {
   fill: none;
