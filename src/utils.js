@@ -142,30 +142,6 @@ export const attributes = { // Reordered so that similar topics are close
     minYear: 1999,
     description: ''
   },
-  spendvtax: {
-    name: 'Public spending',
-    goesOnLineChart: true,
-    goesOnParallelCoordinates: true,
-    goesOnRadviz: true,
-    minYear: 2006,
-    description: 'Improving public services vs. reducing taxes<br>10 = strongly favors improving public services<br>0 = strongly favors reducing taxes'
-  },
-  redistribution: {
-    name: 'Wealth redistribution',
-    goesOnLineChart: true,
-    goesOnParallelCoordinates: true,
-    goesOnRadviz: true,
-    minYear: 2006,
-    description: 'Redistribution of wealth from the rich to the poor<br>10 = strongly favors redistribution<br>0 = strongly opposes redistribution'
-  },
-  deregulation: {
-    name: 'Market deregulation',
-    goesOnLineChart: true,
-    goesOnParallelCoordinates: true,
-    goesOnRadviz: true,
-    minYear: 2006,
-    description: 'Deregulations of markets<br>10 = strongly favors deregulation<br>0 = strongly opposes deregulation'
-  },
   eu_position: {
     name: 'European Union',
     goesOnLineChart: true,
@@ -190,6 +166,14 @@ export const attributes = { // Reordered so that similar topics are close
     minYear: 1999,
     description: 'EU foreign and security policy<br>10 = strongly in favor<br>0 = strongly opposed'
   },
+  nationalism: {
+    name: 'Nationalism',
+    goesOnLineChart: true,
+    goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
+    minYear: 2014,
+    description: 'Nationalism vs. cosmopolitanism<br>10 = Strongly favors a nationalist society<br>0 = Strongly favors a cosmopolitan society'
+  },
   immigrate_policy: {
     name: 'Immigration restriction',
     goesOnLineChart: true,
@@ -197,6 +181,62 @@ export const attributes = { // Reordered so that similar topics are close
     goesOnRadviz: true,
     minYear: 2006,
     description: 'Immigration policies<br>10 = strongly favors restrictive policies<br>0 = strongly favors liberal policies'
+  },
+  civlib_laworder: {
+    name: 'Law & order',
+    goesOnLineChart: true,
+    goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
+    minYear: 2006,
+    description: 'Law & order vs. civil liberties<br>10 = strongly favors tough measures to fight crime<br>0 = strongly favors civil liberties'
+  },
+  religious_principles: {
+    name: 'Religion in politics',
+    goesOnLineChart: true,
+    goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
+    minYear: 2006,
+    description: 'Role of religious principles in politics<br>10 = strongly favors religion in politics<br>0 = strongly opposes religion in politics'
+  },
+  deregulation: {
+    name: 'Market deregulation',
+    goesOnLineChart: true,
+    goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
+    minYear: 2006,
+    description: 'Deregulations of markets<br>10 = strongly favors deregulation<br>0 = strongly opposes deregulation'
+  },
+  spendvtax: {
+    name: 'Public spending',
+    goesOnLineChart: true,
+    goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
+    minYear: 2006,
+    description: 'Improving public services vs. reducing taxes<br>10 = strongly favors improving public services<br>0 = strongly favors reducing taxes'
+  },
+  redistribution: {
+    name: 'Wealth redistribution',
+    goesOnLineChart: true,
+    goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
+    minYear: 2006,
+    description: 'Redistribution of wealth from the rich to the poor<br>10 = strongly favors redistribution<br>0 = strongly opposes redistribution'
+  },
+  environment: {
+    name: 'Environment protection',
+    goesOnLineChart: true,
+    goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
+    minYear: 2010,
+    description: 'Environmental sustainability<br>10 = strongly favors environment protection at the cost of economic growth<br>0 = strongly favors economic growth at the cost of environment protection'
+  },
+  sociallifestyle: {
+    name: 'Social lifestyle',
+    goesOnLineChart: true,
+    goesOnParallelCoordinates: true,
+    goesOnRadviz: true,
+    minYear: 2006,
+    description: 'LGBT rights, gender equality, etc.<br>10 = strongly favors liberal policies<br>0 = strongly opposes liberal policies'
   },
   multiculturalism: {
     name: 'Multiculturalism',
@@ -213,46 +253,6 @@ export const attributes = { // Reordered so that similar topics are close
     goesOnRadviz: true,
     minYear: 2006,
     description: 'Rights for ethnic minorities<br>10 = strongly favors more rights<br>0 = strongly opposes more rights'
-  },
-  nationalism: {
-    name: 'Nationalism',
-    goesOnLineChart: true,
-    goesOnParallelCoordinates: true,
-    goesOnRadviz: true,
-    minYear: 2014,
-    description: 'Nationalism vs. cosmopolitanism<br>10 = Strongly favors a nationalist society<br>0 = Strongly favors a cosmopolitan society'
-  },
-  civlib_laworder: {
-    name: 'Law & order',
-    goesOnLineChart: true,
-    goesOnParallelCoordinates: true,
-    goesOnRadviz: true,
-    minYear: 2006,
-    description: 'Law & order vs. civil liberties<br>10 = strongly favors tough measures to fight crime<br>0 = strongly favors civil liberties'
-  },
-  sociallifestyle: {
-    name: 'Social lifestyle',
-    goesOnLineChart: true,
-    goesOnParallelCoordinates: true,
-    goesOnRadviz: true,
-    minYear: 2006,
-    description: 'LGBT rights, gender equality, etc.<br>10 = strongly favors liberal policies<br>0 = strongly opposes liberal policies'
-  },
-  religious_principles: {
-    name: 'Religion in politics',
-    goesOnLineChart: true,
-    goesOnParallelCoordinates: true,
-    goesOnRadviz: true,
-    minYear: 2006,
-    description: 'Role of religious principles in politics<br>10 = strongly favors religion in politics<br>0 = strongly opposes religion in politics'
-  },
-  environment: {
-    name: 'Environment protection',
-    goesOnLineChart: true,
-    goesOnParallelCoordinates: true,
-    goesOnRadviz: true,
-    minYear: 2010,
-    description: 'Environmental sustainability<br>10 = strongly favors environment protection at the cost of economic growth<br>0 = strongly favors economic growth at the cost of environment protection'
   },
   regions: {
     name: 'Regionalism',
