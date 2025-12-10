@@ -103,14 +103,14 @@ body {
   fill: none;
   stroke-width: 3.5px;
   stroke: gray;
-  opacity: 0.35
+  opacity: 0.15
 }
 
 .line-brushed {
   fill: none;
   stroke-width: 3.5px;
   stroke: red;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .line-hovered {
@@ -118,7 +118,6 @@ body {
   stroke-width: 3.5px;
   stroke: #CCCCCC;
   opacity: 1;
-  pointer-events: none;
 }
 
 // Box plot elements

@@ -128,7 +128,8 @@ export default function () {
         .attr('cx', d => xScale(xAccessor(d)))
         .attr('cy', d => yScale(yAccessor(d)))
         .attr('r', d => radius(rAccessor(d)))
-        .attr('fill', d => colorAccessor(d))
+        .attr('fill', d => d.hovered ? 'white' : colorAccessor(d))
+        .style('opacity', d => d.hovered ? 1 : null)
         .style('pointer-events', interactionMode === 'hover' ? 'all' : 'none')
 
       // Add hover listeners only in hover mode

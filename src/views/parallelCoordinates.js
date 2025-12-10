@@ -95,8 +95,6 @@ export default function () {
       .y(([attr, val]) => yScales[attr](val)) // Find right scale with attribute, then pass the value to it
 
     const linesGroup = wrapper.append('g')
-    const brushGroup = wrapper.append('g')
-    const hoverGroup = wrapper.append('g')
     const axesGroup = wrapper.append('g')
     const boxPlotsGroup = wrapper.append('g')
 
@@ -106,23 +104,33 @@ export default function () {
     // Draw lines
     function dataJoin () {
       brushActive = data.some(d => d.brushed)
+
       linesGroup.selectAll('path')
-        .data(data, d => d.party_id)
+        .data(data.sort((a, b) => {
+          // First priority: hovered state (hovered on top)
+          if (a.hovered !== b.hovered) {
+            return a.hovered ? 1 : -1
+          }
+          // Second priority: brushed state (brushed above non-brushed)
+          if (a.brushed !== b.brushed) {
+            return a.brushed ? 1 : -1
+          }
+          // No third priority needed for lines (they don't have size)
+          return 0
+        }), d => d.party_id)
         .join(enterFn, updateFn, exitFn)
-      brushGroup.selectAll('path')
-        .data(data.filter(d => d.brushed), d => d.party_id)
-        .join(enterFnBrush, updateFn, exitFn)
-      hoverGroup.selectAll('path') // Draw on top of the normal lines
-        .data(data.filter(d => d.hovered), d => d.party_id)
-        .join(enterFnHover, updateFn, exitFn)
     }
     dataJoin()
 
     // Join functions
     function enterFn (sel) {
       return sel.append('path')
-        .attr('class', brushActive ? 'line-deselected' : 'line')
-        // For each datum, create [attr, value] and give it to the line (it will connect the values of the many attributes)
+        .attr('class', d => {
+          if (d.hovered) return 'line-hovered'
+          if (d.brushed) return 'line-brushed'
+          if (brushActive) return 'line-deselected'
+          return 'line'
+        })
         .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
         .on('mouseenter', (event, d) => {
           onMouseEnter(d)
@@ -133,29 +141,15 @@ export default function () {
           onMouseLeave(d)
           hideTooltip()
         })
-    }
-    function enterFnBrush (sel) {
-      return sel.append('path')
-        .attr('class', 'line-brushed')
-        .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
-        .on('mouseenter', (event, d) => {
-          onMouseEnter(d)
-          showTooltip(event, d)
-        })
-        .on('mousemove', (event) => moveTooltip(event))
-        .on('mouseleave', (event, d) => {
-          onMouseLeave(d)
-          hideTooltip()
-        })
-    }
-    function enterFnHover (sel) {
-      return sel.append('path')
-        .attr('class', 'line-hovered')
-        .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
     }
     function updateFn (sel) {
       return sel.call(update => update
-        .classed('line-deselected', d => brushActive && !d.brushed)
+        .attr('class', d => {
+          if (d.hovered) return 'line-hovered'
+          if (d.brushed) return 'line-brushed'
+          if (brushActive) return 'line-deselected'
+          return 'line'
+        })
         .transition()
         .duration(doTransition ? TR_TIME : 0)
         .attr('d', d => line(attributeIds.map(attr => [attr, yAccessors[attr](d)])))
