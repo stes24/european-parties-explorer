@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import { attributes, hideTooltip, moveTooltip, showTooltip, TR_TIME, years } from '@/utils'
+import { attributes, hideTooltip, moveTooltip, showLineChartTooltip, TR_TIME, years } from '@/utils'
 
 // Configurable function - it returns a new function (which, when called, draws the view)
 export default function () {
@@ -180,8 +180,7 @@ export default function () {
             .attr('d', line(d.values))
             .on('mouseenter', (event) => {
               onMouseEnter(d.values)
-              const party = d.values.find(v => v.year === currentYear) || d.values[0]
-              showTooltip(event, party)
+              showLineChartTooltip(event, d.values)
             })
             .on('mousemove', (event) => moveTooltip(event))
             .on('mouseleave', () => {
@@ -206,7 +205,7 @@ export default function () {
             .on('mouseenter', (event) => {
               const allInstances = parties.get(d.data.party_id) || [d.data]
               onMouseEnter(allInstances)
-              showTooltip(event, d.data)
+              showLineChartTooltip(event, allInstances)
             })
             .on('mousemove', (event) => moveTooltip(event))
             .on('mouseleave', () => {

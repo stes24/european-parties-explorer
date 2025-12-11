@@ -318,6 +318,26 @@ export function showTooltip (event, d) {
   moveTooltip(event) // Correctly place tooltip
 }
 
+export function showLineChartTooltip (event, partyInstances) {
+  const tooltip = d3.select('#tooltip').style('visibility', 'visible')
+
+  // Sort instances by year descending (most recent first)
+  const sortedInstances = [...partyInstances].sort((a, b) => b.year - a.year)
+
+  // Build HTML for all years
+  let html = ''
+  sortedInstances.forEach((instance, index) => {
+    if (index > 0) html += '<br>' // Add spacing between years
+    html += `${instance.year}: <b>${instance.party}</b> - ${factions[instance.family].name} - Votes: ${instance.vote}%`
+  })
+
+  // Add country at the end (same for all instances)
+  html += `<br>${countries[sortedInstances[0].country]}`
+
+  tooltip.html(html)
+  moveTooltip(event) // Correctly place tooltip
+}
+
 export function moveTooltip (event) {
   const tooltip = d3.select('#tooltip')
 
