@@ -5,12 +5,14 @@ export default function () {
   let data = []
   let updateData
   let currentAttribute // Which attribute this box plot is referring to
+  let brushedOnly = false // If true, only show brushed data
+  let skipTransition = false // If true, skip transitions (used during active brushing)
 
   const dimensions = {
     width: null,
     height: null,
     margin: { top: 10, bottom: 10 },
-    axisMargin: 5 // Space between axis and box plot
+    axisMargin: 3 // Space between axis and box plot
   }
   let updateSize
 
@@ -19,6 +21,9 @@ export default function () {
   let onMouseLeave = _ => {}
 
   const TR_TIME = 1500
+
+  // Helper to get transition duration
+  const getTransitionDuration = () => (brushedOnly && skipTransition) ? 0 : TR_TIME
 
   // It draws and can be configured (it is returned again when something changes)
   function boxPlot (wrapper) {
@@ -40,7 +45,19 @@ export default function () {
 
     // Draw box plot elements
     function dataJoin () {
-      const sortedData = data
+      // Filter data if showing brushed only
+      const filteredData = brushedOnly ? data.filter(d => d.brushed) : data
+
+      // If no data to show, hide all elements
+      if (filteredData.length === 0) {
+        verticalLineGroup.selectAll('line').remove()
+        boxGroup.selectAll('rect').remove()
+        horizontalLinesGroup.selectAll('line').remove()
+        hoverRegionsGroup.selectAll('rect.hover-region').remove()
+        return
+      }
+
+      const sortedData = filteredData
         .map(d => d[currentAttribute])
         .sort(d3.ascending)
 
@@ -52,11 +69,17 @@ export default function () {
         max: d3.max(sortedData)
       }
       const mid = dimensions.width / 2
+      const boxClass = brushedOnly ? 'box-brushed' : 'box'
 
-      // Axis
-      const axis = d3.axisLeft(yScale)
-        .ticks(3)
-      axisGroup.call(axis)
+      // Axis (only show for non-brushed box plot)
+      if (!brushedOnly) {
+        const axis = d3.axisLeft(yScale)
+          .ticks(3)
+          .tickFormat(() => '') // Remove tick labels
+        axisGroup.call(axis)
+      } else {
+        axisGroup.selectAll('*').remove() // Hide axis for brushed box plot
+      }
 
       // Vertical line
       verticalLineGroup.selectAll('line')
@@ -73,7 +96,7 @@ export default function () {
           update => {
             return update
               .transition()
-              .duration(TR_TIME)
+              .duration(getTransitionDuration())
               .attr('y1', d => yScale(d.min))
               .attr('y2', d => yScale(d.max))
           }
@@ -85,7 +108,7 @@ export default function () {
         .join(
           enter => {
             return enter.append('rect')
-              .attr('class', 'box')
+              .attr('class', boxClass)
               .attr('x', 0)
               .attr('y', yScale(stats.q3))
               .attr('width', dimensions.width)
@@ -93,8 +116,9 @@ export default function () {
           },
           update => {
             return update
+              .attr('class', boxClass)
               .transition()
-              .duration(TR_TIME)
+              .duration(getTransitionDuration())
               .attr('y', yScale(stats.q3))
               .attr('height', yScale(stats.q1) - yScale(stats.q3))
           }
@@ -115,7 +139,7 @@ export default function () {
           update => {
             return update
               .transition()
-              .duration(TR_TIME)
+              .duration(getTransitionDuration())
               .attr('y1', d => yScale(d))
               .attr('y2', d => yScale(d))
           }
@@ -144,7 +168,8 @@ export default function () {
               .style('fill', 'transparent')
               .on('mouseenter', (event, d) => {
                 // Find all parties whose attribute value falls in this range
-                hoveredParties = data.filter(party => {
+                // Use filteredData so we only hover parties shown in this box plot
+                hoveredParties = filteredData.filter(party => {
                   const value = party[currentAttribute]
                   return d.range[0] <= value && value <= d.range[1]
                 })
@@ -160,6 +185,14 @@ export default function () {
             return update
               .attr('y', d => yScale(d.range[1]))
               .attr('height', d => yScale(d.range[0]) - yScale(d.range[1]))
+              .on('mouseenter', (event, d) => {
+                // Update hover handler to use current filteredData
+                hoveredParties = filteredData.filter(party => {
+                  const value = party[currentAttribute]
+                  return d.range[0] <= value && value <= d.range[1]
+                })
+                onMouseEnter(hoveredParties)
+              })
           }
         )
     }
@@ -205,6 +238,18 @@ export default function () {
   boxPlot.bindMouseLeave = function (callback) {
     onMouseLeave = callback
     return this
+  }
+
+  boxPlot.brushedOnly = function (_) {
+    if (!arguments.length) return brushedOnly
+    brushedOnly = _
+    return boxPlot
+  }
+
+  boxPlot.skipTransition = function (_) {
+    if (!arguments.length) return skipTransition
+    skipTransition = _
+    return boxPlot
   }
 
   return boxPlot

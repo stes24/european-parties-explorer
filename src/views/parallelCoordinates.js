@@ -17,7 +17,7 @@ export default function () {
   const dimensions = {
     width: null,
     height: null,
-    margin: { top: 50, right: 75, bottom: 70, left: 125 },
+    margin: { top: 50, right: 75, bottom: 80, left: 125 },
     legend: { x: 10, y: 18 },
     brush: { top: -1, right: 10, bottom: 1, left: -10 }
   }
@@ -40,6 +40,7 @@ export default function () {
   const brushes = {} // Stores party IDs for each brushed axis
   const brushExtents = {} // Stores brush selection extents [y0, y1] for each axis
   let brushActive = false
+  let isBrushingNow = false // Flag to track if we're currently in a brush operation
 
   // It draws and can be configured (it is returned again when something changes)
   function parallelCoordinates (containerDiv) {
@@ -100,8 +101,9 @@ export default function () {
     const axesGroup = wrapper.append('g')
     const boxPlotsGroup = wrapper.append('g')
 
-    // Store box plots
+    // Store box plots (two per attribute: all data and brushed data)
     const boxPlotInstances = {}
+    const boxPlotBrushedInstances = {}
 
     // Draw lines
     function dataJoin () {
@@ -203,13 +205,21 @@ export default function () {
           return y0 <= y && y <= y1
         }).map(d => d.party_id)
       )
+      // Set flag to indicate we're in a brush operation
+      isBrushingNow = true
       // Intersect all brushes
       onBrush(intersect(Object.values(brushes)), 'parallelCoordinates')
+      // Reset flag after a short delay to allow updates to complete
+      setTimeout(() => { isBrushingNow = false }, 0)
     }
     function clearBrush (attr) {
       brushes[attr] = null
       delete brushExtents[attr]
+      // Set flag to indicate we're in a brush operation
+      isBrushingNow = true
       onBrush(intersect(Object.values(brushes)), 'parallelCoordinates')
+      // Reset flag after a short delay to allow updates to complete
+      setTimeout(() => { isBrushingNow = false }, 0)
     }
     function intersect (sets) {
       const active = sets.filter(s => s !== null) // Non null brushes (active brushes)
@@ -278,22 +288,23 @@ export default function () {
     }
 
     function drawBoxPlots () {
-      const boxPlotWidth = 15
+      const boxPlotWidth = 20
+      const boxPlotSpacing = 1.5 // Space between the two box plots
       const boxPlotHeight = dimensions.margin.bottom
 
       // Exclude categorical attributes
       const numericAttributes = attributeIds.filter(attr => attr !== 'country' && attr !== 'family' && attr !== 'region')
 
-      // Manage box plot containers
+      // Manage ALL DATA box plot containers (left side)
       boxPlotsGroup.selectAll('g.boxPlot')
         .data(numericAttributes, d => d)
         .join(
           enter => { // Place box plot containers and set parameters for each box plot
             return enter.append('g')
               .attr('class', 'boxPlot')
-              .attr('transform', attr => `translate(${xScale(attr) - boxPlotWidth / 2}, ${dimensions.height - dimensions.margin.bottom})`)
+              .attr('transform', attr => `translate(${xScale(attr) - boxPlotWidth - boxPlotSpacing}, ${dimensions.height - dimensions.margin.bottom})`)
               .each(function (attr) {
-                // Create new box plot for this attribute
+                // Create new box plot for this attribute (all data)
                 const bp = boxPlot()
                 boxPlotInstances[attr] = bp
                 // Bind hover callbacks (box plots hover many parties at once)
@@ -303,6 +314,7 @@ export default function () {
                 bp.size(boxPlotWidth, boxPlotHeight)
                   .data(data)
                   .attribute(attr)
+                  .brushedOnly(false)
                 d3.select(this).call(bp)
               })
           },
@@ -310,7 +322,7 @@ export default function () {
             return update
               .transition()
               .duration(doTransition ? TR_TIME : 0)
-              .attr('transform', attr => `translate(${xScale(attr) - boxPlotWidth / 2}, ${dimensions.height - dimensions.margin.bottom})`)
+              .attr('transform', attr => `translate(${xScale(attr) - boxPlotWidth - boxPlotSpacing}, ${dimensions.height - dimensions.margin.bottom})`)
               .each(function (attr) {
                 // Update the existing box plot instance
                 const bp = boxPlotInstances[attr]
@@ -324,6 +336,53 @@ export default function () {
           exit => {
             return exit.each(function (attr) {
               delete boxPlotInstances[attr]
+            }).remove()
+          }
+        )
+
+      // Manage BRUSHED DATA box plot containers (right side) - only shown when brushing
+      boxPlotsGroup.selectAll('g.boxPlotBrushed')
+        .data(brushActive ? numericAttributes : [], d => d)
+        .join(
+          enter => { // Place brushed box plot containers
+            return enter.append('g')
+              .attr('class', 'boxPlotBrushed')
+              .attr('transform', attr => `translate(${xScale(attr) + boxPlotSpacing}, ${dimensions.height - dimensions.margin.bottom})`)
+              .each(function (attr) {
+                // Create new box plot for brushed data
+                const bp = boxPlot()
+                boxPlotBrushedInstances[attr] = bp
+                // Bind hover callbacks
+                bp.bindMouseEnter(onBoxPlotMouseEnter)
+                  .bindMouseLeave(onBoxPlotMouseLeave)
+                // Set parameters and call drawing function
+                bp.size(boxPlotWidth, boxPlotHeight)
+                  .data(data)
+                  .attribute(attr)
+                  .brushedOnly(true)
+                  .skipTransition(isBrushingNow) // Skip transition if entering during brushing
+                d3.select(this).call(bp)
+              })
+          },
+          update => {
+            return update
+              .transition()
+              .duration(doTransition ? TR_TIME : 0)
+              .attr('transform', attr => `translate(${xScale(attr) + boxPlotSpacing}, ${dimensions.height - dimensions.margin.bottom})`)
+              .each(function (attr) {
+                // Update the existing brushed box plot instance
+                const bp = boxPlotBrushedInstances[attr]
+                if (bp) {
+                  bp.size(boxPlotWidth, boxPlotHeight)
+                    .data(data)
+                    .attribute(attr)
+                    .skipTransition(isBrushingNow) // Skip transition during active brushing
+                }
+              })
+          },
+          exit => {
+            return exit.each(function (attr) {
+              delete boxPlotBrushedInstances[attr]
             }).remove()
           }
         )
