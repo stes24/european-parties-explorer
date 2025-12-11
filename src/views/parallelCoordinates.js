@@ -25,6 +25,7 @@ export default function () {
 
   // Do animation or not
   let doTransition = false
+  let isUpdating = false // Prevent recursive updates
 
   // Hovering
   let onMouseEnter = _ => {}
@@ -36,7 +37,8 @@ export default function () {
 
   // Brushing
   let onBrush = _ => {}
-  const brushes = {}
+  const brushes = {} // Stores party IDs for each brushed axis
+  const brushExtents = {} // Stores brush selection extents [y0, y1] for each axis
   let brushActive = false
 
   // It draws and can be configured (it is returned again when something changes)
@@ -192,6 +194,9 @@ export default function () {
     function updateBrush (attr, sel) {
       // Retrieve single brush on axis
       const [y0, y1] = sel
+      // Store the brush extent for later recalculation
+      brushExtents[attr] = [y0, y1]
+      // Calculate which parties fall within this brush
       brushes[attr] = new Set(
         data.filter(d => {
           const y = yScales[attr](yAccessors[attr](d))
@@ -203,6 +208,7 @@ export default function () {
     }
     function clearBrush (attr) {
       brushes[attr] = null
+      delete brushExtents[attr]
       onBrush(intersect(Object.values(brushes)), 'parallelCoordinates')
     }
     function intersect (sets) {
@@ -325,22 +331,42 @@ export default function () {
 
     // Update functions
     updateData = function () {
-      // Recompute which axes are needed for the selected year
-      computeAttributes()
+      if (isUpdating) return // Prevent recursive updates
+      isUpdating = true
 
-      // Clear brushes for axes that are no longer present in the newly selected year
-      Object.keys(brushes).forEach(attr => {
-        if (!attributeIds.includes(attr)) {
-          delete brushes[attr]
-          // Update the data model
-          onBrush(intersect(Object.values(brushes)), 'parallelCoordinates')
-        }
-      })
+      try {
+        // Recompute which axes are needed for the selected year
+        computeAttributes()
 
-      doTransition = false
-      axesJoin()
+        // Clear brushes for axes that are no longer present in the newly selected year
+        Object.keys(brushes).forEach(attr => {
+          if (!attributeIds.includes(attr)) {
+            delete brushes[attr]
+            delete brushExtents[attr]
+          }
+        })
 
-      dataJoin()
+        // Recalculate which parties in the NEW data fall within the existing brush extents
+        Object.keys(brushExtents).forEach(attr => {
+          const [y0, y1] = brushExtents[attr]
+          brushes[attr] = new Set(
+            data.filter(d => {
+              const y = yScales[attr](yAccessors[attr](d))
+              return y0 <= y && y <= y1
+            }).map(d => d.party_id)
+          )
+        })
+
+        // Update the data model with the recalculated brushes
+        onBrush(intersect(Object.values(brushes)), 'parallelCoordinates')
+
+        doTransition = false
+        axesJoin()
+
+        dataJoin()
+      } finally {
+        isUpdating = false
+      }
     }
 
     updateSize = function () {
