@@ -24,6 +24,7 @@ export default function () {
 
   // Do animation or not
   let doTransition = false
+  let isUpdating = false // Prevent recursive updates
 
   // Interaction mode
   let interactionMode = 'hover'
@@ -34,6 +35,8 @@ export default function () {
 
   // Brushing
   let onBrush = _ => {}
+  let brushExtent = null // Store brush selection extent [[x0, y0], [x1, y1]]
+  let isBrushing = false // Flag to prevent restoration during active brushing
 
   // It draws and can be configured (it is returned again when something changes)
   function scatterPlot (containerDiv) {
@@ -196,6 +199,9 @@ export default function () {
     // Brush
     function updateBrush (sel) {
       const [[x0, y0], [x1, y1]] = sel
+      // Store the brush extent for later recalculation
+      brushExtent = [[x0, y0], [x1, y1]]
+      // Calculate which parties fall within this brush
       const brushedData = new Set(
         data.filter(d => {
           const x = xScale(xAccessor(d))
@@ -206,14 +212,19 @@ export default function () {
       onBrush(brushedData, 'scatterPlot')
     }
     function clearBrush (sel) {
+      brushExtent = null
       onBrush(null, 'scatterPlot')
     }
 
     brushBehavior
+      .on('start', () => {
+        isBrushing = true
+      })
       .on('brush', (event) => {
         updateBrush(event.selection)
       })
       .on('end', (event) => {
+        isBrushing = false
         if (!event.selection) clearBrush(event.selection)
       })
 
@@ -255,13 +266,44 @@ export default function () {
 
         // Enable brush
         drawArea.call(brushBehavior)
+
+        // Restore the visual brush if there's a stored extent
+        if (brushExtent) {
+          drawArea.call(brushBehavior.move, brushExtent)
+        }
       }
     }
 
     // Update functions
     updateData = function () {
-      doTransition = false
-      dataJoin()
+      if (isUpdating) return // Prevent recursive updates
+      isUpdating = true
+
+      try {
+        // Recalculate which parties in the NEW data fall within the existing brush extent
+        // But only if not actively brushing (to avoid interfering with user interaction)
+        if (brushExtent && !isBrushing) {
+          const [[x0, y0], [x1, y1]] = brushExtent
+          const brushedData = new Set(
+            data.filter(d => {
+              const x = xScale(xAccessor(d))
+              const y = yScale(yAccessor(d))
+              return x0 <= x && x <= x1 && y0 <= y && y <= y1
+            }).map(d => d.party_id)
+          )
+          onBrush(brushedData, 'scatterPlot')
+
+          // Restore the visual brush only if in brush mode
+          if (interactionMode === 'brush') {
+            drawArea.call(brushBehavior.move, brushExtent)
+          }
+        }
+
+        doTransition = false
+        dataJoin()
+      } finally {
+        isUpdating = false
+      }
     }
 
     updateSize = function () {
