@@ -37,6 +37,7 @@ export default function () {
   let onBrush = _ => {}
   let brushExtent = null // Store brush selection extent [[x0, y0], [x1, y1]]
   let isBrushing = false // Flag to prevent restoration during active brushing
+  let lastDataSignature = null // Track data changes to detect year changes vs hover updates
 
   // It draws and can be configured (it is returned again when something changes)
   function scatterPlot (containerDiv) {
@@ -295,9 +296,14 @@ export default function () {
       isUpdating = true
 
       try {
+        // Check if the data structure has changed (year change) vs just properties (hover)
+        const currentDataSignature = data.map(d => d.party_id).join(',') // Converts array to string separated by commas
+        const dataStructureChanged = currentDataSignature !== lastDataSignature
+        lastDataSignature = currentDataSignature
+
         // Recalculate which parties in the NEW data fall within the existing brush extent
-        // But only if not actively brushing (to avoid interfering with user interaction)
-        if (brushExtent && !isBrushing) {
+        // Only when data structure changes (year change) to avoid performance issues with hover
+        if (brushExtent && !isBrushing && dataStructureChanged) {
           const [[x0, y0], [x1, y1]] = brushExtent
           const brushedData = new Set(
             data.filter(d => {
