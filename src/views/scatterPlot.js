@@ -16,7 +16,7 @@ export default function () {
     width: null,
     height: null,
     margin: { top: 0, right: 12, bottom: 60, left: 47 },
-    offset: { x: 2.5, y: 2.5 },
+    offset: { x: 3.5, y: 2.5 },
     radius: { min: 4, max: 30 },
     legendY: 30
   }

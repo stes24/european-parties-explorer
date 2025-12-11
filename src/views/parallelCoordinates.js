@@ -288,7 +288,7 @@ export default function () {
     }
 
     function drawBoxPlots () {
-      const boxPlotWidth = 20
+      const boxPlotWidth = 18
       const boxPlotSpacing = 1.5 // Space between the two box plots
       const boxPlotHeight = dimensions.margin.bottom
 
