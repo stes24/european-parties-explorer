@@ -214,7 +214,7 @@ export default function () {
     // Draw axes and box plots
     function axesJoin () {
       axesGroup.selectAll('.axis')
-        .data(attributeIds)
+        .data(attributeIds, d => d) // Bind the data using the attribute id, not the position -> brushes don't move on year change
         .join(enterFnAxes, updateFnAxes, exitFnAxes)
       drawBoxPlots()
     }
@@ -327,6 +327,16 @@ export default function () {
     updateData = function () {
       // Recompute which axes are needed for the selected year
       computeAttributes()
+
+      // Clear brushes for axes that are no longer present in the newly selected year
+      Object.keys(brushes).forEach(attr => {
+        if (!attributeIds.includes(attr)) {
+          delete brushes[attr]
+          // Update the data model
+          onBrush(intersect(Object.values(brushes)), 'parallelCoordinates')
+        }
+      })
+
       doTransition = false
       axesJoin()
 
