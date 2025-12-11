@@ -133,7 +133,12 @@ export default function () {
         .attr('r', d => radius(rAccessor(d)))
         .attr('fill', d => d.hovered ? 'white' : colorAccessor(d))
         .style('opacity', d => d.hovered ? 0.95 : null)
-        .style('pointer-events', interactionMode === 'hover' ? 'all' : 'none')
+        .style('pointer-events', d => {
+          if (interactionMode === 'brush') return 'none'
+          // In hover mode, let CSS handle pointer-events for deselected circles
+          if (brushActive && !d.brushed) return null
+          return 'all'
+        })
 
       // Add hover listeners only in hover mode
       if (interactionMode === 'hover') {
@@ -159,7 +164,12 @@ export default function () {
       })
         .attr('fill', d => d.hovered ? 'white' : colorAccessor(d))
         .style('opacity', d => d.hovered ? 0.95 : null)
-        .style('pointer-events', interactionMode === 'hover' ? 'all' : 'none')
+        .style('pointer-events', d => {
+          if (interactionMode === 'brush') return 'none'
+          // In hover mode, let CSS handle pointer-events for deselected circles
+          if (brushActive && !d.brushed) return null
+          return 'all'
+        })
       return sel.call(update => update
         .transition()
         .duration(doTransition ? TR_TIME : 0)
@@ -239,7 +249,12 @@ export default function () {
 
       // Update circle pointer events and listeners
       pointsGroup.selectAll('circle')
-        .style('pointer-events', newMode === 'hover' ? 'all' : 'none')
+        .style('pointer-events', d => {
+          if (newMode === 'brush') return 'none'
+          // In hover mode, let CSS handle pointer-events for deselected circles
+          if (brushActive && !d.brushed) return null
+          return 'all'
+        })
         .on('mouseenter', null)
         .on('mousemove', null)
         .on('mouseleave', null)
