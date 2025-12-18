@@ -101,13 +101,35 @@ export default function () {
     const axesGroup = wrapper.append('g')
     const boxPlotsGroup = wrapper.append('g')
 
+    // Add counter in the bottom left
+    const countersGroup = wrapper.append('g')
+      .attr('class', 'counters')
+      .attr('transform', `translate(5, ${dimensions.height - 30})`)
+
+    const partiesCounter = countersGroup.append('text')
+      .attr('class', 'counter')
+      .attr('x', 0)
+      .attr('y', 0)
+      .style('font-size', '14px')
+      .style('fill', '#CCCCCC')
+
     // Store box plots (two per attribute: all data and brushed data)
     const boxPlotInstances = {}
     const boxPlotBrushedInstances = {}
 
+    // Update counter
+    function updateCounters () {
+      const totalParties = data.length
+      const selectedParties = data.filter(d => d.brushed).length
+      const percentage = totalParties > 0 ? ((selectedParties / totalParties) * 100).toFixed(2) : 0
+
+      partiesCounter.text(`Number of selected parties: ${selectedParties}/${totalParties} (${percentage}%)`)
+    }
+
     // Draw lines
     function dataJoin () {
       brushActive = data.some(d => d.brushed)
+      updateCounters()
 
       linesGroup.selectAll('path')
         .data(data.sort((a, b) => {
@@ -125,6 +147,7 @@ export default function () {
         .join(enterFn, updateFn, exitFn)
     }
     dataJoin()
+    updateCounters() // Initialize counters
 
     // Join functions
     function enterFn (sel) {
@@ -432,6 +455,9 @@ export default function () {
       wrapper.attr('width', dimensions.width).attr('height', dimensions.height)
       xScale.range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
       attributeIds.forEach(attr => yScales[attr].range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top]))
+
+      // Update counter position
+      countersGroup.attr('transform', `translate(5, ${dimensions.height - 30})`)
 
       doTransition = true
       axesJoin()
