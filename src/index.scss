@@ -219,7 +219,8 @@ svg .legend {
   cursor: pointer;
   color: #CCCCCC;
 
-  input[type="radio"] {
+  input[type="radio"],
+  input[type="checkbox"] {
     cursor: pointer;
     accent-color: steelblue;
   }

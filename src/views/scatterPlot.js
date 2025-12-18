@@ -17,7 +17,17 @@ export default function () {
     height: null,
     margin: { top: 2, right: 12, bottom: 70, left: 47 },
     offset: { x: 3.5, y: 2.5 },
-    radius: { min: 4, max: 30, fixed: 8 },
+    radius: {
+      fixed: 8,
+      // Discrete radius values for vote intervals
+      intervals: [
+        { maxVotes: 2, radius: 4 }, // 0% <= votes < 2%
+        { maxVotes: 5, radius: 6.5 }, // 2% <= votes < 5%
+        { maxVotes: 10, radius: 10 }, // 5% <= votes < 10%
+        { maxVotes: 25, radius: 18 }, // 10% <= votes < 25%
+        { maxVotes: Infinity, radius: 30 } // votes >= 25%
+      ]
+    },
     legendY: 30
   }
   let updateSize
@@ -106,13 +116,18 @@ export default function () {
       .domain([d3.min(data, d => yAccessor(d) - dimensions.offset.y), d3.max(data, d => yAccessor(d) + dimensions.offset.y)])
       .range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
 
-    // How to compute circles radius
-    const radiusScale = d3.scaleSqrt() // Sqrt to avoid exponential growth
-      .domain(d3.extent(data, rAccessor))
-      .range([dimensions.radius.min, dimensions.radius.max])
+    // Function to get discrete radius based on vote percentage
+    const getDiscreteRadius = (vote) => {
+      for (const interval of dimensions.radius.intervals) {
+        if (vote < interval.maxVotes) {
+          return interval.radius
+        }
+      }
+      return dimensions.radius.intervals[dimensions.radius.intervals.length - 1].radius
+    }
 
     // Function to get radius based on whether size varies
-    const radius = d => varyCircleSize ? radiusScale(rAccessor(d)) : dimensions.radius.fixed
+    const radius = d => varyCircleSize ? getDiscreteRadius(rAccessor(d)) : dimensions.radius.fixed
 
     const drawArea = wrapper.append('g') // It contains points' g and clip
     const pointsGroup = drawArea.append('g')
