@@ -442,6 +442,9 @@ export default function () {
         // Update the data model with the recalculated brushes
         onBrush(intersect(Object.values(brushes)), 'parallelCoordinates')
 
+        // Update brushActive BEFORE drawing (needed for box plots)
+        brushActive = data.some(d => d.brushed)
+
         doTransition = false
         axesJoin()
 
