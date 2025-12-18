@@ -15,7 +15,7 @@ export default function () {
   const dimensions = {
     width: null,
     height: null,
-    margin: { top: 5, right: 25, bottom: 72, left: 30 },
+    margin: { top: 5, right: 25, bottom: 67, left: 30 },
     legendY: 32
   }
   let updateSize

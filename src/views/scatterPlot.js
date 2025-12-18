@@ -15,9 +15,9 @@ export default function () {
   const dimensions = {
     width: null,
     height: null,
-    margin: { top: 0, right: 12, bottom: 60, left: 47 },
+    margin: { top: 2, right: 12, bottom: 70, left: 47 },
     offset: { x: 3.5, y: 2.5 },
-    radius: { min: 4, max: 30 },
+    radius: { min: 4, max: 30, fixed: 8 },
     legendY: 30
   }
   let updateSize
@@ -28,6 +28,7 @@ export default function () {
 
   // Interaction mode
   let interactionMode = 'hover'
+  let varyCircleSize = false // Whether circle size varies with votes
 
   // Hovering
   let onMouseEnter = _ => {}
@@ -73,6 +74,26 @@ export default function () {
 
     selectLabel.append('span').text('select')
 
+    // Add size control checkbox
+    const sizeControlContainer = containerDiv.append('div')
+      .attr('class', 'interaction-mode-container')
+
+    const sizeLabel = sizeControlContainer.append('label')
+      .attr('class', 'mode-radio-label')
+
+    sizeLabel.append('input')
+      .attr('type', 'checkbox')
+      .attr('id', 'vary-circle-size')
+      .property('checked', varyCircleSize)
+      .on('change', (event) => {
+        varyCircleSize = event.target.checked
+        doTransition = true
+        dataJoin()
+        doTransition = false
+      })
+
+    sizeLabel.append('span').text('Size = votes in most recent national election (%)')
+
     const wrapper = containerDiv.append('svg')
       .attr('width', dimensions.width)
       .attr('height', dimensions.height)
@@ -86,9 +107,12 @@ export default function () {
       .range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
 
     // How to compute circles radius
-    const radius = d3.scaleSqrt() // Sqrt to avoid exponential growth
+    const radiusScale = d3.scaleSqrt() // Sqrt to avoid exponential growth
       .domain(d3.extent(data, rAccessor))
       .range([dimensions.radius.min, dimensions.radius.max])
+
+    // Function to get radius based on whether size varies
+    const radius = d => varyCircleSize ? radiusScale(rAccessor(d)) : dimensions.radius.fixed
 
     const drawArea = wrapper.append('g') // It contains points' g and clip
     const pointsGroup = drawArea.append('g')
@@ -114,7 +138,7 @@ export default function () {
           if (a.brushed !== b.brushed) {
             return a.brushed ? 1 : -1
           }
-          // Third priority: within each group, bigger circles on the background
+          // Third priority: always sort by vote (within each group, bigger circles on the background)
           return d3.descending(rAccessor(a), rAccessor(b))
         }), d => d.party_id)
         .join(enterFn, updateFn, exitFn)
@@ -131,7 +155,7 @@ export default function () {
         })
         .attr('cx', d => xScale(xAccessor(d)))
         .attr('cy', d => yScale(yAccessor(d)))
-        .attr('r', d => radius(rAccessor(d)))
+        .attr('r', d => radius(d))
         .attr('fill', d => d.hovered ? 'white' : colorAccessor(d))
         .style('opacity', d => d.hovered ? 0.95 : null)
         .style('pointer-events', d => {
@@ -176,6 +200,7 @@ export default function () {
         .duration(doTransition ? TR_TIME : 0)
         .attr('cx', d => xScale(xAccessor(d)))
         .attr('cy', d => yScale(yAccessor(d)))
+        .attr('r', d => radius(d))
       )
     }
     function exitFn (sel) {
