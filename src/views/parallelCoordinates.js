@@ -65,7 +65,7 @@ export default function () {
       attributeIds.forEach(attr => {
         if (attr === 'family') {
           yScales[attr] = d3.scalePoint()
-            .domain(Object.keys(factions).map(Number))
+            .domain([1, 2, 4, 3, 5, 7, 6, 8, 9, 10, 11])
             .range(scaleRange)
         } else if (attr === 'country') {
           yScales[attr] = d3.scalePoint()
