@@ -282,6 +282,9 @@ export default function () {
             axis.selectAll('.tick text').style('fill', d => factions[d].color)
           }
 
+          // Make tick labels transparent to pointer events so they don't block hovering
+          axis.selectAll('.tick text').style('pointer-events', 'none')
+
           // Brush
           setupBrush(axis, attr)
         })
@@ -300,6 +303,8 @@ export default function () {
           axis.select('.legend')
             .text(attributes[attr].name)
             .call(legendHover)
+
+          axis.selectAll('.tick text').style('pointer-events', 'none')
 
           // Update brush with new scales
           setupBrush(axis, attr)
