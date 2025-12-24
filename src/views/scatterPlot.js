@@ -137,6 +137,7 @@ export default function () {
       .extent([[xScale.range()[0], yScale.range()[1]], [xScale.range()[1], yScale.range()[0]]])
 
     let brushActive = false
+    let currentHoveredPartyId = null // Track currently hovered party
 
     // Draw points
     function dataJoin () {
@@ -158,7 +159,79 @@ export default function () {
         }), d => d.party_id)
         .join(enterFn, updateFn, exitFn)
     }
-    dataJoin()
+
+    // Manual hover detection respecting z-order priority
+    function setupManualHover () {
+      if (interactionMode !== 'hover') return
+
+      wrapper.on('mousemove', function (event) {
+        const [mouseX, mouseY] = d3.pointer(event, this)
+
+        // Find all circles under the cursor, with their priority
+        const candidatesWithPriority = data
+          .filter(d => {
+            // When brushing is active, only allow hovering brushed circles
+            if (brushActive && !d.brushed) return false
+
+            const cx = xScale(xAccessor(d))
+            const cy = yScale(yAccessor(d))
+            const r = radius(d)
+            const distance = Math.sqrt((mouseX - cx) ** 2 + (mouseY - cy) ** 2)
+            return distance <= r
+          })
+          .map(d => ({
+            party: d,
+            // Calculate priority WITHOUT considering current hover state
+            priority: (d.brushed ? 100000 : 0) - rAccessor(d)
+          }))
+
+        if (candidatesWithPriority.length > 0) {
+          // Pick the candidate with highest priority
+          candidatesWithPriority.sort((a, b) => b.priority - a.priority)
+          const topCandidate = candidatesWithPriority[0].party
+
+          // Only update if it's a different party
+          if (currentHoveredPartyId !== topCandidate.party_id) {
+            // Clear previous hover
+            if (currentHoveredPartyId !== null) {
+              const prevParty = data.find(d => d.party_id === currentHoveredPartyId)
+              if (prevParty) {
+                onMouseLeave(prevParty)
+              }
+            }
+
+            // Set new hover
+            currentHoveredPartyId = topCandidate.party_id
+            onMouseEnter(topCandidate)
+            showTooltip(event, topCandidate)
+          } else {
+            // Same party, just move tooltip
+            moveTooltip(event)
+          }
+        } else {
+          // No circle under cursor, clear hover
+          if (currentHoveredPartyId !== null) {
+            const prevParty = data.find(d => d.party_id === currentHoveredPartyId)
+            if (prevParty) {
+              onMouseLeave(prevParty)
+            }
+            currentHoveredPartyId = null
+            hideTooltip()
+          }
+        }
+      })
+
+      wrapper.on('mouseleave', () => {
+        if (currentHoveredPartyId !== null) {
+          const prevParty = data.find(d => d.party_id === currentHoveredPartyId)
+          if (prevParty) {
+            onMouseLeave(prevParty)
+          }
+          currentHoveredPartyId = null
+          hideTooltip()
+        }
+      })
+    }
 
     // Join functions
     function enterFn (sel) {
@@ -173,26 +246,7 @@ export default function () {
         .attr('r', d => radius(d))
         .attr('fill', d => d.hovered ? 'white' : colorAccessor(d))
         .style('opacity', d => d.hovered ? 0.95 : null)
-        .style('pointer-events', d => {
-          if (interactionMode === 'brush') return 'none'
-          // In hover mode, let CSS handle pointer-events for deselected circles
-          if (brushActive && !d.brushed) return null
-          return 'all'
-        })
-
-      // Add hover listeners only in hover mode
-      if (interactionMode === 'hover') {
-        circles
-          .on('mouseenter', (event, d) => {
-            onMouseEnter(d)
-            showTooltip(event, d)
-          })
-          .on('mousemove', (event) => moveTooltip(event))
-          .on('mouseleave', (event, d) => {
-            onMouseLeave(d)
-            hideTooltip()
-          })
-      }
+        .style('pointer-events', 'none') // Disable default pointer events, use manual detection
 
       return circles
     }
@@ -204,12 +258,7 @@ export default function () {
       })
         .attr('fill', d => d.hovered ? 'white' : colorAccessor(d))
         .style('opacity', d => d.hovered ? 0.95 : null)
-        .style('pointer-events', d => {
-          if (interactionMode === 'brush') return 'none'
-          // In hover mode, let CSS handle pointer-events for deselected circles
-          if (brushActive && !d.brushed) return null
-          return 'all'
-        })
+        .style('pointer-events', 'none') // Always use manual hover detection
       return sel.call(update => update
         .transition()
         .duration(doTransition ? TR_TIME : 0)
@@ -282,43 +331,47 @@ export default function () {
     // Apply brush only in brush mode
     if (interactionMode === 'brush') {
       drawArea.call(brushBehavior)
+    } else {
+      // Setup manual hover in hover mode
+      setupManualHover()
     }
+
+    dataJoin() // Initial draw
 
     // Switch interaction mode
     function switchMode (newMode) {
       interactionMode = newMode
 
-      // Update circle pointer events and listeners
-      pointsGroup.selectAll('circle')
-        .style('pointer-events', d => {
-          if (newMode === 'brush') return 'none'
-          // In hover mode, let CSS handle pointer-events for deselected circles
-          if (brushActive && !d.brushed) return null
-          return 'all'
-        })
-        .on('mouseenter', null)
-        .on('mousemove', null)
-        .on('mouseleave', null)
-
       if (newMode === 'hover') {
-        // Enable hover interactions
-        pointsGroup.selectAll('circle')
-          .on('mouseenter', (event, d) => {
-            onMouseEnter(d)
-            showTooltip(event, d)
-          })
-          .on('mousemove', (event) => moveTooltip(event))
-          .on('mouseleave', (event, d) => {
-            onMouseLeave(d)
-            hideTooltip()
-          })
+        // Clear any current hover state
+        if (currentHoveredPartyId !== null) {
+          const prevParty = data.find(d => d.party_id === currentHoveredPartyId)
+          if (prevParty) {
+            onMouseLeave(prevParty)
+          }
+          currentHoveredPartyId = null
+        }
 
         // Disable brush
         drawArea.on('.brush', null)
         drawArea.selectAll('.selection, .overlay, .handle').remove()
+
+        // Enable manual hover detection
+        setupManualHover()
       } else {
-        // Disable hover interactions (already done above with null)
+        // Clear any current hover state
+        if (currentHoveredPartyId !== null) {
+          const prevParty = data.find(d => d.party_id === currentHoveredPartyId)
+          if (prevParty) {
+            onMouseLeave(prevParty)
+          }
+          currentHoveredPartyId = null
+        }
+
+        // Disable hover interactions
         hideTooltip()
+        wrapper.on('mousemove', null)
+        wrapper.on('mouseleave', null)
 
         // Enable brush
         drawArea.call(brushBehavior)
@@ -340,6 +393,14 @@ export default function () {
         const currentDataSignature = data.map(d => d.party_id).join(',') // Converts array to string separated by commas
         const dataStructureChanged = currentDataSignature !== lastDataSignature
         lastDataSignature = currentDataSignature
+
+        // Reset hover state if data structure changed (year change)
+        if (dataStructureChanged && currentHoveredPartyId !== null) {
+          const partyStillExists = data.some(d => d.party_id === currentHoveredPartyId)
+          if (!partyStillExists) {
+            currentHoveredPartyId = null
+          }
+        }
 
         // Recalculate which parties in the NEW data fall within the existing brush extent
         // Only when data structure changes (year change) to avoid performance issues with hover
