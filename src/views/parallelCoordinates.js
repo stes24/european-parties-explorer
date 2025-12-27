@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import { attributes, countries, factions, hideTooltip, moveTooltip, showTooltip, TR_TIME } from '@/utils'
+import { attributes, countries, factions, regions, hideTooltip, moveTooltip, showTooltip, TR_TIME } from '@/utils'
 import boxPlot from './boxPlot'
 
 const LEGEND_ROTATION = -13
@@ -76,7 +76,7 @@ export default function () {
             .range(scaleRange)
         } else if (attr === 'region') {
           yScales[attr] = d3.scalePoint()
-            .domain(['West', 'North', 'South', 'East'].reverse())
+            .domain(Object.keys(regions).reverse())
             .range(scaleRange)
         } else if (attr === 'lrgen' || attr === 'lrecon') {
           yScales[attr] = d3.scaleLinear()

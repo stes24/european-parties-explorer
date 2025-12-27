@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import { factions, hideTooltip, moveTooltip, showTooltip, TR_TIME } from '@/utils'
+import { factions, regions, hideTooltip, moveTooltip, showTooltip, TR_TIME } from '@/utils'
 
 // Configurable function - it returns a new function (which, when called, draws the view)
 export default function () {
@@ -10,7 +10,9 @@ export default function () {
   const xAccessor = d => d.mds1
   const yAccessor = d => d.mds2
   const rAccessor = d => d.vote
-  const colorAccessor = d => factions[d.family].color
+
+  let colorBy = 'faction' // 'faction' or 'region'
+  const colorAccessor = d => colorBy === 'faction' ? factions[d.family].color : regions[d.region]
 
   const dimensions = {
     width: null,
@@ -72,7 +74,7 @@ export default function () {
       .property('checked', interactionMode === 'hover')
       .on('change', () => switchMode('hover'))
 
-    hoverLabel.append('span').text('hover')
+    hoverLabel.append('span').text('zoom, move and hover')
 
     const selectLabel = modeContainer.append('label')
       .attr('class', 'mode-radio-label')
@@ -89,8 +91,14 @@ export default function () {
     // Add size control checkbox
     const sizeControlContainer = containerDiv.append('div')
       .attr('class', 'interaction-mode-container')
+      .style('justify-content', 'space-between')
 
-    const sizeLabel = sizeControlContainer.append('label')
+    const leftSection = sizeControlContainer.append('div')
+      .style('display', 'flex')
+      .style('align-items', 'center')
+      .style('gap', '6px')
+
+    const sizeLabel = leftSection.append('label')
       .attr('class', 'mode-radio-label')
 
     sizeLabel.append('input')
@@ -106,6 +114,34 @@ export default function () {
       })
 
     sizeLabel.append('span').text('Size = votes in most recent national election (%)')
+
+    // Add color dropdown on the right edge
+    const rightSection = sizeControlContainer.append('div')
+      .style('display', 'flex')
+      .style('align-items', 'center')
+      .style('gap', '6px')
+
+    rightSection.append('span')
+      .attr('class', 'mode-label')
+      .text('Color:')
+
+    rightSection.append('select')
+      .attr('class', 'dropDown')
+      .attr('id', 'color-attribute-select')
+      .on('change', function () {
+        colorBy = this.value
+        doTransition = false
+        dataJoin()
+      })
+      .selectAll('option')
+      .data([
+        { value: 'faction', label: 'Political faction' },
+        { value: 'region', label: 'European region' }
+      ])
+      .join('option')
+      .attr('value', d => d.value)
+      .property('selected', d => d.value === colorBy)
+      .text(d => d.label)
 
     const wrapper = containerDiv.append('svg')
       .attr('width', dimensions.width)

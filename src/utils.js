@@ -64,7 +64,7 @@ export const attributes = { // Reordered so that similar topics are close
     description: 'Parties\' country of origin'
   },
   region: {
-    name: 'European Region',
+    name: 'European region',
     goesOnLineChart: false,
     goesOnParallelCoordinates: true,
     goesOnRadviz: false,
@@ -305,6 +305,13 @@ export const factions = {
   9: { name: 'No faction', color: '#7F7F7F' },
   10: { name: 'Confessional', color: '#E377C2' },
   11: { name: 'Agrarian/Center', color: '#FF7F0E' }
+}
+
+export const regions = {
+  West: '#D62728',
+  North: '#1F77B4',
+  South: '#2CA02C',
+  East: '#BCBD22'
 }
 
 export function showTooltip (event, d) {
