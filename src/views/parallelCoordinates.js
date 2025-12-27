@@ -22,6 +22,7 @@ export default function () {
     brush: { top: -1, right: 10, bottom: 1, left: -10 }
   }
   let updateSize
+  let updateAxes // Function to update axes when color mode changes
 
   // Do animation or not
   let doTransition = false
@@ -41,6 +42,9 @@ export default function () {
   const brushExtents = {} // Stores brush selection extents [y0, y1] for each axis
   let brushActive = false
   let isBrushingNow = false // Flag to track if we're currently in a brush operation
+
+  // Color mode from scatter plot
+  let regionColoringActive = false
 
   // It draws and can be configured (it is returned again when something changes)
   function parallelCoordinates (containerDiv) {
@@ -278,8 +282,27 @@ export default function () {
             .text(attributes[attr].name)
             .call(legendHover)
 
-          if (attr === 'family') {
+          if (attr === 'family' && !regionColoringActive) {
             axis.selectAll('.tick text').style('fill', d => factions[d].color)
+          }
+          if (attr === 'region' && regionColoringActive) {
+            // Add background rectangles for better readability
+            axis.selectAll('.tick').each(function () {
+              const tick = d3.select(this)
+              const text = tick.select('text')
+              const bbox = text.node().getBBox()
+
+              // Insert background rectangle before text
+              tick.insert('rect', 'text')
+                .attr('x', bbox.x - 2)
+                .attr('y', bbox.y - 1)
+                .attr('width', bbox.width + 4)
+                .attr('height', bbox.height + 2)
+                .attr('fill', 'black')
+                .attr('opacity', 0.7)
+                .style('pointer-events', 'none')
+            })
+            axis.selectAll('.tick text').style('fill', d => regions[d])
           }
 
           // Make tick labels transparent to pointer events so they don't block hovering
@@ -303,6 +326,40 @@ export default function () {
           axis.select('.legend')
             .text(attributes[attr].name)
             .call(legendHover)
+
+          // Remove old background rectangles from region axis
+          if (attr === 'region') {
+            axis.selectAll('.tick rect').remove()
+          }
+
+          if (attr === 'region' && regionColoringActive) {
+            // Add background rectangles for better readability
+            axis.selectAll('.tick').each(function () {
+              const tick = d3.select(this)
+              const text = tick.select('text')
+              const bbox = text.node().getBBox()
+
+              // Insert background rectangle before text
+              tick.insert('rect', 'text')
+                .attr('x', bbox.x - 2)
+                .attr('y', bbox.y - 1)
+                .attr('width', bbox.width + 4)
+                .attr('height', bbox.height + 2)
+                .attr('fill', 'black')
+                .attr('opacity', 0.7)
+                .style('pointer-events', 'none')
+            })
+            axis.selectAll('.tick text').style('fill', d => regions[d])
+          } else if (attr === 'region') {
+            axis.selectAll('.tick text').style('fill', null) // Reset to default color
+          }
+
+          // Update family axis coloring based on region coloring state
+          if (attr === 'family' && !regionColoringActive) {
+            axis.selectAll('.tick text').style('fill', d => factions[d].color)
+          } else if (attr === 'family' && regionColoringActive) {
+            axis.selectAll('.tick text').style('fill', null) // Reset to default color
+          }
 
           axis.selectAll('.tick text').style('pointer-events', 'none')
 
@@ -459,6 +516,11 @@ export default function () {
       }
     }
 
+    updateAxes = function () {
+      doTransition = false
+      axesJoin()
+    }
+
     updateSize = function () {
       wrapper.attr('width', dimensions.width).attr('height', dimensions.height)
       xScale.range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
@@ -492,6 +554,13 @@ export default function () {
     dimensions.width = width
     dimensions.height = height
     if (typeof updateSize === 'function') updateSize()
+    return parallelCoordinates
+  }
+  parallelCoordinates.setRegionColoring = function (active) {
+    regionColoringActive = active
+    if (typeof updateAxes === 'function') {
+      updateAxes() // Redraw axes to update colors
+    }
     return parallelCoordinates
   }
 

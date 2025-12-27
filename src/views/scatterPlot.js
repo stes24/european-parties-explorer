@@ -45,6 +45,9 @@ export default function () {
   let onMouseEnter = _ => {}
   let onMouseLeave = _ => {}
 
+  // Color change callback
+  let onColorChange = _ => {}
+
   // Size legend update function
   let updateSizeLegend
 
@@ -130,6 +133,7 @@ export default function () {
       .attr('id', 'color-attribute-select')
       .on('change', function () {
         colorBy = this.value
+        onColorChange(colorBy) // Notify controller of color change
         doTransition = false
         dataJoin()
       })
@@ -603,6 +607,11 @@ export default function () {
   scatterPlot.bindBrush = function (callback) {
     onBrush = callback
     console.debug('Scatter plot received the functions for updating the model on brush')
+    return this
+  }
+  scatterPlot.bindColorChange = function (callback) {
+    onColorChange = callback
+    console.debug('Scatter plot received the function for notifying color change')
     return this
   }
 
