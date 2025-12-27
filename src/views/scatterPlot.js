@@ -16,16 +16,15 @@ export default function () {
     width: null,
     height: null,
     margin: { top: 2, right: 12, bottom: 70, left: 47 },
-    offset: { x: 3.5, y: 2.5 },
+    offset: { xLeft: 1.5, xRight: 5.5, y: 2.5 },
     radius: {
       fixed: 8,
       // Discrete radius values for vote intervals
       intervals: [
-        { maxVotes: 2, radius: 4 }, // 0% <= votes < 2%
-        { maxVotes: 5, radius: 6.5 }, // 2% <= votes < 5%
-        { maxVotes: 10, radius: 10 }, // 5% <= votes < 10%
-        { maxVotes: 25, radius: 18 }, // 10% <= votes < 25%
-        { maxVotes: Infinity, radius: 30 } // votes >= 25%
+        { maxVotes: 5, radius: 5 }, // 0% <= votes < 5%
+        { maxVotes: 10, radius: 8 }, // 5% <= votes < 10%
+        { maxVotes: 25, radius: 13 }, // 10% <= votes < 25%
+        { maxVotes: Infinity, radius: 22 } // votes >= 25%
       ]
     },
     legendY: 30
@@ -38,11 +37,14 @@ export default function () {
 
   // Interaction mode
   let interactionMode = 'hover'
-  let varyCircleSize = false // Whether circle size varies with votes
+  let varyCircleSize = true // Whether circle size varies with votes
 
   // Hovering
   let onMouseEnter = _ => {}
   let onMouseLeave = _ => {}
+
+  // Size legend update function
+  let updateSizeLegend
 
   // Brushing
   let onBrush = _ => {}
@@ -97,6 +99,7 @@ export default function () {
       .property('checked', varyCircleSize)
       .on('change', (event) => {
         varyCircleSize = event.target.checked
+        updateSizeLegend()
         doTransition = true
         dataJoin()
         doTransition = false
@@ -110,7 +113,7 @@ export default function () {
 
     // Scales
     const xScale = d3.scaleLinear()
-      .domain([d3.min(data, d => xAccessor(d) - dimensions.offset.x), d3.max(data, d => xAccessor(d) + dimensions.offset.x)])
+      .domain([d3.min(data, d => xAccessor(d) - dimensions.offset.xLeft), d3.max(data, d => xAccessor(d) + dimensions.offset.xRight)])
       .range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
     const yScale = d3.scaleLinear()
       .domain([d3.min(data, d => yAccessor(d) - dimensions.offset.y), d3.max(data, d => yAccessor(d) + dimensions.offset.y)])
@@ -296,6 +299,88 @@ export default function () {
       .attr('text-anchor', 'middle')
       .text('MDS dimension 2')
 
+    // Size legend in top right corner
+    const sizeLegendGroup = wrapper.append('g')
+      .attr('class', 'size-legend')
+      .attr('transform', `translate(${dimensions.width - dimensions.margin.right - 80}, ${dimensions.margin.top + 10})`)
+      .style('display', varyCircleSize ? null : 'none')
+
+    // Generate legend data from intervals
+    const legendData = dimensions.radius.intervals.map((interval, i) => {
+      const minVotes = i === 0 ? 0 : dimensions.radius.intervals[i - 1].maxVotes
+      const maxVotes = interval.maxVotes
+      const label = maxVotes === Infinity
+        ? `≥${maxVotes === Infinity ? dimensions.radius.intervals[i - 1].maxVotes : maxVotes}%`
+        : `<${maxVotes}%`
+      return {
+        minVotes,
+        maxVotes,
+        radius: interval.radius,
+        label
+      }
+    })
+
+    // Calculate positions with fixed gap between circumferences
+    const maxRadius = Math.max(...legendData.map(d => d.radius))
+    const gapBetweenCircles = 3 // Fixed gap between circle edges
+
+    // Calculate cumulative y positions
+    let currentY = 0
+    const positions = []
+    legendData.forEach((d, i) => {
+      if (i === 0) {
+        currentY = d.radius // Start with the radius of the first circle
+      } else {
+        currentY += legendData[i - 1].radius + gapBetweenCircles + d.radius
+      }
+      positions.push(currentY)
+    })
+
+    // Calculate total legend height for background
+    const totalLegendHeight = positions[positions.length - 1] + legendData[legendData.length - 1].radius + 10
+    const legendWidth = maxRadius * 2 + 40
+
+    // Add background rectangle
+    sizeLegendGroup.append('rect')
+      .attr('x', -5)
+      .attr('y', -5)
+      .attr('width', legendWidth)
+      .attr('height', totalLegendHeight)
+      .attr('fill', '#4a4a4a')
+      .attr('stroke', '#CCCCCC')
+      .attr('stroke-width', '1px')
+      .attr('rx', 4)
+      .attr('ry', 4)
+
+    // Draw legend items
+    legendData.forEach((d, i) => {
+      const itemGroup = sizeLegendGroup.append('g')
+        .attr('transform', `translate(0, ${positions[i]})`)
+
+      // Draw circle
+      itemGroup.append('circle')
+        .attr('cx', maxRadius)
+        .attr('cy', 0)
+        .attr('r', d.radius)
+        .attr('fill', 'none')
+        .attr('stroke', '#CCCCCC')
+        .attr('stroke-width', '1.5px')
+
+      // Draw label
+      itemGroup.append('text')
+        .attr('x', maxRadius * 2 + 2)
+        .attr('y', 0)
+        .attr('dy', '0.35em')
+        .style('fill', 'white')
+        .style('font-size', '12px')
+        .text(d.label)
+    })
+
+    // Function to update size legend visibility
+    updateSizeLegend = function () {
+      sizeLegendGroup.style('display', varyCircleSize ? null : 'none')
+    }
+
     // Brush
     function updateBrush (sel) {
       const [[x0, y0], [x1, y1]] = sel
@@ -445,6 +530,8 @@ export default function () {
         .attr('y', dimensions.height - dimensions.margin.bottom + dimensions.legendY)
       yLegend.transition(trans)
         .attr('x', -(dimensions.height + dimensions.margin.top - dimensions.margin.bottom) / 2)
+      sizeLegendGroup.transition(trans)
+        .attr('transform', `translate(${dimensions.width - dimensions.margin.right - 80}, ${dimensions.margin.top + 10})`)
 
       doTransition = true
       dataJoin()
