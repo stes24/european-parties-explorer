@@ -9,6 +9,7 @@ export default function () {
   let updateData
   let currentYear
   let lastDrawnYear = null // Track last drawn year to detect year changes
+  let lastBrushActive = false // Track brush state to detect brush changes
 
   const dimensions = {
     width: null,
@@ -112,22 +113,49 @@ export default function () {
 
     // Function to customize the look of the points
     function colorPoints (selection) {
+      // Check if any data is brushed
+      const brushActive = data.some(d => d.brushed)
+
       selection
         .attr('r', 1.3)
+        .attr('class', d => {
+          const party = findPartyFromData(d)
+          if (party.brushed) return 'data_point circle-brushed'
+          if (brushActive) return 'data_point circle-deselected'
+          return 'data_point circle'
+        })
         .style('fill', d => {
           const party = findPartyFromData(d)
           return party.hovered ? 'white' : factions[party.family].color
         })
         .style('opacity', d => {
           const party = findPartyFromData(d)
-          return party.hovered ? 0.95 : 0.85
+          return party.hovered ? 0.95 : null
+        })
+        .style('stroke-width', d => {
+          const party = findPartyFromData(d)
+          return party.brushed ? '0.4' : '0.3'
+        })
+        .style('stroke', d => {
+          const party = findPartyFromData(d)
+          return party.brushed ? 'red' : null
         })
         .each(function (d) {
           const party = findPartyFromData(d)
-          if (party.hovered) {
+          if (party.brushed) {
             d3.select(this).raise()
           }
         })
+
+      raiseHoveredPoints(selection)
+    }
+    function raiseHoveredPoints (selection) { // Raise hovered only after raising all brushed
+      selection.each(function (d) {
+        const party = findPartyFromData(d)
+        if (party.hovered) {
+          d3.select(this).raise()
+        }
+      })
     }
 
     function draw () {
@@ -201,18 +229,21 @@ export default function () {
           hideTooltip()
         })
 
-      // Update last drawn year
+      // Update last drawn year and brush state
       lastDrawnYear = currentYear
+      lastBrushActive = data.some(d => d.brushed)
     }
     draw()
 
     updateData = function () {
-      // Only redraw if year has changed (not just for hover/brush updates)
-      if (currentYear !== lastDrawnYear) {
+      const brushActive = data.some(d => d.brushed)
+
+      // Redraw if year changed or brush state changed (to update z-order)
+      if (currentYear !== lastDrawnYear || brushActive !== lastBrushActive) {
         updateButtons() // Update available buttons for new year
         draw()
       } else {
-        // Update point styling for hover/brush changes without full redraw
+        // Update point styling for hover changes without full redraw
         colorPoints(wrapper.selectAll('.data_point'))
       }
     }
