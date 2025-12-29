@@ -26,6 +26,8 @@ class Controller {
     this.scatterPlot.bindMouseLeave(p => this.handleMouseLeave(p)).bind(this)
     this.scatterPlot.bindBrush((p, v) => this.handleBrush(p, v)).bind(this)
     this.scatterPlot.bindColorChange(colorBy => this.handleColorChange(colorBy)).bind(this)
+    this.radviz.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)
+    this.radviz.bindMouseLeave(p => this.handleMouseLeave(p)).bind(this)
     this.lineChart.bindMouseEnter(p => this.handleBatchMouseEnter(p)).bind(this)
     this.lineChart.bindMouseLeave(() => this.handleBatchMouseLeave()).bind(this)
     this.parallelCoordinates.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)

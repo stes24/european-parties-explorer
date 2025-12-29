@@ -32,7 +32,20 @@ body {
   grid-row: 1 / 5;
   grid-column: 4 / 7;
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
+}
+
+#radviz-container .radviz-left-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  // overflow: hidden;
+  // min-width: 0;
+}
+
+#radviz-container .radviz-left-container > svg {
+  width: 100%;
+  height: 100%;
 }
 
 #lineChart-container {
@@ -142,8 +155,27 @@ body {
 
 // RADVIZ ELEMENTS ----------------------
 
+.radviz-controls {
+  display: flex;
+  // justify-content: flex-start;
+  // align-items: center;
+  padding: 4px 8px;
+  // flex-shrink: 0;
+}
+
+.radviz-points-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.radviz-points-label {
+  font-size: 12px;
+  color: #CCCCCC;
+}
+
 .radviz-buttons-container {
-  width: 150px;
+  width: 120px;
   padding: 2px;
   display: flex;
   flex-direction: column;
@@ -151,8 +183,8 @@ body {
 }
 
 .radviz-button {
-  padding: 3px 4px;
-  font-size: 9px;
+  padding: 2px 2px;
+  font-size: 8.5px;
   background-color: #2a2a2a;
   color: #CCCCCC;
   border: 1px solid #CCCCCC;

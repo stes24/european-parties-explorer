@@ -1,12 +1,14 @@
 // import { radviz } from 'd3-radviz'
+import * as d3 from 'd3'
 import * as d3Radviz from 'd3-radviz'
-import { attributes } from '@/utils'
+import { attributes, factions, showTooltip, moveTooltip, hideTooltip } from '@/utils'
 
 // Configurable function - it returns a new function (which, when called, draws the view)
 export default function () {
   let data = []
   let updateData
   let currentYear
+  let lastDrawnYear = null // Track last drawn year to detect year changes
 
   const dimensions = {
     width: null,
@@ -20,15 +22,50 @@ export default function () {
   // Dimensions to use as radviz anchors
   let selectedDimensions = ['leftgen', 'rightgen', 'leftecon', 'rightecon']
 
+  // Hovering
+  let onMouseEnter = _ => {}
+  let onMouseLeave = _ => {}
+
   // It draws and can be configured (it is returned again when something changes)
   function radvizPlot (containerDiv) {
+    // Create left side container for controls and SVG
+    const leftContainer = containerDiv.append('div')
+      .attr('class', 'radviz-left-container')
+
+    // Create buttons container on the right (full height)
+    const buttonsContainer = containerDiv.append('div')
+      .attr('class', 'radviz-buttons-container')
+
+    // Create controls container at the top of left side
+    const controlsContainer = leftContainer.append('div')
+      .attr('class', 'radviz-controls')
+
+    // Create label + dropdown for aggregation mode
+    const pointsContainer = controlsContainer.append('div')
+      .attr('class', 'radviz-points-container')
+
+    pointsContainer.append('span')
+      .attr('class', 'radviz-points-label')
+      .text('Points:')
+
+    const aggregationDropdown = pointsContainer.append('select')
+      .attr('class', 'dropDown')
+      .attr('id', 'radvizAggregationDropDown')
+
+    aggregationDropdown.selectAll('option')
+      .data([
+        { value: 'single', label: 'Single parties' },
+        { value: 'faction', label: 'Faction average' },
+        { value: 'country', label: 'Country average' }
+      ])
+      .enter()
+      .append('option')
+      .attr('value', d => d.value)
+      .text(d => d.label)
+
     // Get available attributes for current year
     let availableAttributes = Object.keys(attributes)
       .filter(a => attributes[a].goesOnRadviz && currentYear >= attributes[a].minYear)
-
-    // Create buttons container on the right
-    const buttonsContainer = containerDiv.append('div')
-      .attr('class', 'radviz-buttons-container')
 
     // Function to update buttons based on available attributes
     function updateButtons () {
@@ -63,14 +100,39 @@ export default function () {
       draw()
     }
 
-    const wrapper = containerDiv.append('svg')
-      .attr('width', dimensions.width)
-      .attr('height', dimensions.height)
-
-    // radvizInstance = radviz()
+    const wrapper = leftContainer.append('svg')
     radvizInstance = d3Radviz.radviz()
+    // radvizInstance = radviz()
+
+    // Helper function to find party data from radviz data point
+    function findPartyFromData (d) {
+      const partyId = d.attributes.party_id
+      return data.find(p => p.party_id === partyId && p.year === currentYear)
+    }
+
+    // Function to customize the look of the points
+    function colorPoints (selection) {
+      selection
+        .attr('r', 1.3)
+        .style('fill', d => {
+          const party = findPartyFromData(d)
+          return party.hovered ? 'white' : factions[party.family].color
+        })
+        .style('opacity', d => {
+          const party = findPartyFromData(d)
+          return party.hovered ? 0.95 : 0.85
+        })
+        .each(function (d) {
+          const party = findPartyFromData(d)
+          if (party.hovered) {
+            d3.select(this).raise()
+          }
+        })
+    }
 
     function draw () {
+      // PREPARE DATA -------------------------
+
       if (data.length === 0 || selectedDimensions.length < 2) return
       // Filter data to include only the desired dimensions plus classification attributes
       // d3-radviz uses all numeric properties as dimensions, so we need to filter
@@ -85,6 +147,8 @@ export default function () {
         return filtered
       })
 
+      // DRAW RADVIZ --------------------------
+
       // Assign data and use effectiveness error heuristic
       radvizInstance.data(filteredData, 'party_id')
       const eemhDA = d3Radviz.radvizDA.minEffectivenessErrorHeuristic(radvizInstance.data())
@@ -97,14 +161,65 @@ export default function () {
       wrapper.selectAll('*').remove()
       wrapper.call(radvizInstance)
 
-      // Set background
-      wrapper.select('circle').style('fill', 'black')
+      // CUSTOMIZE RADVIZ LOOK ----------------
+
+      // Change grid color
+      wrapper.selectAll('path')
+        .style('fill', '#AAAAAA')
+        .style('opacity', 1)
+
+      // Update anchor labels to use attribute names instead of attribute IDs
+      wrapper.selectAll('text.anchor-points').each(function () {
+        const name = attributes[this.textContent].name
+        // Replace spaces with newlines by splitting into tspan elements
+        const lines = name.split(' ')
+
+        // Clear current text
+        this.textContent = ''
+
+        // Add each word as a separate tspan on a new line
+        lines.forEach((line, i) => {
+          const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
+          tspan.textContent = line
+          tspan.setAttribute('x', this.getAttribute('x'))
+          tspan.setAttribute('dy', i === 0 ? 0 : '1em')
+          this.appendChild(tspan)
+        })
+      })
+
+      // Color points
+      const points = wrapper.selectAll('.data_point')
+      colorPoints(points)
+
+      // Mouse handling
+      points.on('mouseenter', function (event, d) {
+        const party = findPartyFromData(d)
+        onMouseEnter(party)
+        showTooltip(event, party)
+      })
+        .on('mousemove', (event) => {
+          moveTooltip(event)
+        })
+        .on('mouseleave', function (event, d) {
+          const party = findPartyFromData(d)
+          onMouseLeave(party)
+          hideTooltip()
+        })
+
+      // Update last drawn year
+      lastDrawnYear = currentYear
     }
     draw()
 
     updateData = function () {
-      updateButtons()
-      draw()
+      // Only redraw if year has changed (not just for hover/brush updates)
+      if (currentYear !== lastDrawnYear) {
+        updateButtons() // Update available buttons for new year
+        draw()
+      } else {
+        // Update point styling for hover/brush changes without full redraw
+        colorPoints(wrapper.selectAll('.data_point'))
+      }
     }
 
     updateSize = function () {
@@ -133,6 +248,17 @@ export default function () {
     dimensions.height = height
     if (typeof updateSize === 'function') updateSize()
     return radvizPlot
+  }
+
+  // Save the callbacks (update hovered property)
+  radvizPlot.bindMouseEnter = function (callback) {
+    onMouseEnter = callback
+    return this
+  }
+  radvizPlot.bindMouseLeave = function (callback) {
+    onMouseLeave = callback
+    console.debug('Radviz received the functions for updating the model on hover')
+    return this
   }
 
   console.debug('Finished creating radviz configurable function')
