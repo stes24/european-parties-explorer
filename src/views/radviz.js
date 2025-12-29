@@ -163,11 +163,6 @@ export default function () {
 
       // CUSTOMIZE RADVIZ LOOK ----------------
 
-      // Change grid color
-      wrapper.selectAll('path')
-        .style('fill', '#AAAAAA')
-        .style('opacity', 1)
-
       // Update anchor labels to use attribute names instead of attribute IDs
       wrapper.selectAll('text.anchor-points').each(function () {
         const name = attributes[this.textContent].name

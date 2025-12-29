@@ -185,7 +185,7 @@ body {
 .radviz-button {
   padding: 2px 2px;
   font-size: 8.5px;
-  background-color: #2a2a2a;
+  background-color: #2A2A2A;
   color: #CCCCCC;
   border: 1px solid #CCCCCC;
   border-radius: 2px;
@@ -194,23 +194,29 @@ body {
   overflow: hidden;
 
   &:hover {
-    background-color: #3a3a3a;
+    background-color: #3A3A3A;
   }
 
   &.active {
-    background-color: #4a4a4a;
+    background-color: #4A4A4A;
     color: white;
     border-color: steelblue;
     font-weight: bold;
   }
 }
 
-text.anchor-points {
-  fill: #CCCCCC;
+#radviz-container .radviz-left-container > svg > svg > g > path {
+  fill: #4A4A4A;
+  opacity: 0.9;
+  stroke: #CCCCCC;
 }
 
 circle.anchor-points {
-  fill: #CCCCCC !important;
+  fill: #AAAAAA !important;
+}
+
+text.anchor-points {
+  fill: #CCCCCC;
 }
 
 // OTHER --------------------------------
