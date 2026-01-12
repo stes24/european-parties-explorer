@@ -151,6 +151,15 @@ export default function () {
       .attr('width', dimensions.width)
       .attr('height', dimensions.height)
 
+    wrapper.append('defs')
+      .append('clipPath')
+      .attr('id', 'scatter-clip')
+      .append('rect')
+      .attr('x', dimensions.margin.left)
+      .attr('y', dimensions.margin.top)
+      .attr('width', dimensions.width - dimensions.margin.left - dimensions.margin.right)
+      .attr('height', dimensions.height - dimensions.margin.top - dimensions.margin.bottom)
+
     // Scales
     const xScale = d3.scaleLinear()
       .domain([d3.min(data, d => xAccessor(d) - dimensions.offset.xLeft), d3.max(data, d => xAccessor(d) + dimensions.offset.xRight)])
@@ -179,6 +188,7 @@ export default function () {
 
     const drawArea = wrapper.append('g') // It contains points' g and clip
     const pointsGroup = drawArea.append('g')
+      .attr('clip-path', 'url(#scatter-clip)')
 
     // Store brush behavior
     const brushBehavior = d3.brush()
@@ -593,6 +603,12 @@ export default function () {
       const trans = d3.transition().duration(TR_TIME)
 
       wrapper.attr('width', dimensions.width).attr('height', dimensions.height)
+      wrapper.select('#scatter-clip rect')
+        .transition(trans)
+        .attr('x', dimensions.margin.left)
+        .attr('y', dimensions.margin.top)
+        .attr('width', dimensions.width - dimensions.margin.left - dimensions.margin.right)
+        .attr('height', dimensions.height - dimensions.margin.top - dimensions.margin.bottom)
       xScale.range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
       yScale.range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
 
