@@ -27,6 +27,9 @@ export default function () {
   let onMouseEnter = _ => {}
   let onMouseLeave = _ => {}
 
+  // Dimension selection change callback
+  let onDimensionChange = _ => {}
+
   // It draws and can be configured (it is returned again when something changes)
   function radvizPlot (containerDiv) {
     // Create left side container for controls and SVG
@@ -99,6 +102,7 @@ export default function () {
       }
       updateButtons()
       draw()
+      onDimensionChange(selectedDimensions)
     }
 
     const wrapper = leftContainer.append('svg')
@@ -285,6 +289,16 @@ export default function () {
     onMouseLeave = callback
     console.debug('Radviz received the functions for updating the model on hover')
     return this
+  }
+  radvizPlot.bindDimensionChange = function (callback) {
+    onDimensionChange = callback
+    console.debug('Radviz received the function for updating on dimension change')
+    return this
+  }
+
+  // Getter for selected dimensions
+  radvizPlot.getSelectedDimensions = function () {
+    return selectedDimensions
   }
 
   console.debug('Finished creating radviz configurable function')

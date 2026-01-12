@@ -46,6 +46,18 @@ export default function () {
   // Color mode from scatter plot
   let regionColoringActive = false
 
+  // Selected dimensions from radviz
+  let radvizSelectedDimensions = []
+
+  // Helper function to check if an attribute should be highlighted based on radviz selection
+  function isRadvizSelected (attr) {
+    if (radvizSelectedDimensions.includes(attr)) return true
+    // Special cases for composite dimensions
+    if (attr === 'lrgen' && (radvizSelectedDimensions.includes('leftgen') || radvizSelectedDimensions.includes('rightgen'))) return true
+    if (attr === 'lrecon' && (radvizSelectedDimensions.includes('leftecon') || radvizSelectedDimensions.includes('rightecon'))) return true
+    return false
+  }
+
   // It draws and can be configured (it is returned again when something changes)
   function parallelCoordinates (containerDiv) {
     const wrapper = containerDiv.append('svg')
@@ -280,6 +292,7 @@ export default function () {
             .attr('y', dimensions.margin.top - dimensions.legend.y)
             .attr('text-anchor', 'middle')
             .text(attributes[attr].name)
+            .style('fill', isRadvizSelected(attr) ? 'steelblue' : null)
             .call(legendHover)
 
           if (attr === 'family' && !regionColoringActive) {
@@ -325,6 +338,7 @@ export default function () {
           // Update legend
           axis.select('.legend')
             .text(attributes[attr].name)
+            .style('fill', isRadvizSelected(attr) ? 'steelblue' : null)
             .call(legendHover)
 
           // Remove old background rectangles from region axis
@@ -558,6 +572,13 @@ export default function () {
   }
   parallelCoordinates.setRegionColoring = function (active) {
     regionColoringActive = active
+    if (typeof updateAxes === 'function') {
+      updateAxes() // Redraw axes to update colors
+    }
+    return parallelCoordinates
+  }
+  parallelCoordinates.setRadvizSelectedDimensions = function (dimensions) {
+    radvizSelectedDimensions = dimensions
     if (typeof updateAxes === 'function') {
       updateAxes() // Redraw axes to update colors
     }

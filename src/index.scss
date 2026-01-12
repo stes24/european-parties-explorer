@@ -219,6 +219,10 @@ text.anchor-points {
   fill: #CCCCCC;
 }
 
+text.anchor-points tspan {
+  font-size: 2.5px;
+}
+
 // OTHER --------------------------------
 
 svg .legend {

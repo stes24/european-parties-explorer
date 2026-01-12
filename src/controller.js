@@ -28,6 +28,7 @@ class Controller {
     this.scatterPlot.bindColorChange(colorBy => this.handleColorChange(colorBy)).bind(this)
     this.radviz.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)
     this.radviz.bindMouseLeave(p => this.handleMouseLeave(p)).bind(this)
+    this.radviz.bindDimensionChange(dims => this.handleRadvizDimensionChange(dims)).bind(this)
     this.lineChart.bindMouseEnter(p => this.handleBatchMouseEnter(p)).bind(this)
     this.lineChart.bindMouseLeave(() => this.handleBatchMouseLeave()).bind(this)
     this.parallelCoordinates.bindMouseEnter(p => this.handleMouseEnter(p)).bind(this)
@@ -38,6 +39,9 @@ class Controller {
 
     // Pass the function that sets the selected year
     this.lineChart.bindYearChange(year => this.setYear(year)).bind(this)
+
+    // Initialize parallel coordinates with radviz dimensions
+    this.parallelCoordinates.setRadvizSelectedDimensions(this.radviz.getSelectedDimensions())
 
     console.debug('Finished creating controller')
   }
@@ -102,6 +106,11 @@ class Controller {
   handleColorChange (colorBy) {
     // Notify parallel coordinates when color mode changes in scatter plot
     this.parallelCoordinates.setRegionColoring(colorBy === 'region')
+  }
+
+  handleRadvizDimensionChange (dimensions) {
+    // Update parallel coordinates to highlight selected radviz dimensions
+    this.parallelCoordinates.setRadvizSelectedDimensions(dimensions)
   }
 
   // Passed to the models so that it is called whenever there's an update -> data calls the drawing function of the relative view
