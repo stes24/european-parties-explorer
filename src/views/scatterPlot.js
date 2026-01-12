@@ -159,6 +159,11 @@ export default function () {
       .domain([d3.min(data, d => yAccessor(d) - dimensions.offset.y), d3.max(data, d => yAccessor(d) + dimensions.offset.y)])
       .range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
 
+    // Current scales (that will be modified by zoom)
+    let currentXScale = xScale
+    let currentYScale = yScale
+    let zoomTransform = d3.zoomIdentity // Store zoom state
+
     // Function to get discrete radius based on vote percentage
     const getDiscreteRadius = (vote) => {
       for (const interval of dimensions.radius.intervals) {
@@ -216,8 +221,8 @@ export default function () {
             // When brushing is active, only allow hovering brushed circles
             if (brushActive && !d.brushed) return false
 
-            const cx = xScale(xAccessor(d))
-            const cy = yScale(yAccessor(d))
+            const cx = currentXScale(xAccessor(d))
+            const cy = currentYScale(yAccessor(d))
             const r = radius(d)
             const distance = Math.sqrt((mouseX - cx) ** 2 + (mouseY - cy) ** 2)
             return distance <= r
@@ -284,8 +289,8 @@ export default function () {
           if (brushActive) return 'circle-deselected'
           return 'circle'
         })
-        .attr('cx', d => xScale(xAccessor(d)))
-        .attr('cy', d => yScale(yAccessor(d)))
+        .attr('cx', d => currentXScale(xAccessor(d)))
+        .attr('cy', d => currentYScale(yAccessor(d)))
         .attr('r', d => radius(d))
         .attr('fill', d => d.hovered ? 'white' : colorAccessor(d))
         .style('opacity', d => d.hovered ? 0.95 : null)
@@ -305,8 +310,8 @@ export default function () {
       return sel.call(update => update
         .transition()
         .duration(doTransition ? TR_TIME : 0)
-        .attr('cx', d => xScale(xAccessor(d)))
-        .attr('cy', d => yScale(yAccessor(d)))
+        .attr('cx', d => currentXScale(xAccessor(d)))
+        .attr('cy', d => currentYScale(yAccessor(d)))
         .attr('r', d => radius(d))
       )
     }
@@ -429,8 +434,8 @@ export default function () {
       // Calculate which parties fall within this brush
       const brushedData = new Set(
         data.filter(d => {
-          const x = xScale(xAccessor(d))
-          const y = yScale(yAccessor(d))
+          const x = currentXScale(xAccessor(d))
+          const y = currentYScale(yAccessor(d))
           return x0 <= x && x <= x1 && y0 <= y && y <= y1
         }).map(d => d.party_id)
       )
@@ -453,11 +458,35 @@ export default function () {
         if (!event.selection) clearBrush(event.selection)
       })
 
-    // Apply brush only in brush mode
+    // Zoom behavior
+    const handleZoom = (event) => {
+      zoomTransform = event.transform
+
+      // Create new scales based on the transformation
+      currentXScale = zoomTransform.rescaleX(xScale)
+      currentYScale = zoomTransform.rescaleY(yScale)
+
+      // Update axes
+      xAxis.call(d3.axisBottom(currentXScale))
+      yAxis.call(d3.axisLeft(currentYScale))
+
+      // Reposition existing circles
+      pointsGroup.selectAll('circle')
+        .attr('cx', d => currentXScale(xAccessor(d)))
+        .attr('cy', d => currentYScale(yAccessor(d)))
+    }
+
+    const zoom = d3.zoom()
+      .scaleExtent([0.8, 8])
+      .extent([[0, 0], [dimensions.width, dimensions.height]])
+      .on('zoom', handleZoom)
+
+    // Apply brush only in brush mode, otherwise enable zoom
     if (interactionMode === 'brush') {
       drawArea.call(brushBehavior)
     } else {
-      // Setup manual hover in hover mode
+      // Enable zoom and manual hover in hover mode
+      wrapper.call(zoom)
       setupManualHover()
     }
 
@@ -481,6 +510,10 @@ export default function () {
         drawArea.on('.brush', null)
         drawArea.selectAll('.selection, .overlay, .handle').remove()
 
+        // ENABLE ZOOM (and restore the last state)
+        wrapper.call(zoom)
+          .call(zoom.transform, zoomTransform)
+
         // Enable manual hover detection
         setupManualHover()
       } else {
@@ -492,6 +525,9 @@ export default function () {
           }
           currentHoveredPartyId = null
         }
+
+        // DISABLE ZOOM (remove listener) to leave space for the brush
+        wrapper.on('.zoom', null)
 
         // Disable hover interactions
         hideTooltip()
@@ -533,8 +569,8 @@ export default function () {
           const [[x0, y0], [x1, y1]] = brushExtent
           const brushedData = new Set(
             data.filter(d => {
-              const x = xScale(xAccessor(d))
-              const y = yScale(yAccessor(d))
+              const x = currentXScale(xAccessor(d))
+              const y = currentYScale(yAccessor(d))
               return x0 <= x && x <= x1 && y0 <= y && y <= y1
             }).map(d => d.party_id)
           )
@@ -559,6 +595,10 @@ export default function () {
       wrapper.attr('width', dimensions.width).attr('height', dimensions.height)
       xScale.range([dimensions.margin.left, dimensions.width - dimensions.margin.right])
       yScale.range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
+
+      wrapper.call(zoom.transform, d3.zoomIdentity)
+      currentXScale = xScale
+      currentYScale = yScale
 
       xAxis.transition(trans)
         .attr('transform', `translate(0, ${dimensions.height - dimensions.margin.bottom})`)
