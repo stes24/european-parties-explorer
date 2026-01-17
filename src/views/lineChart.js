@@ -15,7 +15,7 @@ export default function () {
   const dimensions = {
     width: null,
     height: null,
-    margin: { top: 5, right: 25, bottom: 67, left: 30 },
+    margin: { top: 5, right: 35, bottom: 67, left: 30 },
     legendY: 32
   }
   let updateSize
@@ -272,6 +272,10 @@ export default function () {
       .attr('transform', `translate(${dimensions.margin.left}, 0)`)
       .call(d3.axisLeft(yScale))
 
+    // Shift year labels to the right
+    xAxis.selectAll('.tick text')
+      .attr('dx', 8)
+
     // Highlight current year on x-axis
     function highlightCurrentYear () {
       xAxis.selectAll('.tick text')
@@ -345,6 +349,8 @@ export default function () {
         .call(d3.axisBottom(xScale)
           .ticks(years.length)
           .tickValues(years))
+      xAxis.selectAll('.tick text')
+        .attr('dx', 8)
       yAxis.transition(trans)
         .call(d3.axisLeft(yScale))
       xLegend.transition(trans)
