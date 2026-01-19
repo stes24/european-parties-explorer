@@ -302,7 +302,12 @@ export default function () {
         .attr('cx', d => currentXScale(xAccessor(d)))
         .attr('cy', d => currentYScale(yAccessor(d)))
         .attr('r', d => radius(d))
-        .attr('fill', d => d.hovered ? 'white' : colorAccessor(d))
+        .attr('fill', d => {
+          if (d.hovered) return 'white'
+          // Don't set fill for deselected circles, let CSS handle it
+          if (brushActive && !d.brushed) return null
+          return colorAccessor(d)
+        })
         .style('opacity', d => d.hovered ? 0.95 : null)
         .style('pointer-events', 'none') // Disable default pointer events, use manual detection
 
@@ -314,7 +319,12 @@ export default function () {
         if (brushActive) return 'circle-deselected'
         return 'circle'
       })
-        .attr('fill', d => d.hovered ? 'white' : colorAccessor(d))
+        .attr('fill', d => {
+          if (d.hovered) return 'white'
+          // Don't set fill for deselected circles, let CSS handle it
+          if (brushActive && !d.brushed) return null
+          return colorAccessor(d)
+        })
         .style('opacity', d => d.hovered ? 0.95 : null)
         .style('pointer-events', 'none') // Always use manual hover detection
       return sel.call(update => update

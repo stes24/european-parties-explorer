@@ -56,6 +56,20 @@ body {
 #parallelCoordinates-container {
   grid-row: 5 / -1;
   grid-column:  1 / -1;
+  position: relative;
+}
+
+.clear-brush-button {
+  position: absolute;
+  bottom: 6px;
+  left: 5px;
+  font-size: 14px;
+  padding: 3px 4px;
+  background-color: #4A4A4A;
+  color: #CCCCCC;
+  border: 1px solid #CCCCCC;
+  border-radius: 3px;
+  cursor: pointer;
 }
 
 // GRAPHICAL ELEMENTS -------------------
@@ -93,9 +107,10 @@ body {
 }
 
 .circle-deselected {
+  fill: #AAAAAA !important;
   stroke-width: 2px;
   stroke: black;
-  opacity: 0.45;
+  opacity: 0.2;
   pointer-events: none;
 }
 

@@ -60,6 +60,11 @@ export default function () {
 
   // It draws and can be configured (it is returned again when something changes)
   function parallelCoordinates (containerDiv) {
+    // Add "Delete all selections" button
+    const clearButton = containerDiv.append('button')
+      .attr('class', 'clear-brush-button')
+      .text('Delete all selections')
+
     const wrapper = containerDiv.append('svg')
       .attr('width', dimensions.width)
       .attr('height', dimensions.height)
@@ -120,7 +125,7 @@ export default function () {
     // Add counter in the bottom left
     const countersGroup = wrapper.append('g')
       .attr('class', 'counters')
-      .attr('transform', `translate(5, ${dimensions.height - 30})`)
+      .attr('transform', `translate(5, ${dimensions.height - 40})`)
 
     const partiesCounter = countersGroup.append('text')
       .attr('class', 'counter')
@@ -129,9 +134,31 @@ export default function () {
       .style('font-size', '14px')
       .style('fill', '#CCCCCC')
 
+    // Function to clear all brushes
+    function clearAllBrushes () {
+      // Clear all brush extents in parallel coordinates
+      Object.keys(brushes).forEach(attr => {
+        delete brushes[attr]
+        delete brushExtents[attr]
+      })
+
+      // Clear visual brushes from all axes
+      axesGroup.selectAll('.axis').each(function () {
+        d3.select(this).call(d3.brushY().clear)
+      })
+
+      // Notify controller to clear brushes in all views
+      onBrush(null, 'parallelCoordinates')
+    }
+
     // Store box plots (two per attribute: all data and brushed data)
     const boxPlotInstances = {}
     const boxPlotBrushedInstances = {}
+
+    // Set up button click handler (just once, not in updateCounters)
+    clearButton.on('click', function () {
+      clearAllBrushes()
+    })
 
     // Update counter
     function updateCounters () {
@@ -541,7 +568,7 @@ export default function () {
       attributeIds.forEach(attr => yScales[attr].range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top]))
 
       // Update counter position
-      countersGroup.attr('transform', `translate(5, ${dimensions.height - 30})`)
+      countersGroup.attr('transform', `translate(5, ${dimensions.height - 40})`)
 
       doTransition = true
       axesJoin()
