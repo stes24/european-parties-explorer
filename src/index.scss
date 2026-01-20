@@ -291,6 +291,30 @@ svg .legend {
   padding: 2px 8px;
 }
 
+.lineChart-attr-container {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+  .lineChart-info-icon {
+    flex-shrink: 0;
+    cursor: default;
+  
+    circle {
+      fill: #4A4A4A;
+      stroke: #AAAAAA;
+      stroke-width: 0.5;
+    }
+  
+    text {
+      fill: white;
+      font-size: 14px;
+      font-weight: bold;
+      font-family: sans-serif;
+    }
+  }
+
 .dropDown {
   font-size: 12px;
 }

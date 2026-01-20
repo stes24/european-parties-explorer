@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import { attributes, hideTooltip, moveTooltip, showLineChartTooltip, TR_TIME, years } from '@/utils'
+import { attributes, hideTooltip, moveTooltip, showLineChartTooltip, showTooltip, TR_TIME, years } from '@/utils'
 
 // Configurable function - it returns a new function (which, when called, draws the view)
 export default function () {
@@ -35,8 +35,12 @@ export default function () {
     const controlsContainer = containerDiv.append('div')
       .attr('class', 'lineChart-controls')
 
+    // Create container for dropdown + info icon
+    const attrContainer = controlsContainer.append('div')
+      .attr('class', 'lineChart-attr-container')
+
     // Attributes drop-down menu
-    const attrDropDown = controlsContainer.append('select')
+    const attrDropDown = attrContainer.append('select')
       .attr('class', 'dropDown')
       .attr('id', 'lineChartDropDown')
     attrDropDown.selectAll('option')
@@ -48,7 +52,42 @@ export default function () {
     attrDropDown.on('change', (event) => {
       selectedOption = event.target.value
       updateData()
+      // Update info icon tooltip data binding
+      infoIcon.datum(selectedOption)
     })
+
+    // Add info icon (question mark in a grey circle)
+    const infoIcon = attrContainer.append('svg')
+      .attr('class', 'lineChart-info-icon')
+      .attr('width', 20)
+      .attr('height', 20)
+      .attr('viewBox', '0 0 20 20')
+      .datum(selectedOption) // Store current selection
+
+    // Grey circle
+    infoIcon.append('circle')
+      .attr('cx', 10)
+      .attr('cy', 10)
+      .attr('r', 9)
+
+    // Question mark
+    infoIcon.append('text')
+      .attr('x', 10)
+      .attr('y', 14)
+      .attr('text-anchor', 'middle')
+      .text('?')
+
+    // Tooltip on hover
+    infoIcon
+      .on('mouseenter', (event) => {
+        showTooltip(event, selectedOption)
+      })
+      .on('mousemove', (event) => {
+        moveTooltip(event)
+      })
+      .on('mouseleave', () => {
+        hideTooltip()
+      })
 
     // Create container for year label + drop-down
     const yearContainer = controlsContainer.append('div')
