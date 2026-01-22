@@ -1,7 +1,7 @@
 // import { radviz } from 'd3-radviz'
 import * as d3 from 'd3'
 import * as d3Radviz from 'd3-radviz'
-import { attributes, factions, showTooltip, moveTooltip, hideTooltip } from '@/utils'
+import { attributes, factions, showTooltip, showFactionTooltip, moveTooltip, hideTooltip } from '@/utils'
 
 // Configurable function - it returns a new function (which, when called, draws the view)
 export default function () {
@@ -23,9 +23,19 @@ export default function () {
   // Dimensions to use as radviz anchors
   let selectedDimensions = ['leftgen', 'rightgen', 'leftecon', 'rightecon']
 
-  // Hovering
+  // Aggregation mode
+  let aggregationMode = 'single' // 'single' or 'faction'
+
+  // Local hover state for aggregated points (doesn't affect data model)
+  let hoveredAggregatedPoint = null // Stores the party_id of hovered aggregated point
+
+  // Hovering (single party)
   let onMouseEnter = _ => {}
   let onMouseLeave = _ => {}
+
+  // Batch hovering (multiple parties, for faction aggregation)
+  let onBatchMouseEnter = _ => {}
+  let onBatchMouseLeave = _ => {}
 
   // Dimension selection change callback
   let onDimensionChange = _ => {}
@@ -59,13 +69,19 @@ export default function () {
     aggregationDropdown.selectAll('option')
       .data([
         { value: 'single', label: 'Single parties' },
-        { value: 'faction', label: 'Faction average' },
-        { value: 'country', label: 'Country average' }
+        { value: 'faction', label: 'Faction average' }
       ])
       .enter()
       .append('option')
       .attr('value', d => d.value)
       .text(d => d.label)
+
+    // Add event listener for aggregation dropdown
+    aggregationDropdown.on('change', function (event) {
+      aggregationMode = event.target.value
+      hoveredAggregatedPoint = null // Clear local hover state when changing mode
+      draw()
+    })
 
     // Get available attributes for current year
     let availableAttributes = Object.keys(attributes)
@@ -109,19 +125,90 @@ export default function () {
     radvizInstance = d3Radviz.radviz()
     // radvizInstance = radviz()
 
+    // Helper function to aggregate data by faction
+    function aggregateByFaction (data) {
+      const factionGroups = d3.group(data, d => d.family)
+      const aggregated = []
+
+      factionGroups.forEach((parties, family) => {
+        const aggregatedPoint = {
+          faction_id: family,
+          party_id: `faction_${family}`, // Unique identifier for this aggregation
+          family,
+          hovered: false, // Aggregated points never receive hover from individual parties
+          brushed: false // Aggregated points never receive brush from individual parties
+        }
+
+        // First, compute average lrgen and lrecon if needed
+        let avgLrgen = null
+        let avgLrecon = null
+
+        if (selectedDimensions.some(d => ['leftgen', 'rightgen'].includes(d))) {
+          const validLrgen = parties.filter(p => p.lrgen != null && !isNaN(p.lrgen))
+          if (validLrgen.length > 0) {
+            avgLrgen = d3.mean(validLrgen, p => p.lrgen)
+          }
+        }
+
+        if (selectedDimensions.some(d => ['leftecon', 'rightecon'].includes(d))) {
+          const validLrecon = parties.filter(p => p.lrecon != null && !isNaN(p.lrecon))
+          if (validLrecon.length > 0) {
+            avgLrecon = d3.mean(validLrecon, p => p.lrecon)
+          }
+        }
+
+        // Calculate values for each selected dimension
+        selectedDimensions.forEach(dim => {
+          // Handle left/right split dimensions specially
+          if (dim === 'leftgen' && avgLrgen !== null) {
+            aggregatedPoint[dim] = avgLrgen <= 0 ? -avgLrgen : 0
+          } else if (dim === 'rightgen' && avgLrgen !== null) {
+            aggregatedPoint[dim] = avgLrgen >= 0 ? avgLrgen : 0
+          } else if (dim === 'leftecon' && avgLrecon !== null) {
+            aggregatedPoint[dim] = avgLrecon <= 0 ? -avgLrecon : 0
+          } else if (dim === 'rightecon' && avgLrecon !== null) {
+            aggregatedPoint[dim] = avgLrecon >= 0 ? avgLrecon : 0
+          } else {
+            // For all other dimensions, compute average normally
+            const validValues = parties.filter(p => p[dim] != null && !isNaN(p[dim]))
+            if (validValues.length > 0) {
+              aggregatedPoint[dim] = d3.mean(validValues, p => p[dim])
+            }
+          }
+        })
+
+        aggregated.push(aggregatedPoint)
+      })
+
+      return aggregated
+    }
+
     // Helper function to find party data from radviz data point
     function findPartyFromData (d) {
-      const partyId = d.attributes.party_id
-      return data.find(p => p.party_id === partyId && p.year === currentYear)
+      if (aggregationMode === 'single') {
+        const partyId = d.attributes.party_id
+        return data.find(p => p.party_id === partyId && p.year === currentYear)
+      } else if (aggregationMode === 'faction') {
+        // For faction aggregation, the point represents a faction
+        const factionId = d.attributes.party_id.replace('faction_', '')
+        const partyId = d.attributes.party_id
+        return {
+          party_id: partyId,
+          family: parseInt(factionId),
+          party: factions[parseInt(factionId)].name,
+          hovered: hoveredAggregatedPoint === partyId, // Check local hover state
+          brushed: false // Aggregated points never show brush state from data
+        }
+      }
     }
 
     // Function to customize the look of the points
     function colorPoints (selection) {
-      // Check if any data is brushed
-      const brushActive = data.some(d => d.brushed)
+      // Check if any data is brushed (only relevant in single mode)
+      const brushActive = aggregationMode === 'single' ? data.some(d => d.brushed) : false
 
       selection
-        .attr('r', 1.3)
+        .attr('r', aggregationMode === 'single' ? 1.3 : 1.7) // Larger points for aggregated data
         .attr('class', d => {
           const party = findPartyFromData(d)
           if (party.brushed) return 'data_point circle-brushed'
@@ -134,15 +221,15 @@ export default function () {
         })
         .style('opacity', d => {
           const party = findPartyFromData(d)
-          return party.hovered ? 0.95 : null
+          return party.hovered ? 0.95 : (aggregationMode === 'single' ? null : 0.9)
         })
         .style('stroke-width', d => {
           const party = findPartyFromData(d)
-          return party.brushed ? '0.4' : '0.3'
+          return party.brushed ? '0.5' : (aggregationMode === 'single' ? '0.3' : '0.4')
         })
         .style('stroke', d => {
           const party = findPartyFromData(d)
-          return party.brushed ? 'red' : null
+          return party.brushed ? 'red' : (aggregationMode === 'single' ? null : 'black')
         })
         .each(function (d) {
           const party = findPartyFromData(d)
@@ -166,9 +253,19 @@ export default function () {
       // PREPARE DATA -------------------------
 
       if (data.length === 0 || selectedDimensions.length < 2) return
+
+      // Get data for current year
+      const currentYearData = data.filter(d => d.year === currentYear)
+
+      // Aggregate data based on selected mode
+      let dataToVisualize = currentYearData
+      if (aggregationMode === 'faction') {
+        dataToVisualize = aggregateByFaction(currentYearData)
+      }
+
       // Filter data to include only the desired dimensions plus classification attributes
       // d3-radviz uses all numeric properties as dimensions, so we need to filter
-      const filteredData = data.map(d => {
+      const filteredData = dataToVisualize.map(d => {
         const filtered = {
           party_id: d.party_id // Keep identifier
         }
@@ -220,36 +317,61 @@ export default function () {
 
       // Mouse handling
       points.on('mouseenter', function (event, d) {
-        const party = findPartyFromData(d)
-        onMouseEnter(party)
-        showTooltip(event, party)
+        if (aggregationMode === 'single') {
+          const party = findPartyFromData(d)
+          onMouseEnter(party)
+          showTooltip(event, party)
+        } else if (aggregationMode === 'faction') {
+          // Set local hover state for visual feedback
+          hoveredAggregatedPoint = d.attributes.party_id
+          colorPoints(wrapper.selectAll('.data_point'))
+
+          // Hover all parties in this faction in other views
+          const factionId = d.attributes.party_id.replace('faction_', '')
+          const partiesInFaction = data.filter(p => p.family === parseInt(factionId) && p.year === currentYear)
+          onBatchMouseEnter(partiesInFaction) // Pass array of parties (batch hover)
+          // Show simple tooltip with just faction name
+          showFactionTooltip(event, parseInt(factionId))
+        }
       })
         .on('mousemove', (event) => {
           moveTooltip(event)
         })
         .on('mouseleave', function (event, d) {
-          const party = findPartyFromData(d)
-          onMouseLeave(party)
+          if (aggregationMode === 'single') {
+            const party = findPartyFromData(d)
+            onMouseLeave(party)
+          } else if (aggregationMode === 'faction') {
+            // Clear local hover state
+            hoveredAggregatedPoint = null
+            colorPoints(wrapper.selectAll('.data_point'))
+            onBatchMouseLeave()
+          }
           hideTooltip()
         })
 
-      // Update last drawn year and brush state
+      // Update last drawn year and brush state (only track brush in single mode)
       lastDrawnYear = currentYear
-      lastBrushActive = data.some(d => d.brushed)
+      lastBrushActive = aggregationMode === 'single' ? data.some(d => d.brushed) : false
     }
     draw()
 
     updateData = function () {
-      const brushActive = data.some(d => d.brushed)
-
-      // Redraw if year changed or brush state changed (to update z-order)
-      if (currentYear !== lastDrawnYear || brushActive !== lastBrushActive) {
+      // Redraw if year changed
+      if (currentYear !== lastDrawnYear) {
         updateButtons() // Update available buttons for new year
         draw()
-      } else {
-        // Update point styling for hover changes without full redraw
-        colorPoints(wrapper.selectAll('.data_point'))
+      } else if (aggregationMode === 'single') {
+        // In single mode, respond to brush and hover changes
+        const brushActive = data.some(d => d.brushed)
+        if (brushActive !== lastBrushActive) {
+          draw() // Redraw for brush changes (to update z-order)
+        } else {
+          // Update point styling for hover changes without full redraw
+          colorPoints(wrapper.selectAll('.data_point'))
+        }
       }
+      // In aggregation mode, don't respond to individual party hover/brush from other views
     }
 
     updateSize = function () {
@@ -288,6 +410,15 @@ export default function () {
   radvizPlot.bindMouseLeave = function (callback) {
     onMouseLeave = callback
     console.debug('Radviz received the functions for updating the model on hover')
+    return this
+  }
+  radvizPlot.bindBatchMouseEnter = function (callback) {
+    onBatchMouseEnter = callback
+    return this
+  }
+  radvizPlot.bindBatchMouseLeave = function (callback) {
+    onBatchMouseLeave = callback
+    console.debug('Radviz received the functions for batch hover')
     return this
   }
   radvizPlot.bindDimensionChange = function (callback) {

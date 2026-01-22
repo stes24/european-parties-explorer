@@ -345,6 +345,12 @@ export function showLineChartTooltip (event, partyInstances) {
   moveTooltip(event) // Correctly place tooltip
 }
 
+export function showFactionTooltip (event, factionId) {
+  const tooltip = d3.select('#tooltip').style('visibility', 'visible')
+  tooltip.html(`<b>${factions[factionId].name}</b>`)
+  moveTooltip(event)
+}
+
 export function moveTooltip (event) {
   const tooltip = d3.select('#tooltip')
 
