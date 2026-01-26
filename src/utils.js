@@ -116,7 +116,7 @@ export const attributes = { // Reordered so that similar topics are close
     goesOnParallelCoordinates: false,
     goesOnRadviz: true,
     minYear: 1999,
-    description: ''
+    description: 'Overall ideological stance (left component)<br>Higher values = more left-leaning'
   },
   rightgen: {
     name: 'Right',
@@ -124,7 +124,7 @@ export const attributes = { // Reordered so that similar topics are close
     goesOnParallelCoordinates: false,
     goesOnRadviz: true,
     minYear: 1999,
-    description: ''
+    description: 'Overall ideological stance (right component)<br>Higher values = more right-leaning'
   },
   leftecon: {
     name: 'Economic left',
@@ -132,7 +132,7 @@ export const attributes = { // Reordered so that similar topics are close
     goesOnParallelCoordinates: false,
     goesOnRadviz: true,
     minYear: 1999,
-    description: ''
+    description: 'Ideological stance on economic issues (left component) <br>Higher values = more economically left-leaning'
   },
   rightecon: {
     name: 'Economic right',
@@ -140,7 +140,7 @@ export const attributes = { // Reordered so that similar topics are close
     goesOnParallelCoordinates: false,
     goesOnRadviz: true,
     minYear: 1999,
-    description: ''
+    description: 'Ideological stance on economic issues (right component) <br>Higher values = more economically right-leaning'
   },
   eu_position: {
     name: 'European Union',

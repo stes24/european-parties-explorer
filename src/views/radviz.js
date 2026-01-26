@@ -316,7 +316,9 @@ export default function () {
 
       // Update anchor labels to use attribute names instead of attribute IDs
       wrapper.selectAll('text.anchor-points').each(function () {
-        const name = attributes[this.textContent].name
+        const attributeKey = this.textContent
+        const name = attributes[attributeKey].name
+
         // Replace spaces with newlines by splitting into tspan elements
         const lines = name.split(' ')
 
@@ -331,6 +333,18 @@ export default function () {
           tspan.setAttribute('dy', i === 0 ? 0 : '1em')
           this.appendChild(tspan)
         })
+
+        // Add tooltip functionality
+        d3.select(this)
+          .on('mouseenter', function (event) {
+            showTooltip(event, attributeKey)
+          })
+          .on('mousemove', (event) => {
+            moveTooltip(event)
+          })
+          .on('mouseleave', () => {
+            hideTooltip()
+          })
       })
 
       // Color points
