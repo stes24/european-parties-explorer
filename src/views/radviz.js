@@ -92,6 +92,15 @@ export default function () {
       availableAttributes = Object.keys(attributes)
         .filter(a => attributes[a].goesOnRadviz && currentYear >= attributes[a].minYear)
 
+      // Remove unavailable attributes from selection
+      const previousLength = selectedDimensions.length
+      selectedDimensions = selectedDimensions.filter(d => availableAttributes.includes(d))
+
+      // Notify if dimensions changed due to year change
+      if (previousLength !== selectedDimensions.length) {
+        onDimensionChange(selectedDimensions)
+      }
+
       buttonsContainer.selectAll('button')
         .data(availableAttributes, d => d)
         .join(
@@ -113,8 +122,13 @@ export default function () {
         // Remove dimension if already selected
         selectedDimensions = selectedDimensions.filter(d => d !== dimension)
       } else {
-        // Add dimension if not selected
-        selectedDimensions = [...selectedDimensions, dimension]
+        // Add dimension if not selected, but only if less than 4 are selected
+        if (selectedDimensions.length < 4) {
+          selectedDimensions = [...selectedDimensions, dimension]
+        } else {
+          // Do nothing if 4 are already selected
+          return
+        }
       }
       updateButtons()
       draw()
@@ -250,9 +264,17 @@ export default function () {
     }
 
     function draw () {
+      // Update buttons for current year's available attributes
+      updateButtons()
+
       // PREPARE DATA -------------------------
 
-      if (data.length === 0 || selectedDimensions.length < 2) return
+      if (data.length === 0 || selectedDimensions.length < 2) {
+        // Clear the visualization if insufficient dimensions
+        wrapper.selectAll('*').remove()
+        lastDrawnYear = currentYear // Update tracking even when not drawing
+        return
+      }
 
       // Get data for current year
       const currentYearData = data.filter(d => d.year === currentYear)
@@ -359,7 +381,6 @@ export default function () {
     updateData = function () {
       // Redraw if year changed
       if (currentYear !== lastDrawnYear) {
-        updateButtons() // Update available buttons for new year
         draw()
       } else if (aggregationMode === 'single') {
         // In single mode, respond to brush and hover changes
