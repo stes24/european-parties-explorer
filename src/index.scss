@@ -254,6 +254,7 @@ svg .legend {
   border-color: orange;
   padding: 2px;
   font-size: 13px;
+  pointer-events: none;
 }
 
 .interaction-mode-container {
